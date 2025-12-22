@@ -1,8 +1,8 @@
 /*
-The Keep Version 2.1.0
+The Keep Version 2.2.0
 Changelog:
-Added the changelog to keep track of what was added in this update
-Added a function to shoot all three artifacts
+Fixed the Triangle button shooter speed
+Added a little auto function to switch to an optimal position when firing or eating
 */
 package org.firstinspires.ftc.teamcode.theKeep;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -77,8 +77,8 @@ public class TheKeepTeleOp extends OpMode {
         and if its not move it to the next snap point right or left depending on the trigger you pressed
         - Jason */
 
-        if (gamepad1.leftBumperWasPressed() && motors.spinPosition != 0) motors.spinPosition -= 1;
-        if (gamepad1.rightBumperWasPressed() && motors.spinPosition != 26) motors.spinPosition += 1;
+        //if (gamepad1.leftBumperWasPressed() && motors.spinPosition != 0) motors.spinPosition -= 1;
+        //if (gamepad1.rightBumperWasPressed() && motors.spinPosition != 26) motors.spinPosition += 1;
         if (motors.spinPosition == 0) {
             motors.spinPosition = 6;
         }
@@ -116,12 +116,28 @@ public class TheKeepTeleOp extends OpMode {
         }
 
 
-       /* if(motors.intake.getPower() == 1) {
+       if(motors.intake.getPower() == 1) {
+           if (motors.spinPosition % 2 == 1) {
+               motors.spinPosition += 1;
+           }
+           if (motors.spinPosition % 2 == 0) {
+               if (gamepad1.leftBumperWasPressed() && motors.spinPosition != 0)
+                   motors.spinPosition -= 2;
+               if (gamepad1.rightBumperWasPressed() && motors.spinPosition != 26)
+                   motors.spinPosition += 2;
+           }
+       }
+       if(motors.intake.getPower() == 0) {
+           if(motors.spinPosition % 2 == 1){
+                    if (gamepad1.leftBumperWasPressed() && motors.spinPosition != 0) motors.spinPosition -= 2;
+                    if (gamepad1.rightBumperWasPressed() && motors.spinPosition != 26) motors.spinPosition += 2;
+                }
+           if(motors.spinPosition % 2 == 0){
+                    motors.spinPosition += 1;
+                }
+            }
 
-            motors.fidgetTech.getPosition();
-            motors.fidgetTech.setPosition();
-        }
-        */
+
         // These lines grab the april tag data then write any tags data to the telemetry - Jason
         vision.getAprilTagData();
         if (vision.blueBase != null) telemetry.addData("Blue Base Range", vision.blueBase.ftcPose.range);
