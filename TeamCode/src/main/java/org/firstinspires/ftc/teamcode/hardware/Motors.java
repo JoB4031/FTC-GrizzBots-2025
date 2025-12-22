@@ -1,22 +1,37 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
+import com.bylazar.configurables.annotations.Configurable;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.arcrobotics.ftclib.controller.PIDFController;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+
+
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-
-public class Motors {
-    // Sets up a variable used for the loop to shoot three artifacts - Nikola
-    private int shootAll = 0;
+@Configurable
+@TeleOp(name = "Do Not Use", group = "Motors")
+public class Motors extends OpMode {
 
     ElapsedTime time = new ElapsedTime();
 
-
     public DcMotor intake = null;
+    public DcMotorEx flywheel = null;
     public DcMotor shooter = null;
     public Servo ballEjector = null;
     public Servo fidgetTech = null;
+    PIDFController velocityController;
+    //PID controller constants
+    public static double kP = 0.0003;
+    public static double kI = 0.0;
+    public static double kD = 0.0;
+    public static double kF = 0.00025;
+
+
+
     public int spinPosition;
     public final double[] spinPositions = {
             0.03,0.06,0.1,0.14,0.17,0.21,0.25,0.28,0.32,0.36,
@@ -32,11 +47,29 @@ public class Motors {
         fidgetTech = hardwareMap.get(Servo.class, "spinIndexer");
 
         spinPosition = 13;
+        flywheel = hardwareMap.get(DcMotorEx.class, "Shooter");
+        velocityController = new PIDFController(kP, kI, kD, kF);
+        velocityController.setSetPoint(0);
+
     }
+    // velocity is in RPM
+    public void setFlywheelVelocity(double velocity){
+        velocityController.setSetPoint(velocity*(28.0/60.0));
+    }
+    public void update() {
+        double currentVelocity = flywheel.getVelocity();
+        double power = velocityController.calculate(currentVelocity); // Get power from PIDF
+        flywheel.setPower(power);
+
+    }
+
     //This public void adds a function to shoot all three artifacts - Nikola
     public void shootAllBalls (){
-        // Code to shoot all three artifacts when △ is pressed.
-            spinPosition = 1; shootAll = 0; while(shootAll < 3){
+        // Code to shoot all three artifacts when △ is pressed
+        // Sets up a variable used for the loop to shoot three artifacts - Nikola
+        int shootAll = 0;
+        spinPosition = 1;
+        while(shootAll < 3){
             spinPosition += 2;
             shooter.setPower(0.7);
             time.reset();
@@ -54,6 +87,16 @@ public class Motors {
             shootAll += 1;
         }
 
+
+    }
+
+    @Override
+    public void init() {
+
+    }
+
+    @Override
+    public void loop() {
 
     }
 }
