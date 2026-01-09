@@ -1,8 +1,6 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.bylazar.configurables.annotations.Configurable;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -13,8 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Configurable
-@TeleOp(name = "Do Not Use", group = "Motors")
-public class Motors extends OpMode {
+public class Motors{
 
     ElapsedTime time = new ElapsedTime();
 
@@ -29,7 +26,6 @@ public class Motors extends OpMode {
     public static double kI = 0.0;
     public static double kD = 0.0;
     public static double kF = 0.00025;
-
 
 
     public int spinPosition;
@@ -53,50 +49,60 @@ public class Motors extends OpMode {
 
     }
     // velocity is in RPM
-    public void setFlywheelVelocity(double velocity){
-        velocityController.setSetPoint(velocity*(28.0/60.0));
+    public void setFlywheelVelocity(double distance){
+        velocityController.setSetPoint((5*Math.sqrt(398210.4444*distance)-450*Math.sqrt(distance)+450)*(28.0/60.0));
     }
     public void update() {
+        // Updates the Flywheel Velocity
         double currentVelocity = flywheel.getVelocity();
         double power = velocityController.calculate(currentVelocity); // Get power from PIDF
         flywheel.setPower(power);
 
+        // Sets the fidget tech position to pick-up or fire based on whether the intake is on or off
+        if(intake.getPower() > 0) {
+            if (spinPosition % 2 == 1) {
+                if (spinPosition >= 13) {
+                    spinPosition -= 1;
+                } else spinPosition += 1;
+            }
+        } else {
+            if(spinPosition % 2 == 0){
+                if (spinPosition >= 13) {
+                    spinPosition -= 1;
+                } else spinPosition += 1;
+            }
+        }
+
+        // moves the Fidget Tech to the set position
+        fidgetTech.setPosition(spinPositions[spinPosition]);
     }
 
     //This public void adds a function to shoot all three artifacts - Nikola
-    public void shootAllBalls (){
+    public void shootAllBalls (double distance){
         // Code to shoot all three artifacts when △ is pressed
         // Sets up a variable used for the loop to shoot three artifacts - Nikola
         int shootAll = 0;
-        spinPosition = 1;
+        intake.setPower(0);
+        spinPosition = 9;
+
         while(shootAll < 3){
-            spinPosition += 2;
-            shooter.setPower(0.7);
+            setFlywheelVelocity(distance);
             time.reset();
-            fidgetTech.setPosition(spinPositions[spinPosition]);
             while(time.seconds() < 4 ){
                 //just chill
+                update();
             }
             ballEjector.setPosition(0.3);
             time.reset();
             while (time.seconds() < 1) {
                 //you get to chill again
+                update();
             }
             ballEjector.setPosition(0);
-
+            spinPosition += 2;
             shootAll += 1;
         }
 
-
-    }
-
-    @Override
-    public void init() {
-
-    }
-
-    @Override
-    public void loop() {
 
     }
 }
