@@ -134,9 +134,8 @@ public class TheKeepTeleOp extends OpMode {
                 }
            if(motors.spinPosition % 2 == 0){
                     motors.spinPosition += 1;
-                }
+                }   
             }
-
 
         // These lines grab the april tag data then write any tags data to the telemetry - Jason
         vision.getAprilTagData();
