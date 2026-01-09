@@ -1,17 +1,13 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
 import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierCurve;
-import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.BezierPoint;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.theKeep.TheKeepAuto;
-
 import java.util.function.Supplier;
 
 public class PedroPathing {
@@ -69,4 +65,7 @@ public class PedroPathing {
 
     }
 
+    public void update() {
+        follower.update();
+    }
 }

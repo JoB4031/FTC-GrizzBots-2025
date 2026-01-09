@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.hardware;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.teamcode.theKeep.TheKeepAuto;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -15,8 +16,9 @@ import java.util.List;
 public class Vision {
     public AprilTagProcessor aprilTag;
     public VisionPortal visionPortal;
-    public AprilTagDetection blueBase = null;
-    public AprilTagDetection redBase = null;
+    private AprilTagDetection blueBase = null;
+    private AprilTagDetection redBase = null;
+    public AprilTagDetection allianceBase = null;
 
     // A custom class that allows variables of this class to be set to the ball pattern - Jason
     public enum BallPattern { GPP, PGP, PPG }
@@ -35,7 +37,7 @@ public class Vision {
                 .setDrawTagOutline(true)
                 .setTagFamily(AprilTagProcessor.TagFamily.TAG_36h11)
                 .setTagLibrary(AprilTagGameDatabase.getDecodeTagLibrary())
-                .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
+                .setOutputUnits(DistanceUnit.METER, AngleUnit.DEGREES)
 
                 // == CAMERA CALIBRATION ==
                 // If you do not manually specify calibration parameters, the SDK will attempt
@@ -86,7 +88,7 @@ public class Vision {
     }
 
     // Gets the april tag data from all tags the camera sees - Jason
-    public void getAprilTagData() {
+    public void update() {
         blueBase = null;
         redBase = null;
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
@@ -102,10 +104,10 @@ public class Vision {
                 }
             }
         }
-    }
-
-    // Resets the ball pattern - Jason
-    public void resetPattern() {
-        pattern = null;
+        if (TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE) {
+            allianceBase = blueBase;
+        } else {
+            allianceBase = redBase;
+        }
     }
 }

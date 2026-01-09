@@ -1,8 +1,10 @@
 /*
-The Keep Version 2.2.0
+The Keep Version 2.3.0
 Changelog:
-Fixed the Triangle button shooter speed
-Added a little auto function to switch to an optimal position when firing or eating
+Added velocity control for the flywheel and tuned it
+Used an equation to be able to shoot from close and far range
+Made sure all the hardware had an update function
+Cleaned up some code and moved exes processes to the hardware methods
 */
 package org.firstinspires.ftc.teamcode.theKeep;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -39,26 +41,37 @@ public class TheKeepTeleOp extends OpMode {
 
     @Override
     public void start() {
-
+        telemetry.clear();
         // Turns Pedro Path into TeleOp drive mode - Jason
         pathing.follower.startTeleopDrive();
-
     } // This runs once when the play button is pressed
     @Override
     public void loop() {
 
-        // Updates the follower - Jason
-        pathing.follower.update();
+        // Updates all the hardware - Jason
+        pathing.update();
         motors.update();
+        vision.update();
+
         // This tells the follower to activate manual drive mode if it is not following a path -Jason
         if (!pathing.automatedDrive) {
-            pathing.follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y,
-                    -gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x,
-                    true // Robot Centric
-            );
+            if (motors.intake.getPower() > 0 || motors.shooter.getPower() > 0) {
+                pathing.follower.setTeleOpDrive(
+                        -gamepad1.left_stick_y,
+                        -gamepad1.left_stick_x,
+                        -(gamepad1.right_stick_x*0.5),
+                        true// Robot Centric
+                );
+            } else {
+                pathing.follower.setTeleOpDrive(
+                        -gamepad1.left_stick_y,
+                        -gamepad1.left_stick_x,
+                        -gamepad1.right_stick_x,
+                        true // Robot Centric
+                );
+            }
         }
+
         // Turns the bots heading to face the alliance goal - Jason
         if (gamepad1.crossWasPressed()) {
             pathing.follower.followPath(pathing.turnToGoal.get());
@@ -71,30 +84,10 @@ public class TheKeepTeleOp extends OpMode {
             pathing.automatedDrive = false;
         } // Switches to TeleOp drive if the follower is done - Jason
 
-
-
-        /* These lines check to make sure the fidget tech is not at the maximum or minimum range
-        and if its not move it to the next snap point right or left depending on the trigger you pressed
-        - Jason */
-
-        //if (gamepad1.leftBumperWasPressed() && motors.spinPosition != 0) motors.spinPosition -= 1;
-        //if (gamepad1.rightBumperWasPressed() && motors.spinPosition != 26) motors.spinPosition += 1;
-        if (motors.spinPosition == 0) {
-            motors.spinPosition = 6;
-        }
-        if (motors.spinPosition == 26) {
-            motors.spinPosition = 20;
-        }
-
-        // Constantly sets the fidgetTech's position to our current snap point - Jason
-        motors.fidgetTech.setPosition(motors.spinPositions[motors.spinPosition]);
-
-        // These lines set the shooter's power to 80% if the circle button is pressed and 0% if its not
+        // These lines set the flywheel to the required speed depending on the distance if the circle button is pressed and 0% if its not
         if (gamepad1.left_trigger > 0) {
-            if (vision.blueBase != null) {
-                motors.setFlywheelVelocity(5*Math.sqrt(398210.4444*vision.blueBase.ftcPose.range*0.0254)-450*Math.sqrt(vision.blueBase.ftcPose.range*0.0254)+450);
-                motors.intake.setPower(0);
-            }
+            motors.setFlywheelVelocity(1);
+            motors.intake.setPower(0);
         } else motors.setFlywheelVelocity(0);
 
         /* These lines check to see if the fidget tech is in the way of the ball ejector if it's not, when
@@ -103,53 +96,31 @@ public class TheKeepTeleOp extends OpMode {
             motors.ballEjector.setPosition(.3);
         } else motors.ballEjector.setPosition(0);
 
-        // This if statement makes turns the intake on when the circle is pressed and off when the square is pressed - Jason
+        // This if statement turns the intake on when the circle is pressed and off when the square is pressed - Jason
         if (gamepad1.circleWasPressed()) {
-            motors.intake.setPower(1);
+            if (motors.intake.getPower() == 0) {
+                motors.intake.setPower(1);
+            } else motors.intake.setPower(0);
         }
-        if (gamepad1.squareWasPressed()) {
-            motors.intake.setPower(0);
-        }
+
         // This if loop makes the robot shoot all the artifacts - Nikola
         if (gamepad1.triangleWasPressed()){
-
-            motors.shootAllBalls();
-
+            motors.shootAllBalls(1);
         }
 
+        // Moves the Fidget Tech forward or backward one step depending on which trigger was pressed
+        if (gamepad1.leftBumperWasPressed() && motors.spinPosition != 0) motors.spinPosition -= 2;
+        if (gamepad1.rightBumperWasPressed() && motors.spinPosition != 26) motors.spinPosition += 2;
 
-       if(motors.intake.getPower() == 1) {
-           if (motors.spinPosition % 2 == 1) {
-               motors.spinPosition += 1;
-           }
-           if (motors.spinPosition % 2 == 0) {
-               if (gamepad1.leftBumperWasPressed() && motors.spinPosition != 0)
-                   motors.spinPosition -= 2;
-               if (gamepad1.rightBumperWasPressed() && motors.spinPosition != 26)
-                   motors.spinPosition += 2;
-           }
-       }
-       if(motors.intake.getPower() == 0) {
-           if(motors.spinPosition % 2 == 1){
-                    if (gamepad1.leftBumperWasPressed() && motors.spinPosition != 0) motors.spinPosition -= 2;
-                    if (gamepad1.rightBumperWasPressed() && motors.spinPosition != 26) motors.spinPosition += 2;
-                }
-           if(motors.spinPosition % 2 == 0){
-                    motors.spinPosition += 1;
-                }
-            }
-
-
-        // These lines grab the april tag data then write any tags data to the telemetry - Jason
-        vision.getAprilTagData();
-        if (vision.blueBase != null) telemetry.addData("Blue Base Range", vision.blueBase.ftcPose.range);
-        if (vision.redBase != null) telemetry.addData("Red Base Range", vision.redBase.ftcPose.range);
-        if (vision.blueBase != null) telemetry.addData("Blue Base Bearing", vision.blueBase.ftcPose.bearing);
-        if (vision.redBase != null) telemetry.addData("Red Base Bearing", vision.redBase.ftcPose.bearing);
+        // These lines write any april tag data to the telemetry - Jason
+        if (vision.allianceBase != null) {
+           telemetry.addData("Alliance Base Range", vision.allianceBase.ftcPose.range);
+           telemetry.addData("Alliance Base Bearing", vision.allianceBase.ftcPose.bearing);
+        }
         if (Vision.pattern != null) {
-            telemetry.addData("Pattern Is", Vision.pattern);
+           telemetry.addData("Pattern Is", Vision.pattern);
         } else {
-            telemetry.addData("Pattern Is", "unknown");
+           telemetry.addData("Pattern Is", "unknown");
         }
 
         // These lines add the fidget tech's position and the bot's position to the telemetry - Jason
