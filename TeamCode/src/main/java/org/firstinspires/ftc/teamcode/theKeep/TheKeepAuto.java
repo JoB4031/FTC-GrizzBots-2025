@@ -1,7 +1,7 @@
 // The Keep Auto Version 2.0
+
 package org.firstinspires.ftc.teamcode.theKeep;
 
-// Pedro Path imports
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.skeletonarmy.marrow.prompts.BooleanPrompt;
@@ -38,7 +38,7 @@ public class TheKeepAuto extends OpMode {
         // Call their init methods
         vision.initAprilTag(hardwareMap);
         motors.initMotors(hardwareMap);
-
+        motors.setFlywheelVelocity(0);
         //Sets up the prompter - Jason
         prompter.prompt("alliance", new OptionPrompt<>("Select Alliance", Alliance.RED, Alliance.BLUE))
                 .prompt("startLocation", new OptionPrompt<>("Select Start Location", 1, 2))
@@ -69,13 +69,19 @@ public class TheKeepAuto extends OpMode {
     } // A loop that runs from when the init button is pressed to when the start button is hit
 
     @Override
+    public void start() {
+        telemetry.clear();
+    }
+
+    @Override
     public void loop() {
 
-        // Updates the follower - Jason
-        pathing.follower.update();
+        // Updates the hardware - Jason
+        pathing.update();
+        vision.update();
+        motors.update();
 
         // These lines grab the april tag data then write any tags data to the telemetry - Jason
-        vision.getAprilTagData();
         if (Vision.pattern != null) {
             telemetry.addData("Pattern Is", Vision.pattern);
         } else {
