@@ -38,7 +38,7 @@ public class TheKeepAuto extends OpMode {
         // Call their init methods
         vision.initAprilTag(hardwareMap);
         motors.initMotors(hardwareMap);
-        motors.setFlywheelVelocity(0);
+        motors.setFlywheelVelocity(0,0);
         //Sets up the prompter - Jason
         prompter.prompt("alliance", new OptionPrompt<>("Select Alliance", Alliance.RED, Alliance.BLUE))
                 .prompt("startLocation", new OptionPrompt<>("Select Start Location", 1, 2))

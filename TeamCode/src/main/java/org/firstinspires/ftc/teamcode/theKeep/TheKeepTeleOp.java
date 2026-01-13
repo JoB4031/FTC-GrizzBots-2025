@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.hardware.Motors;
 import org.firstinspires.ftc.teamcode.hardware.PedroPathing;
+import org.firstinspires.ftc.teamcode.hardware.Sensors;
 import org.firstinspires.ftc.teamcode.hardware.Vision;
 @TeleOp(name="The Keep TeleOp", group="The Keep")
 public class TheKeepTeleOp extends OpMode {
@@ -19,6 +20,7 @@ public class TheKeepTeleOp extends OpMode {
     private Vision vision;
     private PedroPathing pathing;
     private Motors motors;
+    private Sensors sensors;
 
     @Override
     public void init() {
@@ -27,11 +29,13 @@ public class TheKeepTeleOp extends OpMode {
         vision = new Vision();
         pathing = new PedroPathing();
         motors = new Motors();
+        sensors = new Sensors();
 
         // Call the hardware init methods - Jason
         vision.initAprilTag(hardwareMap);
         pathing.initFollower(hardwareMap);
         motors.initMotors(hardwareMap);
+        sensors.initSensors(hardwareMap);
 
         // Reports the status - Jason
         telemetry.addData("Status", "Initialized");
@@ -52,6 +56,7 @@ public class TheKeepTeleOp extends OpMode {
         pathing.update();
         motors.update();
         vision.update();
+        sensors.update();
 
         // This tells the follower to activate manual drive mode if it is not following a path -Jason
         if (!pathing.automatedDrive) {
@@ -86,9 +91,9 @@ public class TheKeepTeleOp extends OpMode {
 
         // These lines set the flywheel to the required speed depending on the distance if the circle button is pressed and 0% if its not
         if (gamepad1.left_trigger > 0) {
-            motors.setFlywheelVelocity(1);
+            motors.setFlywheelVelocity(1,1);
             motors.intake.setPower(0);
-        } else motors.setFlywheelVelocity(0);
+        } else motors.setFlywheelVelocity(0,0);
 
         /* These lines check to see if the fidget tech is in the way of the ball ejector if it's not, when
         you press the triangle it will swing knocking out the ball - Jason */
@@ -127,6 +132,7 @@ public class TheKeepTeleOp extends OpMode {
         telemetry.addData("Flywheel Speed", motors.flywheel.getVelocity());
         telemetry.addData("Fidget Tech Position", motors.spinPositions[motors.spinPosition]);
         telemetry.addData("Bot Position", pathing.follower.getPose());
+        telemetry.addData("Artifact Detected", sensors.artifactDetected);
         telemetry.update();
 
     } // This section holds all the controls used during TeleOp
