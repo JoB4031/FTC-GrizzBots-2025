@@ -50,7 +50,8 @@ public class Motors{
     }
     // velocity is in RPM
     public void setFlywheelVelocity(double distance){
-        velocityController.setSetPoint((5*Math.sqrt(398210.4444*distance)-450*Math.sqrt(distance)+450)*(28.0/60.0));
+
+        velocityController.setSetPoint(5 * Math.sqrt(398210.4444 * distance) - 450 * Math.sqrt(distance) + 450 * (Math.ceil(distance / 3.3)));
     }
     public void update() {
         // Updates the Flywheel Velocity
@@ -58,7 +59,7 @@ public class Motors{
         double power = velocityController.calculate(currentVelocity); // Get power from PIDF
         flywheel.setPower(power);
 
-        // Sets the fidget tech position to pick-up or fire based on whether the intake is on or off
+        // Sets the fidget tech position to pick-up or fire based on whether the intake is on or off - Nikola
         if(intake.getPower() > 0) {
             if (spinPosition % 2 == 1) {
                 if (spinPosition >= 13) {
@@ -88,7 +89,7 @@ public class Motors{
         while(shootAll < 3){
             setFlywheelVelocity(distance);
             time.reset();
-            while(time.seconds() < 4 ){
+            while(time.seconds() < 3 ){
                 //just chill
                 update();
             }

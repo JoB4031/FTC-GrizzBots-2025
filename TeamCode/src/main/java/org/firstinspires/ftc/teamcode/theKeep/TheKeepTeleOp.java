@@ -1,10 +1,7 @@
 /*
-The Keep Version 2.3.0
+The Keep Version 2.3.2
 Changelog:
-Added velocity control for the flywheel and tuned it
-Used an equation to be able to shoot from close and far range
-Made sure all the hardware had an update function
-Cleaned up some code and moved exes processes to the hardware methods
+Tweaking the triangle button
 */
 package org.firstinspires.ftc.teamcode.theKeep;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
