@@ -20,7 +20,7 @@ public class TheKeepTeleOp extends OpMode {
     private Vision vision;
     private PedroPathing pathing;
     private Motors motors;
-    private Sensors sensors;
+
 
     @Override
     public void init() {
@@ -29,13 +29,11 @@ public class TheKeepTeleOp extends OpMode {
         vision = new Vision();
         pathing = new PedroPathing();
         motors = new Motors();
-        sensors = new Sensors();
 
         // Call the hardware init methods - Jason
         vision.initAprilTag(hardwareMap);
         pathing.initFollower(hardwareMap);
         motors.initMotors(hardwareMap);
-        sensors.initSensors(hardwareMap);
 
         // Reports the status - Jason
         telemetry.addData("Status", "Initialized");
@@ -56,7 +54,6 @@ public class TheKeepTeleOp extends OpMode {
         pathing.update();
         motors.update();
         vision.update();
-        sensors.update();
 
         // This tells the follower to activate manual drive mode if it is not following a path -Jason
         if (!pathing.automatedDrive) {
@@ -90,8 +87,8 @@ public class TheKeepTeleOp extends OpMode {
         } // Switches to TeleOp drive if the follower is done - Jason
 
         // These lines set the flywheel to the required speed depending on the distance if the circle button is pressed and 0% if its not
-        if (gamepad1.left_trigger > 0) {
-            motors.setFlywheelVelocity(1,1);
+        if (gamepad1.left_trigger > 0 && vision.allianceBase != null) {
+            motors.setFlywheelVelocity(vision.allianceBase.ftcPose.range,1);
             motors.intake.setPower(0);
         } else motors.setFlywheelVelocity(0,0);
 
@@ -110,7 +107,7 @@ public class TheKeepTeleOp extends OpMode {
 
         // This if loop makes the robot shoot all the artifacts - Nikola
         if (gamepad1.triangleWasPressed()){
-            motors.shootAllBalls(1);
+            motors.shootAllBalls(vision.allianceBase.ftcPose.range);
         }
 
         // Moves the Fidget Tech forward or backward one step depending on which trigger was pressed
@@ -132,7 +129,6 @@ public class TheKeepTeleOp extends OpMode {
         telemetry.addData("Flywheel Speed", motors.flywheel.getVelocity());
         telemetry.addData("Fidget Tech Position", motors.spinPositions[motors.spinPosition]);
         telemetry.addData("Bot Position", pathing.follower.getPose());
-        telemetry.addData("Artifact Detected", sensors.artifactDetected);
         telemetry.update();
 
     } // This section holds all the controls used during TeleOp

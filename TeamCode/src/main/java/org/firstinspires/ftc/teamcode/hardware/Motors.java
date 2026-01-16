@@ -50,7 +50,7 @@ public class Motors{
     }
     // velocity is in RPM
     public void setFlywheelVelocity(double distance, double multiplier){
-        velocityController.setSetPoint(multiplier*((5*Math.sqrt(398210.4444*distance)-450*Math.sqrt(distance)+450)*(28.0/60.0)));
+        velocityController.setSetPoint(multiplier*((5*Math.sqrt(398210.4444*distance)-450*Math.sqrt(distance)+(Math.ceil(distance/5)*550))*(28.0/60.0)));
     }
     public void update() {
         // Updates the Flywheel Velocity
