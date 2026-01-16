@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.hardware.Motors;
 import org.firstinspires.ftc.teamcode.hardware.PedroPathing;
+import org.firstinspires.ftc.teamcode.hardware.Sensors;
 import org.firstinspires.ftc.teamcode.hardware.Vision;
 @TeleOp(name="The Keep TeleOp", group="The Keep")
 public class TheKeepTeleOp extends OpMode {
@@ -19,6 +20,7 @@ public class TheKeepTeleOp extends OpMode {
     private Vision vision;
     private PedroPathing pathing;
     private Motors motors;
+
 
     @Override
     public void init() {
@@ -85,10 +87,10 @@ public class TheKeepTeleOp extends OpMode {
         } // Switches to TeleOp drive if the follower is done - Jason
 
         // These lines set the flywheel to the required speed depending on the distance if the circle button is pressed and 0% if its not
-        if (gamepad1.left_trigger > 0) {
-            motors.setFlywheelVelocity(1);
+        if (gamepad1.left_trigger > 0 && vision.allianceBase != null) {
+            motors.setFlywheelVelocity(vision.allianceBase.ftcPose.range,1);
             motors.intake.setPower(0);
-        } else motors.setFlywheelVelocity(0);
+        } else motors.setFlywheelVelocity(0,0);
 
         /* These lines check to see if the fidget tech is in the way of the ball ejector if it's not, when
         you press the triangle it will swing knocking out the ball - Jason */
@@ -105,7 +107,7 @@ public class TheKeepTeleOp extends OpMode {
 
         // This if loop makes the robot shoot all the artifacts - Nikola
         if (gamepad1.triangleWasPressed()){
-            motors.shootAllBalls(1);
+            motors.shootAllBalls(vision.allianceBase.ftcPose.range);
         }
 
         // Moves the Fidget Tech forward or backward one step depending on which trigger was pressed

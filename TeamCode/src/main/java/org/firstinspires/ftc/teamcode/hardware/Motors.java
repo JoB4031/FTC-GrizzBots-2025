@@ -49,8 +49,8 @@ public class Motors{
 
     }
     // velocity is in RPM
-    public void setFlywheelVelocity(double distance){
-        velocityController.setSetPoint((5*Math.sqrt(398210.4444*distance)-450*Math.sqrt(distance)+450)*(28.0/60.0));
+    public void setFlywheelVelocity(double distance, double multiplier){
+        velocityController.setSetPoint(multiplier*((5*Math.sqrt(398210.4444*distance)-450*Math.sqrt(distance)+(Math.ceil(distance/5)*550))*(28.0/60.0)));
     }
     public void update() {
         // Updates the Flywheel Velocity
@@ -86,7 +86,7 @@ public class Motors{
         spinPosition = 9;
 
         while(shootAll < 3){
-            setFlywheelVelocity(distance);
+            setFlywheelVelocity(distance,1);
             time.reset();
             while(time.seconds() < 4 ){
                 //just chill
