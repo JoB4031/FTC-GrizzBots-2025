@@ -26,7 +26,7 @@ public class Motors{
     public static double kI = 0.0;
     public static double kD = 0.0;
     public static double kF = 0.00025;
-
+    public double wantedVelocity;
 
     public int spinPosition;
     public final double[] spinPositions = {
@@ -50,14 +50,13 @@ public class Motors{
     }
     // velocity is in RPM
     public void setFlywheelVelocity(double distance, double multiplier){
-        velocityController.setSetPoint(multiplier*((5*Math.sqrt(398210.4444*distance)-450*Math.sqrt(distance)+(Math.ceil(distance/5)*550))*(28.0/60.0)));
+        velocityController.setSetPoint(multiplier*((6*Math.sqrt(398210*distance)-900*Math.sqrt(distance)+(Math.ceil(distance/5)*400))*(28.0/60.0)));
     }
     public void update() {
         // Updates the Flywheel Velocity
         double currentVelocity = flywheel.getVelocity();
         double power = velocityController.calculate(currentVelocity); // Get power from PIDF
         flywheel.setPower(power);
-
         // Sets the fidget tech position to pick-up or fire based on whether the intake is on or off
         if(intake.getPower() > 0) {
             if (spinPosition % 2 == 1) {
@@ -84,17 +83,16 @@ public class Motors{
         int shootAll = 0;
         intake.setPower(0);
         spinPosition = 9;
-
         while(shootAll < 3){
             setFlywheelVelocity(distance,1);
             time.reset();
-            while(time.seconds() < 4 ){
+            while(time.seconds() < 3 ){
                 //just chill
                 update();
             }
             ballEjector.setPosition(0.3);
             time.reset();
-            while (time.seconds() < 1) {
+            while (time.seconds() < 0.5) {
                 //you get to chill again
                 update();
             }
