@@ -7,8 +7,10 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
-import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.skeletonarmy.marrow.zones.Point;
+import com.skeletonarmy.marrow.zones.PolygonZone;
+
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import org.firstinspires.ftc.teamcode.theKeep.TheKeepAuto;
 import java.util.function.Supplier;
@@ -21,20 +23,23 @@ public class PedroPathing {
 
     // Sets up a bunch of positions that the bot uses to create the start position - Jason
     public static Pose startPose;
-    private final Pose redAlliance1 = new Pose(81,9.2,Math.toRadians(90));
-    private final Pose redAlliance2 = new Pose(63,135,Math.toRadians(-90));
-    private final Pose blueAlliance1 = new Pose(64,9.2,Math.toRadians(90));
-    private final Pose blueAlliance2 = new Pose(81,135,Math.toRadians(-90));
+    private final Pose redAlliance1 = new Pose(81,9,Math.toRadians(90));
+    private final Pose redAlliance2 = new Pose(118.5,128.5,Math.toRadians(-135));
+    private final Pose blueAlliance1 = new Pose(63,9,Math.toRadians(90));
+    private final Pose blueAlliance2 = new Pose(25.6,128.5,Math.toRadians(-45));
     private final Pose redGoalPose = new Pose(144, 144);
     private final Pose blueGoalPose = new Pose(0,144);
+    private static Pose allianceGoalPose;
 
 
     // Score Positions
-    private final Pose blueNearLaunchPose = new Pose(72, 72, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-    private final Pose redNearLaunchPose = new Pose(72, 72, Math.toRadians(45));
+    private final Pose blueNearLaunchPose = new Pose(72, 82, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose redNearLaunchPose = new Pose(72, 82, Math.toRadians(45));
     private final Pose blueFarLaunchPose = new Pose(60,21, Math.toRadians(113));
     private final Pose redFarLaunchPose = new Pose(84,21,Math.toRadians(70));
-    private Pose LaunchPose;
+    private final Pose notLaunchZoneBlue = new Pose(45,60,Math.toRadians(180));
+    private final Pose notLaunchZoneRed = new Pose(80,60,Math.toRadians(180));
+    private Pose LaunchPose, notLaunchZone;
 
 
     // Blue alliance's top artifact positions
@@ -69,27 +74,29 @@ public class PedroPathing {
     private final Pose RBBArtifact = new Pose(120, 36, Math.toRadians(0));
 
 
-    // Current alliance's top artifact positions
+    // The first set of artifacts picked up
     private Pose firstFrontArtifact;
     private Pose firstMiddleArtifact;
     private Pose firstBackArtifact;
 
-    // Current alliance's middle artifact positions
+    // The second set of artifacts picked up
     private Pose secondFrontArtifact;
     private Pose secondMiddleArtifact;
     private  Pose secondBackArtifact;
 
-    // Current alliance's bottom artifact positions
-    private Pose bottomFrontArtifact;
-    private Pose bottomMiddleArtifact;
-    private Pose bottomBackArtifact;
 
-    private Timer pathTimer, actionTimer, opmodeTimer;
-    private int pathState;
-    private Path scoreArtifact;
+    public int pathState;
+    public Path scoreArtifact;
 
-    public PathChain grabTFArtifact, grabTMArtifact, grabTBArtifact, scoreTopArtifacts;
-    public PathChain grabMFArtifact, grabMMArtifact, grabMBArtifact, scoreMiddleArtifacts;
+    public PathChain grabFirstFront, grabFirstMiddle, grabFirstBack, scoreFirstArtifact;
+    public PathChain grabSecondFront, grabSecondMiddle, grabSecondBack, scoreSecondArtifacts;
+    public PathChain leaveLaunchZone;
+
+
+    private final PolygonZone closeLaunchZone = new PolygonZone(new Point(144, 144), new Point(72, 72), new Point(0, 144));
+    private final PolygonZone farLaunchZone = new PolygonZone(new Point(48, 0), new Point(72, 24), new Point(96, 0));
+    private final PolygonZone robotZone = new PolygonZone(17.5, 17);
+    public boolean isAllowedToShoot;
 
     // A method that sets up the follower for pedro pathing - Jason
     public void initFollower(HardwareMap hardwareMap) {
@@ -100,17 +107,10 @@ public class PedroPathing {
         follower.update();
 
         // Decides which goal the PathChain turnToGoal should face based on the chosen alliance - Jason
-        if (TheKeepAuto.alliance == TheKeepAuto.Alliance.RED) {
-            turnToGoal = () -> follower.pathBuilder()
-                    .addPath(new BezierPoint(follower::getPose))
-                    .setHeadingInterpolation(HeadingInterpolator.facingPoint(redGoalPose))
-                    .build();
-        } else {
-            turnToGoal = () -> follower.pathBuilder()
-                    .addPath(new BezierPoint(follower::getPose))
-                    .setHeadingInterpolation(HeadingInterpolator.facingPoint(blueGoalPose))
-                    .build();
-        }
+        turnToGoal = () -> follower.pathBuilder()
+                .addPath(new BezierPoint(follower::getPose))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(allianceGoalPose))
+                .build();
     }
 
     // A method that simply sets the start position based on what was the chosen alliance and position - Jason
@@ -133,26 +133,32 @@ public class PedroPathing {
 
     // method to update all the pathing function
     public void update() {
+
         follower.update();
+
+        robotZone.setPosition(follower.getPose().getX(), follower.getPose().getY());
+        robotZone.setRotation(follower.getPose().getHeading());
+        isAllowedToShoot = robotZone.isInside(closeLaunchZone) || robotZone.isInside(farLaunchZone);
     }
 
     public void setArtifact() {
         if(TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE) {
             // Sets the near launch based on the alliance
             if (TheKeepAuto.startLocation == 1) {
-                LaunchPose = blueFarLaunchPose;
+                LaunchPose = blueNearLaunchPose;
 
                 firstFrontArtifact = BBFArtifact;
                 firstMiddleArtifact = BBMArtifact;
                 firstBackArtifact = BBBArtifact;
             } else {
-                LaunchPose = blueNearLaunchPose;
+                LaunchPose = blueFarLaunchPose;
 
                 firstFrontArtifact = BTFArtifact;
                 firstMiddleArtifact = BTMArtifact;
                 firstBackArtifact = BTBArtifact;
             }
-
+            allianceGoalPose = blueGoalPose;
+            notLaunchZone = notLaunchZoneBlue;
             // Sets the middle artifact pose based on alliance
             secondFrontArtifact = BMFArtifact;
             secondMiddleArtifact = BMMArtifact;
@@ -162,19 +168,20 @@ public class PedroPathing {
         } else{
             // Sets the near launch based on the alliance
             if (TheKeepAuto.startLocation == 1) {
-                LaunchPose = redFarLaunchPose;
+                LaunchPose = redNearLaunchPose;
 
                 firstFrontArtifact = RBFArtifact;
                 firstMiddleArtifact = RBMArtifact;
                 firstBackArtifact = RBBArtifact;
             } else {
-                LaunchPose = redNearLaunchPose;
+                LaunchPose = redFarLaunchPose;
 
                 firstFrontArtifact = RTFArtifact;
                 firstMiddleArtifact = RTMArtifact;
                 firstBackArtifact = RTBArtifact;
             }
-
+            allianceGoalPose = redGoalPose;
+            notLaunchZone = notLaunchZoneRed;
             // Sets the middle artifact pose based on alliance
             secondFrontArtifact = RMFArtifact;
             secondMiddleArtifact = RMMArtifact;
@@ -185,137 +192,56 @@ public class PedroPathing {
     public void buildPaths() {
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
         scoreArtifact = new Path(new BezierLine(startPose, LaunchPose));
-        scoreArtifact.setHeadingInterpolation(HeadingInterpolator.facingPoint(blueGoalPose));
+        scoreArtifact.setHeadingInterpolation(HeadingInterpolator.facingPoint(allianceGoalPose));
+
     /* Here is an example for Constant Interpolation
     scorePreload.setConstantInterpolation(startPose.getHeading()); */
             /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-        grabTFArtifact = follower.pathBuilder()
+        grabFirstFront = follower.pathBuilder()
                 .addPath(new BezierLine(LaunchPose, firstFrontArtifact))
                 .setLinearHeadingInterpolation(LaunchPose.getHeading(), firstFrontArtifact.getHeading())
                 .build();
-        grabTMArtifact = follower.pathBuilder()
+        grabFirstMiddle = follower.pathBuilder()
                 .addPath(new BezierLine(firstFrontArtifact, firstMiddleArtifact))
                 .setTangentHeadingInterpolation()
                 .build();
-        grabTBArtifact = follower.pathBuilder()
+        grabFirstBack = follower.pathBuilder()
                 .addPath(new BezierLine(firstMiddleArtifact, firstBackArtifact))
                 .setTangentHeadingInterpolation()
                 .build();
             /* This is our scorePickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-        scoreTopArtifacts = follower.pathBuilder()
+        scoreFirstArtifact = follower.pathBuilder()
                 .addPath(new BezierLine(firstBackArtifact, LaunchPose))
-                .setHeadingInterpolation(HeadingInterpolator.facingPoint(blueGoalPose))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(allianceGoalPose))
                 .build();
 
 
-        grabMFArtifact = follower.pathBuilder()
+        grabSecondFront = follower.pathBuilder()
                 .addPath(new BezierLine(LaunchPose, secondFrontArtifact))
                 .setLinearHeadingInterpolation(LaunchPose.getHeading(), secondFrontArtifact.getHeading())
                 .build();
-        grabMMArtifact = follower.pathBuilder()
+        grabSecondMiddle = follower.pathBuilder()
                 .addPath(new BezierLine(secondFrontArtifact, secondMiddleArtifact))
                 .setTangentHeadingInterpolation()
                 .build();
-        grabMBArtifact = follower.pathBuilder()
+        grabSecondBack = follower.pathBuilder()
                 .addPath(new BezierLine(secondMiddleArtifact, secondBackArtifact))
                 .setTangentHeadingInterpolation()
                 .build();
             /* This is our scorePickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-        scoreMiddleArtifacts = follower.pathBuilder()
+        scoreSecondArtifacts = follower.pathBuilder()
                 .addPath(new BezierLine(secondBackArtifact, LaunchPose))
-                .setHeadingInterpolation(HeadingInterpolator.facingPoint(blueGoalPose))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(allianceGoalPose))
+                .build();
+        leaveLaunchZone = follower.pathBuilder()
+                .addPath(new BezierLine(LaunchPose, notLaunchZone))
+                .setConstantHeadingInterpolation(Math.toRadians(0))
                 .build();
     }
 
 
-    public void autonomousPathUpdate() {
-        switch (pathState) {
-            case 0:
-                follower.followPath(scoreArtifact);
-                setPathState(1);
-                break;
-            case 1:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if (!follower.isBusy()) {
-                    follower.followPath(grabTFArtifact,true);
-                    setPathState(2);
-                }
-                break;
-            case 2:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
-                if (!follower.isBusy()) {
-                    /* Grab Sample */
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(grabTMArtifact, true);
-                    setPathState(3);
-                }
-                break;
-            case 3:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if (!follower.isBusy()) {
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabTBArtifact, true);
-                    setPathState(4);
-                }
-                break;
-            case 4:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
-                if (!follower.isBusy()) {
-                    /* Grab Sample */
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scoreTopArtifacts, true);
-                    setPathState(5);
-                }
-                break;
-            case 5:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if (!follower.isBusy()) {
-
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabMFArtifact, true);
-                    setPathState(6);
-                }
-                break;
-            case 6:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
-                if (!follower.isBusy()) {
-                    /* Grab Sample */
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(grabMMArtifact, true);
-                    setPathState(7);
-                }
-                break;
-            case 7:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if (!follower.isBusy()) {
-
-                    follower.followPath(grabMBArtifact, true);
-                    setPathState(8);
-                }
-                break;
-            case 8:
-                if (!follower.isBusy()) {
-
-                    follower.followPath(scoreMiddleArtifacts, true);
-                    setPathState(8);
-                }
-                break;
-            case 9:
-                if (!follower.isBusy()) {
-
-                    setPathState(-1);
-                }
-                break;
-        }
-    }
-
-    /**
-     * These change the states of the paths and actions. It will also reset the timers of the individual switches
-     **/
     public void setPathState(int pState) {
         pathState = pState;
-        pathTimer.resetTimer();
     }
 
 

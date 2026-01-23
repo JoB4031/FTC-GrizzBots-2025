@@ -45,7 +45,7 @@ import com.qualcomm.robotcore.hardware.DigitalChannel;
  * Display:
  * The current detection state is displayed in telemetry.
  */
-@TeleOp(name = "laserDigitalExample")
+@TeleOp(name = "laserDigitalExample", group= "Tests")
 public class laserDigitalExample extends LinearOpMode {
 
     private DigitalChannel laserInput;
