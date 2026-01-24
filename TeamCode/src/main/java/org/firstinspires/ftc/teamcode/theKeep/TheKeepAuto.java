@@ -124,19 +124,19 @@ public class TheKeepAuto extends OpMode {
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if (!pathing.follower.isBusy()) {
                     int shootAll = 0;
-                    motors.intake.setPower(0);
-                    motors.spinPosition = 9;
+                    motors.setIntake(0);
+                    motors.spinPosition = 11;
                     while (shootAll < 3) {
                         motors.setFlywheelVelocity(vision.allianceBase.ftcPose.range);
                         motors.time.reset();
-                        while (!motors.ableToShoot) {
+                        while (!motors.ableToShoot || motors.time.seconds() < .75) {
                             //just chill
                             motors.update();
                             pathing.update();
                         }
                         motors.ballEjector.setPosition(0.3);
                         motors.time.reset();
-                        while (motors.time.seconds() < 0.5) {
+                        while (motors.time.seconds() < 0.25) {
                             //you get to chill again
                             motors.update();
                             pathing.update();
@@ -144,12 +144,18 @@ public class TheKeepAuto extends OpMode {
                         motors.ballEjector.setPosition(0);
                         motors.spinPosition += 2;
                         shootAll += 1;
+
                     }
                     pathing.setPathState(2);
-
                 }
                 break;
             case 2:
+                if (!pathing.follower.isBusy()) {
+                    pathing.follower.followPath(pathing.grabFirstFront,true);
+                    pathing.setPathState(-1);
+                }
+                break;
+            case 3:
                 if (!pathing.follower.isBusy()) {
                     motors.setFlywheelVelocity(0);
                     pathing.follower.followPath(pathing.leaveLaunchZone,true);

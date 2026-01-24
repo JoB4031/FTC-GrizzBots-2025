@@ -27,16 +27,16 @@ public class PedroPathing {
     private final Pose redAlliance2 = new Pose(118.5,128.5,Math.toRadians(-135));
     private final Pose blueAlliance1 = new Pose(63,9,Math.toRadians(90));
     private final Pose blueAlliance2 = new Pose(25.6,128.5,Math.toRadians(-45));
-    private final Pose redGoalPose = new Pose(144, 144);
-    private final Pose blueGoalPose = new Pose(0,144);
+    private final Pose redGoalPose = new Pose(130, 140);
+    private final Pose blueGoalPose = new Pose(10,140);
     private static Pose allianceGoalPose;
 
 
     // Score Positions
-    private final Pose blueNearLaunchPose = new Pose(72, 82, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
-    private final Pose redNearLaunchPose = new Pose(72, 82, Math.toRadians(45));
-    private final Pose blueFarLaunchPose = new Pose(60,21, Math.toRadians(113));
-    private final Pose redFarLaunchPose = new Pose(84,21,Math.toRadians(70));
+    private final Pose blueNearLaunchPose = new Pose(57, 84, Math.toRadians(135)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose redNearLaunchPose = new Pose(87, 84, Math.toRadians(45));
+    private final Pose blueFarLaunchPose = new Pose(57,21, Math.toRadians(113));
+    private final Pose redFarLaunchPose = new Pose(87,21,Math.toRadians(70));
     private final Pose notLaunchZoneBlue = new Pose(45,60,Math.toRadians(180));
     private final Pose notLaunchZoneRed = new Pose(80,60,Math.toRadians(180));
     private Pose LaunchPose, notLaunchZone;
@@ -145,13 +145,13 @@ public class PedroPathing {
         if(TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE) {
             // Sets the near launch based on the alliance
             if (TheKeepAuto.startLocation == 1) {
-                LaunchPose = blueNearLaunchPose;
+                LaunchPose = blueFarLaunchPose;
 
                 firstFrontArtifact = BBFArtifact;
                 firstMiddleArtifact = BBMArtifact;
                 firstBackArtifact = BBBArtifact;
             } else {
-                LaunchPose = blueFarLaunchPose;
+                LaunchPose = blueNearLaunchPose;
 
                 firstFrontArtifact = BTFArtifact;
                 firstMiddleArtifact = BTMArtifact;
@@ -168,13 +168,13 @@ public class PedroPathing {
         } else{
             // Sets the near launch based on the alliance
             if (TheKeepAuto.startLocation == 1) {
-                LaunchPose = redNearLaunchPose;
+                LaunchPose = redFarLaunchPose;
 
                 firstFrontArtifact = RBFArtifact;
                 firstMiddleArtifact = RBMArtifact;
                 firstBackArtifact = RBBArtifact;
             } else {
-                LaunchPose = redFarLaunchPose;
+                LaunchPose = redNearLaunchPose;
 
                 firstFrontArtifact = RTFArtifact;
                 firstMiddleArtifact = RTMArtifact;

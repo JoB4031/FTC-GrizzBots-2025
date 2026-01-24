@@ -20,7 +20,7 @@ public class TheKeepTeleOp extends OpMode {
     private PedroPathing pathing;
     private Motors motors;
 
-    private boolean ballEjectorHit = false;
+    private double movementMultiplier = 1;
 
     @Override
     public void init() {
@@ -57,16 +57,16 @@ public class TheKeepTeleOp extends OpMode {
         if (!pathing.automatedDrive) {
             if (motors.intake.getPower() > 0 || motors.velocityController.getSetPoint() > 0) {
                 pathing.follower.setTeleOpDrive(
-                        -gamepad1.left_stick_y,
-                        -gamepad1.left_stick_x,
-                        -(gamepad1.right_stick_x*0.5),
+                        -gamepad1.left_stick_y*movementMultiplier,
+                        -gamepad1.left_stick_x*movementMultiplier,
+                        -(gamepad1.right_stick_x*0.5)*movementMultiplier,
                         TheKeepAuto.robotCentric// Robot Centric
                 );
             } else {
                 pathing.follower.setTeleOpDrive(
-                        -gamepad1.left_stick_y,
-                        -gamepad1.left_stick_x,
-                        -gamepad1.right_stick_x,
+                        -gamepad1.left_stick_y*movementMultiplier,
+                        -gamepad1.left_stick_x*movementMultiplier,
+                        -gamepad1.right_stick_x*movementMultiplier,
                         TheKeepAuto.robotCentric // Robot Centric
                 );
             }
@@ -74,8 +74,49 @@ public class TheKeepTeleOp extends OpMode {
 
         // Turns the bots heading to face the alliance goal - Jason
         if (gamepad1.crossWasPressed()) {
-            pathing.follower.followPath(pathing.turnToGoal.get());
+            motors.spinPosition = 12;
+            motors.doNotSpin = true;
+            pathing.follower.followPath(pathing.turnToGoal.get(),true);
+            motors.setFlywheelVelocity(vision.allianceBase.ftcPose.range);
             pathing.automatedDrive = true;
+            while (pathing.follower.isBusy()) {
+                pathing.update();
+                motors.update();
+                vision.update();
+                motors.setFlywheelVelocity(vision.allianceBase.ftcPose.range);
+            }
+            motors.time.reset();
+            while (motors.time.seconds() < 1 ) {
+                pathing.update();
+                motors.update();
+                vision.update();
+                motors.setFlywheelVelocity(vision.allianceBase.ftcPose.range);
+            }
+            int shootAll = 0;
+            motors.setIntake(0);
+            motors.spinPosition = 11;
+            motors.doNotSpin = false;
+            while (shootAll < 3) {
+                vision.update();
+                motors.setFlywheelVelocity(vision.allianceBase.ftcPose.range);
+                motors.time.reset();
+                while (!motors.ableToShoot || motors.time.seconds() < .75) {
+                    //just chill
+                    motors.update();
+                    pathing.update();
+                }
+                motors.ballEjector.setPosition(0.3);
+                motors.time.reset();
+                while (motors.time.seconds() < 0.25) {
+                    //you get to chill again
+                    motors.update();
+                    pathing.update();
+                }
+                motors.ballEjector.setPosition(0);
+                motors.spinPosition += 2;
+                shootAll += 1;
+            }
+
         }
 
         // The dpad down button is used as an emergency stop - Jason
@@ -85,9 +126,9 @@ public class TheKeepTeleOp extends OpMode {
         } // Switches to TeleOp drive if the follower is done - Jason
 
         // These lines set the flywheel to the required speed depending on the distance if the circle button is pressed and 0% if its not
-        if (gamepad1.left_trigger > 0 && vision.allianceBase != null) {
+        if ((gamepad1.left_trigger > 0 || gamepad1.cross) && vision.allianceBase != null) {
             motors.setFlywheelVelocity(vision.allianceBase.ftcPose.range);
-            motors.intake.setPower(0);
+            motors.setIntake(0);
         } else {
             motors.setFlywheelVelocity(0);
         }
@@ -98,32 +139,31 @@ public class TheKeepTeleOp extends OpMode {
                 motors.ballEjector.setPosition(.3);
         } else {
             motors.ballEjector.setPosition(0);
-            ballEjectorHit = false;
         }
 
         // This if statement turns the intake on when the circle is pressed and off when the square is pressed - Jason
         if (gamepad1.circleWasPressed()) {
             if (motors.intake.getPower() == 0) {
-                motors.intake.setPower(1);
-            } else motors.intake.setPower(0);
+                motors.setIntake(1);
+            } else motors.setIntake(0);
         }
 
         // This if loop makes the robot shoot all the artifacts - Nikola
         if (gamepad1.triangleWasPressed() && vision.allianceBase != null) {
             int shootAll = 0;
-            motors.intake.setPower(0);
-            motors.spinPosition = 9;
+            motors.setIntake(0);
+            motors.spinPosition = 11;
             while (shootAll < 3) {
                 motors.setFlywheelVelocity(vision.allianceBase.ftcPose.range);
                 motors.time.reset();
-                while (!motors.ableToShoot) {
+                while (!motors.ableToShoot || motors.time.seconds() < .75) {
                     //just chill
                     motors.update();
                     pathing.update();
                 }
                 motors.ballEjector.setPosition(0.3);
                 motors.time.reset();
-                while (motors.time.seconds() < 0.5) {
+                while (motors.time.seconds() < 0.25) {
                     //you get to chill again
                     motors.update();
                     pathing.update();
@@ -131,6 +171,14 @@ public class TheKeepTeleOp extends OpMode {
                 motors.ballEjector.setPosition(0);
                 motors.spinPosition += 2;
                 shootAll += 1;
+            }
+        }
+
+        if (gamepad1.squareWasPressed()) {
+            if (movementMultiplier == 1) {
+                movementMultiplier = 0.5;
+            } else {
+                movementMultiplier = 1;
             }
         }
 
@@ -154,6 +202,7 @@ public class TheKeepTeleOp extends OpMode {
         telemetry.addData("Flywheel Error", motors.rightFlywheel.getVelocity());
         telemetry.addData("Fidget Tech Position", motors.spinPositions[motors.spinPosition]);
         telemetry.addData("Bot Position", pathing.follower.getPose());
+        telemetry.addData("In Launch Zone", pathing.isAllowedToShoot);
         telemetry.update();
 
     } // This section holds all the controls used during TeleOp
