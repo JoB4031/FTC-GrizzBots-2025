@@ -42,7 +42,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
  * Display:
  * - Driver Station telemetry shows voltage and distance (mm).
  */
-@TeleOp(name = "laserAnalogExample")
+@TeleOp(name = "laserAnalogExample", group= "Tests")
 public class laserAnalogExample extends LinearOpMode {
 
     private AnalogInput laserAnalog;

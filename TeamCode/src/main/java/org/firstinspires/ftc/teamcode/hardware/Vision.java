@@ -89,8 +89,6 @@ public class Vision {
 
     // Gets the april tag data from all tags the camera sees - Jason
     public void update() {
-        blueBase = null;
-        redBase = null;
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
 
         for (AprilTagDetection detection : currentDetections) {
