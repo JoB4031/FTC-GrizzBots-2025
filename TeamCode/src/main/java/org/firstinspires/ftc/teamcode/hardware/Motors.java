@@ -13,6 +13,9 @@ public class Motors{
 
     public ElapsedTime time = new ElapsedTime();
     public DcMotor intake = null;
+    public Servo leftIntake = null;
+    public Servo rightIntake = null;
+    public boolean doNotSpin = false;
     public DcMotorEx rightFlywheel = null;
     public DcMotorEx leftFlywheel = null;
     public Servo ballEjector = null;
@@ -25,19 +28,23 @@ public class Motors{
     public static double kF = 0.00025;
     public int spinPosition;
     public final double[] spinPositions = {
-            0.03,0.06,0.1,0.14,0.17,0.21,0.25,0.28,0.32,0.36,
-            0.4,0.43,0.47,0.51,0.55,0.58,0.62,0.66,0.7,0.73,
-            0.77,0.8,0.83,0.87,0.91,0.94,0.98
+            0,0,0.04,0.08,0.12,0.15,0.19,0.22,0.26,0.3,0.33,0.37,0.41,
+            0.45,0.48,0.52,0.56,0.61,0.64,0.68,0.72,0.75,0.79,0.83,
+            0.86,0.9,0.93,0.97
     };
     public boolean ableToShoot;
 
     public void initMotors(HardwareMap hardwareMap) {
         // maps the motors and servos using the hardware map when called - Jason
         intake = hardwareMap.get(DcMotor.class, "intake");
+        leftIntake = hardwareMap.get(Servo.class, "leftIntake");
+        rightIntake = hardwareMap.get(Servo.class, "rightIntake");
+
+
         ballEjector = hardwareMap.get(Servo.class, "ballEjector");
         fidgetTech = hardwareMap.get(Servo.class, "spinIndexer");
 
-        spinPosition = 13;
+        spinPosition = 15;
 
         rightFlywheel = hardwareMap.get(DcMotorEx.class, "rightFlywheel");
         rightFlywheel.setDirection(DcMotorEx.Direction.FORWARD);
@@ -53,7 +60,7 @@ public class Motors{
     }
     // velocity is in RPM
     public void setFlywheelVelocity(double distance){
-        velocityController.setSetPoint((6*Math.sqrt(398210*distance)-900*Math.sqrt(distance)+(Math.ceil(distance/5)*400))*(28.0/60.0));
+        velocityController.setSetPoint((6.3*Math.sqrt(398210*distance)-900*Math.sqrt(distance)+(Math.ceil(distance/5)*400))*(28.0/60.0));
     }
     public void update() {
         // Updates the Flywheel Velocity
@@ -69,20 +76,20 @@ public class Motors{
         }
 
         // Sets the fidget tech position to pick-up or fire based on whether the intake is on or off
-        if(intake.getPower() > 0) {
+        if(rightFlywheel.getPower() <= 0 || doNotSpin) {
             if (spinPosition % 2 == 1) {
-                if (spinPosition >= 13) {
+                if (spinPosition >= 15) {
                     spinPosition -= 1;
                 } else spinPosition += 1;
             }
         } else {
             if(spinPosition % 2 == 0){
-                if (spinPosition >= 13) {
+                if (spinPosition >= 15) {
                     spinPosition -= 1;
                 } else spinPosition += 1;
             }
         }
-        ableToShoot = (velocityController.getVelocityError() < 50 && velocityController.getVelocityError() > -50);
+        ableToShoot = (velocityController.getVelocityError() < 100 && velocityController.getVelocityError() > -100);
         // moves the Fidget Tech to the set position
         fidgetTech.setPosition(spinPositions[spinPosition]);
     }
@@ -112,6 +119,17 @@ public class Motors{
             shootAll += 1;
         }
 
+
+    }
+    public void setIntake(double power) {
+        intake.setPower(power);
+        if (power <= 0) {
+            leftIntake.setPosition(.5);
+            rightIntake.setPosition(.5);
+        } else {
+            leftIntake.setPosition(0);
+            rightIntake.setPosition(1);
+        }
 
     }
 }
