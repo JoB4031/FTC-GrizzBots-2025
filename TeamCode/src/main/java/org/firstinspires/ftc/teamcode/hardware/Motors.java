@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
-import com.arcrobotics.ftclib.hardware.motors.CRServo;
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
