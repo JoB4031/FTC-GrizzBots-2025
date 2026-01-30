@@ -23,10 +23,10 @@ public class TheKeepTeleOp extends OpMode {
     private PedroPathing pathing;
     private Motors motors;
     private Sensors sensors;
+    private double additionalLaunchPower = 0;
 
     private double movementMultiplier;
 
-    private int rotateCount;
     @Override
     public void init() {
         // Creates a new instance of the hardware classes - Jason
@@ -105,6 +105,7 @@ public class TheKeepTeleOp extends OpMode {
         // Turns the bots heading to face the alliance goal - Jason
         if (gamepad1.crossWasPressed() && pathing.robotInRange) {
             if (pathing.farLaunch) {
+                motors.flywheelPower = 6.6 + additionalLaunchPower;
                 motors.setIntake(0);
                 motors.spinPosition = 12;
                 motors.doNotSpin = true;
@@ -148,6 +149,7 @@ public class TheKeepTeleOp extends OpMode {
                     shootAll += 1;
                 }
             } else {
+                motors.flywheelPower = 6.3 + additionalLaunchPower;
                 motors.setIntake(0);
                 motors.spinPosition = 12;
                 motors.doNotSpin = true;
@@ -288,6 +290,8 @@ public class TheKeepTeleOp extends OpMode {
         if (gamepad1.leftBumperWasPressed() && motors.spinPosition >= 2) motors.spinPosition -= 2;
         if (gamepad1.rightBumperWasPressed() && motors.spinPosition <= 25) motors.spinPosition += 2;
 
+        if (gamepad2.leftBumperWasPressed()) additionalLaunchPower -= 0.1;
+        if (gamepad2.rightBumperWasPressed()) additionalLaunchPower += 0.1;
         // These lines write any april tag data to the telemetry - Jason
         if (vision.allianceBase != null) {
            telemetry.addData("Alliance Base Range", vision.allianceBase.ftcPose.range);
@@ -306,6 +310,8 @@ public class TheKeepTeleOp extends OpMode {
         telemetry.addData("Artifact Distance", sensors.artifactedIntakeDetector.getDistance(DistanceUnit.INCH));
         telemetry.addData("Distance to Goal", pathing.shootDistance);
         telemetry.addData("Goal in range", pathing.robotInRange);
+        telemetry.addData("Flywheel Strength", motors.flywheelPower);
+        telemetry.addData("Additional Power", additionalLaunchPower);
         telemetry.update();
 
     } // This section holds all the controls used during TeleOp

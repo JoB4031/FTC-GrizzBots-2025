@@ -27,6 +27,7 @@ public class Motors{
     public static double kD = 0.0;
     public static double kF = 0.00025;
     public int spinPosition;
+    public double flywheelPower = 6.3;
     public final double[] spinPositions = {
             0,0,0.04,0.08,0.12,0.15,0.19,0.22,0.26,0.3,0.33,0.37,0.41,
             0.45,0.48,0.52,0.56,0.61,0.64,0.68,0.72,0.75,0.79,0.83,
@@ -60,7 +61,7 @@ public class Motors{
     }
     // velocity is in RPM
     public void setFlywheelVelocity(double distance){
-        velocityController.setSetPoint((6.3*Math.sqrt(398210*distance)-900*Math.sqrt(distance)+(Math.ceil(distance/5)*400))*(28.0/60.0));
+        velocityController.setSetPoint((flywheelPower*Math.sqrt(398210*distance)-900*Math.sqrt(distance)+(Math.ceil(distance/5)*400))*(28.0/60.0));
     }
     public void update() {
         // Updates the Flywheel Velocity
