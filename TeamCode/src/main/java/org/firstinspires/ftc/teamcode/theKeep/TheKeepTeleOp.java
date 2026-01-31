@@ -105,7 +105,7 @@ public class TheKeepTeleOp extends OpMode {
         // Turns the bots heading to face the alliance goal - Jason
         if (gamepad1.crossWasPressed() && pathing.robotInRange) {
             if (pathing.farLaunch) {
-                motors.flywheelPower = 6.6 + additionalLaunchPower;
+                motors.flywheelPower = 6.8 + additionalLaunchPower;
                 motors.setIntake(0);
                 motors.spinPosition = 12;
                 motors.doNotSpin = true;
@@ -149,7 +149,7 @@ public class TheKeepTeleOp extends OpMode {
                     shootAll += 1;
                 }
             } else {
-                motors.flywheelPower = 6.3 + additionalLaunchPower;
+                motors.flywheelPower = 6.9 + additionalLaunchPower;
                 motors.setIntake(0);
                 motors.spinPosition = 12;
                 motors.doNotSpin = true;

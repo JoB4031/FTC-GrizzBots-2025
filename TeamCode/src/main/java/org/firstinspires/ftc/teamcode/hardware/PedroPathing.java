@@ -27,7 +27,7 @@ public class PedroPathing {
     public static Pose startPose;
     private final Pose alliance1 = new Pose(63,9,Math.toRadians(90));
     private final Pose alliance2 = new Pose(44.8,140.8,Math.toRadians(180));
-    private static Pose allianceGoalPose = new Pose(10,140);
+    private Pose allianceGoalPose = new Pose(10,140);
 
 
     // Score Positions
@@ -127,7 +127,7 @@ public class PedroPathing {
             launchPose = launchPose.mirror();
             nearLaunchPose = nearLaunchPose.mirror();
             allianceGoalPose = allianceGoalPose.mirror();
-            targetPoint = new Point(((72-targetPoint.getX())+72), targetPoint.getY());
+            targetPoint = new Point(134,131);
             notLaunchZone = notLaunchZone.mirror();
             // Sets the middle artifact pose based on alliance
             firstArtifacts = firstArtifacts.mirror();

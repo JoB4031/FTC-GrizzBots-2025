@@ -28,7 +28,7 @@ public class TheKeepAuto extends OpMode {
     private Sensors sensors;
     private boolean startUpdate = false;
     private double shotDelay = 0.75;
-    private double defaultPower = 6.3;
+    private double defaultPower = 6.9;
 
     // These next lines setup the variables used to store prompter values, which define the autonomous is used - Jason
     public enum Alliance {
@@ -96,7 +96,7 @@ public class TheKeepAuto extends OpMode {
         opmodeTimer.resetTimer();
         if (startLocation == 1) {
             shotDelay = 1.5;
-            defaultPower =  6.6;
+            defaultPower =  6.8;
         }
         motors.flywheelPower = defaultPower;
     }
@@ -108,6 +108,8 @@ public class TheKeepAuto extends OpMode {
         motors.update();
         vision.update();
         sensors.update();
+
+
         autonomousPathUpdate();
         // These lines grab the april tag data then write any tags data to the telemetry - Jason
         if (Vision.pattern != null) {
@@ -363,6 +365,7 @@ public class TheKeepAuto extends OpMode {
             case 8:
                 if (!pathing.follower.isBusy()) {
                     motors.setFlywheelVelocity(0);
+                    pathing.follower.followPath(pathing.leaveLaunchZone, true);
                     motors.update();
                     pathing.setPathState(-1);
                 }
