@@ -28,6 +28,7 @@ public class TheKeepAuto extends OpMode {
     private Sensors sensors;
     private boolean startUpdate = false;
     private double shotDelay = 0.75;
+    private double defaultPower = 6.3;
 
     // These next lines setup the variables used to store prompter values, which define the autonomous is used - Jason
     public enum Alliance {
@@ -95,7 +96,9 @@ public class TheKeepAuto extends OpMode {
         opmodeTimer.resetTimer();
         if (startLocation == 1) {
             shotDelay = 1.5;
+            defaultPower =  6.6;
         }
+        motors.flywheelPower = defaultPower;
     }
 
     @Override
@@ -323,6 +326,7 @@ public class TheKeepAuto extends OpMode {
                 break;
             case 7:
                 if (!pathing.follower.isBusy()) {
+                    motors.flywheelPower = 6.3;
                     motors.time.reset();
                     motors.setIntake(0);
                     while (motors.time.seconds() < 1) {
