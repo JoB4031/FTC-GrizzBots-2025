@@ -25,7 +25,7 @@ public class TheKeepTeleOp extends OpMode {
     public void init() {
         // Creates a new instance of the hardware classes - Jason
         robot = new hardware();
-        robot.initHardware(hardwareMap);
+        robot.initHardware(hardwareMap, false);
         // Call the hardware init methods - Jason
         if (TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE && !TheKeepAuto.robotCentric) {
             movementMultiplier = -1;
@@ -88,20 +88,19 @@ public class TheKeepTeleOp extends OpMode {
         // Turns the bots heading to face the alliance goal - Jason
         if (gamepad1.crossWasPressed() && robot.launchZoneTracker.robotInRange) {
             robot.doNotSpin = true;
+            robot.fidgetTech.setPosition(12);
             robot.flywheel.setFlywheelFireDistance(robot.launchZoneTracker.shootDistance);
             robot.followPath(robot.pathFollower.turnToGoal.get());
-            while (robot.pathingIsBusy()) {
+            robot.timer.reset();
+            while (robot.pathingIsBusy() || robot.timer.seconds() < 2) {
                 robot.update();
             }
             robot.doNotSpin = false;
             robot.shootAllBalls();
-        }
-
-        // The dpad down button is used as an emergency stop - Jason
-        if (robot.automatedDrive && (gamepad1.dpadDownWasPressed() || !robot.pathingIsBusy())) {
             robot.pathFollower.follower.startTeleopDrive();
             robot.automatedDrive = false;
-        } // Switches to TeleOp drive if the follower is done - Jason
+        }
+
 
         // These lines set the flywheel to the required speed depending on the distance if the circle button is pressed and 0% if its not
         if ((gamepad1.left_trigger > 0 || gamepad1.cross)) {
@@ -145,6 +144,8 @@ public class TheKeepTeleOp extends OpMode {
         }
 
         // Moves the Fidget Tech forward or backward one step depending on which trigger was pressed
+        if (gamepad1.leftBumperWasPressed()) robot.fidgetTech.setPosition(robot.fidgetTech.getPosition() - 2);
+        if (gamepad1.rightBumperWasPressed()) robot.fidgetTech.setPosition(robot.fidgetTech.getPosition() + 2);
 
         if (gamepad2.leftBumperWasPressed()) additionalLaunchPower -= 0.1;
         if (gamepad2.rightBumperWasPressed()) additionalLaunchPower += 0.1;

@@ -39,7 +39,7 @@ public class hardware {
     public boolean doNotSpin = false;
 
 
-    public void initHardware(HardwareMap hw) {
+    public void initHardware(HardwareMap hw, boolean auto) {
 
         flywheel = new Flywheel();
         flywheel.initFlywheel(hw);
@@ -59,6 +59,9 @@ public class hardware {
 
         poseLib = new PoseLibrary();
         poseLib.configureAlliancePaths();
+        if (auto) {
+            startPosition(true);
+        }
 
         pathFollower = new PathFollower();
         pathFollower.init(hw, poseLib);
@@ -98,13 +101,15 @@ public class hardware {
             }
         }
         if (!intakeSensor.isNothingDetected()) {
-            intake.setPower(1,0);
-        }
+            intake.setPower(1,-0.25);
+        } else intake.setPower(1,1);
     }
 
     public void shootAllBalls() {
         intake.off();
         fidgetTech.setPosition(11);
+        timer.reset();
+        while (timer.seconds() < 0.1) update();
 
         for (int i = 0; i < 3; i++) {
 
@@ -115,10 +120,11 @@ public class hardware {
             }
             ejector.fire();
             timer.reset();
-            while (timer.seconds() < 0.5) update();
-
+            while (timer.seconds() < 0.1) update();
             ejector.reset();
             fidgetTech.advance();
+            timer.reset();
+            while (timer.seconds() < 0.25) update();
         }
     }
     public void startPosition(boolean atPromptEnd) {

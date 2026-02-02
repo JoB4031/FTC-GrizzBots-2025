@@ -33,6 +33,7 @@ public class Flywheel {
         controller.setSetPoint(RPMToVelocity(6.3 * Math.sqrt(398210 * distance)
                 - 900 * Math.sqrt(distance)
                 + (Math.ceil(distance / 5) * 400)));
+        if (controller.getSetPoint() > 2460) controller.setSetPoint(2460);
     }
     public void off() {
         setFlywheelFireDistance(0);

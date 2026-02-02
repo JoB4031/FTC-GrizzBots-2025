@@ -49,7 +49,7 @@ public class TheKeepAuto extends OpMode {
         alliance = prompter.get("alliance");
         startLocation = prompter.get("startLocation");
         robotCentric = prompter.get("robotCentric");
-        robot.initHardware(hardwareMap);
+        robot.initHardware(hardwareMap, true);
         robot.startPosition(true);
         telemetry.addData("Selected Alliance", alliance);
         telemetry.addData("Selected Start Location", startLocation);

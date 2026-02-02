@@ -11,6 +11,7 @@ public class Intake {
 
     public void initIntake(HardwareMap hw) {
         intake = hw.get(DcMotor.class, "intake");
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         leftIntake = hw.get(Servo.class, "leftIntake");
         rightIntake = hw.get(Servo.class, "rightIntake");
     }
@@ -23,7 +24,7 @@ public class Intake {
     }
 
     public void on() {
-        setPower(1,1);
+        intake.setPower(1);
     }
 
     public void off() {
