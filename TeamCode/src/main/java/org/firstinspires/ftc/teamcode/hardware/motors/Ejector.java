@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.hardware.motors;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class ejector {
+public class Ejector {
 
     private Servo ejector;
 

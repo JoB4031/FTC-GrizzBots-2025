@@ -13,8 +13,8 @@ import com.skeletonarmy.marrow.prompts.BooleanPrompt;
 import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
 
-import org.firstinspires.ftc.teamcode.hardware.Vision;
 import org.firstinspires.ftc.teamcode.hardware.hardware;
+import org.firstinspires.ftc.teamcode.hardware.vision.Vision;
 
 @Autonomous(name="The Keep Auto",group="The Keep")
 public class TheKeepAuto extends OpMode {
@@ -109,7 +109,7 @@ public class TheKeepAuto extends OpMode {
                 break;
             case 2:
                 if (!robot.pathingIsBusy()) {
-                    robot.flywheel.turnOff();
+                    robot.flywheel.off();
                     robot.intake.setPower(1);
                     robot.fidgetTech.setPosition(12);
                     robot.update();
@@ -139,7 +139,7 @@ public class TheKeepAuto extends OpMode {
                 break;
             case 5:
                 if (!robot.pathingIsBusy()) {
-                    robot.flywheel.turnOff();
+                    robot.flywheel.off();
                     robot.intake.setPower(1);
                     robot.fidgetTech.setPosition(12);
                     robot.update();
@@ -169,7 +169,7 @@ public class TheKeepAuto extends OpMode {
                 break;
             case 8:
                 if (!robot.pathingIsBusy()) {
-                    robot.flywheel.turnOff();
+                    robot.flywheel.off();
                     robot.update();
                     robot.followPath(robot.pathBuilder.leaveLaunchZone());
                     robot.pathBuilder.setPathState(-1);

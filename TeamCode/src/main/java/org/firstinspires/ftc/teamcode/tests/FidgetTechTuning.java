@@ -3,10 +3,8 @@ package org.firstinspires.ftc.teamcode.tests;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.hardware.Motors;
-
 @TeleOp(name= "Fidget Tech Tuning", group= "Tests")
-public class fidgetTechTuning extends OpMode {
+public class FidgetTechTuning extends OpMode {
 
     private Motors motors;
     private double fidgetTechPosition = 0.5;

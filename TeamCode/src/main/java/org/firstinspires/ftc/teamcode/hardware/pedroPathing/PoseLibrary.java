@@ -4,7 +4,7 @@ import com.pedropathing.geometry.Pose;
 import com.skeletonarmy.marrow.zones.Point;
 import org.firstinspires.ftc.teamcode.theKeep.TheKeepAuto;
 
-public class poseLibrary {
+public class PoseLibrary {
 
     public static Pose startPose;
     public Pose allianceGoalPose = new Pose(10, 140);
@@ -23,7 +23,9 @@ public class poseLibrary {
 
     public Pose launchPose;
     public Pose firstArtifacts;
+    public Pose firstArtifactControlPoint = new Pose(76.5,35);
     public Pose secondArtifacts;
+    public Pose secondArtifactControlPoint = new Pose(76.5, 67);
 
     public Point targetPoint = new Point(16, 131);
 
@@ -33,7 +35,7 @@ public class poseLibrary {
             startPose = startPose.mirror();
         }
     }
-    public void saveStartPose(pathFollower pathFollower) {
+    public void saveStartPose(PathFollower pathFollower) {
         startPose = pathFollower.getPosition();
     }
     public void configureAlliancePaths() {
@@ -43,6 +45,7 @@ public class poseLibrary {
         } else {
             launchPose = nearLaunchPose;
             firstArtifacts = topArtifacts;
+            firstArtifactControlPoint = new Pose(firstArtifacts.getX(), firstArtifacts.getY());
         }
 
         secondArtifacts = middleArtifacts;
@@ -53,9 +56,11 @@ public class poseLibrary {
             allianceGoalPose = allianceGoalPose.mirror();
             notLaunchZone = notLaunchZone.mirror();
             firstArtifacts = firstArtifacts.mirror();
+            firstArtifactControlPoint = firstArtifactControlPoint.mirror();
             secondArtifacts = secondArtifacts.mirror();
-            baseZone = baseZone.mirror();
+            secondArtifactControlPoint = secondArtifactControlPoint.mirror();
 
+            baseZone = baseZone.mirror();
             targetPoint = new Point(((72 - targetPoint.getX()) + 72), targetPoint.getY());
         }
     }

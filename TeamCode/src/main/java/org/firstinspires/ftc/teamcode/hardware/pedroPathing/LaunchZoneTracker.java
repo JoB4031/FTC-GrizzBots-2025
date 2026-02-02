@@ -3,7 +3,7 @@ import com.pedropathing.geometry.Pose;
 import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 
-public class launchZoneTracker {
+public class LaunchZoneTracker {
 
     private final PolygonZone closeLaunchArea =
             new PolygonZone(new Point(144, 144), new Point(72, 72), new Point(0, 144));

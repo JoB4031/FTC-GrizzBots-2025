@@ -11,15 +11,15 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.function.Supplier;
 
-public class pathFollower{
+public class PathFollower {
 
     public Follower follower;
     public Supplier<PathChain> turnToGoal;
     public Supplier<PathChain> returnToBase;
 
-    public void init(HardwareMap map, poseLibrary poses) {
+    public void init(HardwareMap map, PoseLibrary poses) {
         follower = Constants.createFollower(map);
-        follower.setStartingPose(poses.startPose);
+        follower.setStartingPose(PoseLibrary.startPose);
         follower.update();
 
         turnToGoal = () -> follower.pathBuilder()

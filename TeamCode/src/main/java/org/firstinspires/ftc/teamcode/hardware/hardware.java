@@ -1,71 +1,85 @@
 package org.firstinspires.ftc.teamcode.hardware;
 
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.hardware.motors.ejector;
-import org.firstinspires.ftc.teamcode.hardware.motors.fidgetTech;
-import org.firstinspires.ftc.teamcode.hardware.motors.flywheel;
-import org.firstinspires.ftc.teamcode.hardware.motors.intake;
-import org.firstinspires.ftc.teamcode.hardware.pedroPathing.launchZoneTracker;
-import org.firstinspires.ftc.teamcode.hardware.pedroPathing.pathBuilder;
-import org.firstinspires.ftc.teamcode.hardware.pedroPathing.pathFollower;
-import org.firstinspires.ftc.teamcode.hardware.pedroPathing.poseLibrary;
-import org.firstinspires.ftc.teamcode.hardware.sensors.intakeSensor;
+import org.firstinspires.ftc.teamcode.hardware.motors.Ejector;
+import org.firstinspires.ftc.teamcode.hardware.motors.FidgetTech;
+import org.firstinspires.ftc.teamcode.hardware.motors.Flywheel;
+import org.firstinspires.ftc.teamcode.hardware.motors.Intake;
+import org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchZoneTracker;
+import org.firstinspires.ftc.teamcode.hardware.pedroPathing.PathBuilder;
+import org.firstinspires.ftc.teamcode.hardware.pedroPathing.PathFollower;
+import org.firstinspires.ftc.teamcode.hardware.pedroPathing.PoseLibrary;
+import org.firstinspires.ftc.teamcode.hardware.sensors.IntakeSensor;
+import org.firstinspires.ftc.teamcode.hardware.vision.Vision;
 
 public class hardware {
 
     // Motor Wrappers
-    public flywheel flywheel;
-    public intake intake;
-    public fidgetTech fidgetTech;
-    public ejector ejector;
+    public Flywheel flywheel;
+    public Intake intake;
+    public FidgetTech fidgetTech;
+    public Ejector ejector;
 
     // Sensor Wrappers
-    public intakeSensor intakeSensor;
+    public IntakeSensor intakeSensor;
 
     // Pedro Pathing Wrappers
-    public pathFollower pathFollower;
-    public launchZoneTracker launchZoneTracker;
-    public pathBuilder pathBuilder;
-    public poseLibrary poseLib;
+    public PathFollower pathFollower;
+    public LaunchZoneTracker launchZoneTracker;
+    public PathBuilder pathBuilder;
+    public PoseLibrary poseLib;
     public final ElapsedTime timer = new ElapsedTime();
+
+    public Vision vision;
+
+    public boolean automatedDrive = false;
+    public boolean doNotSpin = false;
 
 
     public void initHardware(HardwareMap hw) {
 
-        flywheel = new flywheel();
-        intake   = new intake();
-        fidgetTech = new fidgetTech();
-        ejector  = new ejector();
-
-
+        flywheel = new Flywheel();
         flywheel.initFlywheel(hw);
+
+        intake   = new Intake();
         intake.initIntake(hw);
+
+        fidgetTech = new FidgetTech();
         fidgetTech.initFidgetTech(hw);
+
+        ejector  = new Ejector();
         ejector.initEjector(hw);
 
 
-        intakeSensor = new intakeSensor();
+        intakeSensor = new IntakeSensor();
         intakeSensor.initIntakeSensor(hw);
 
-        pathFollower = new pathFollower();
-        launchZoneTracker = new launchZoneTracker();
-        pathBuilder = new pathBuilder();
-        poseLib = new poseLibrary();
-        poseLib.configureAlliancePaths();
+        pathFollower = new PathFollower();
+
         pathFollower.init(hw, poseLib);
+
+        launchZoneTracker = new LaunchZoneTracker();
+
+        pathBuilder = new PathBuilder();
         pathBuilder.initPathBuilder(pathFollower.follower, poseLib);
 
+        poseLib = new PoseLibrary();
+        poseLib.configureAlliancePaths();
+
+        vision = new Vision();
+        vision.initVision(hw);
     }
 
     public void update() {
         flywheel.update();
-        fidgetTech.update(flywheel.isAtSpeed(),false);
+        fidgetTech.update(flywheel.getVelocity() > 0, doNotSpin);
         pathFollower.update();
         launchZoneTracker.update(pathFollower.getPosition(), poseLib.targetPoint);
+        vision.update();
+
     }
     public void automaticPickup() {
         if (intake.isPowered() && intakeSensor.isArtifactLoaded()) {
@@ -94,7 +108,7 @@ public class hardware {
 
             setFlywheelToShootDistance();
             timer.reset();
-            while (!flywheel.isAtSpeed() || timer.seconds() < .75) {
+            while (!flywheel.isAtSpeed()) {
                 update();
             }
             ejector.fire();

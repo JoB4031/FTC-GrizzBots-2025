@@ -1,8 +1,7 @@
-package org.firstinspires.ftc.teamcode.hardware;
+package org.firstinspires.ftc.teamcode.hardware.vision;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.theKeep.TheKeepAuto;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -16,17 +15,13 @@ import java.util.List;
 public class Vision {
     public AprilTagProcessor aprilTag;
     public VisionPortal visionPortal;
-    private AprilTagDetection blueBase = null;
-    private AprilTagDetection redBase = null;
-    public AprilTagDetection allianceBase = null;
-
     // A custom class that allows variables of this class to be set to the ball pattern - Jason
     public enum BallPattern { GPP, PGP, PPG }
 
     // We set set this variable to static so it will remember the pattern even when you exit the program - Jason
-    public static BallPattern pattern;
+    public static BallPattern pattern = null;
 
-    public void initAprilTag(HardwareMap hardwareMap) {
+    public void initVision(HardwareMap hw) {
 
         // Create the AprilTag processor - Jason
         aprilTag = new AprilTagProcessor.Builder()
@@ -60,7 +55,7 @@ public class Vision {
         VisionPortal.Builder builder = new VisionPortal.Builder();
 
         // Set the camera (webcam vs. built-in RC phone camera).
-        builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
+        builder.setCamera(hw.get(WebcamName.class, "Webcam 1"));
 
         // Choose a camera resolution. Not all cameras support all resolutions.
         //builder.setCameraResolution(new Size(640, 480));
@@ -89,23 +84,23 @@ public class Vision {
 
     // Gets the april tag data from all tags the camera sees - Jason
     public void update() {
-        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-
-        for (AprilTagDetection detection : currentDetections) {
-            if (detection.metadata != null) {
-                switch (detection.id) {
-                    case 20: blueBase = detection; break;
-                    case 21: pattern = BallPattern.GPP; break;
-                    case 22: pattern = BallPattern.PGP; break;
-                    case 23: pattern = BallPattern.PPG; break;
-                    case 24: redBase = detection; break;
+        if (pattern == null) {
+            List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+            for (AprilTagDetection detection : currentDetections) {
+                if (detection.metadata != null) {
+                    switch (detection.id) {
+                        case 21:
+                            pattern = BallPattern.GPP;
+                            break;
+                        case 22:
+                            pattern = BallPattern.PGP;
+                            break;
+                        case 23:
+                            pattern = BallPattern.PPG;
+                            break;
+                    }
                 }
             }
-        }
-        if (TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE) {
-            allianceBase = blueBase;
-        } else {
-            allianceBase = redBase;
         }
     }
 }

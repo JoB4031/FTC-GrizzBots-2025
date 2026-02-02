@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode.hardware.motors;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-public class fidgetTech {
+public class FidgetTech {
 
     private Servo indexer;
     private static int spinPosition = 15;
@@ -30,9 +30,6 @@ public class fidgetTech {
 
     public void advance() {
         spinPosition += 2;
-    }
-    public void reset() {
-        spinPosition = 15;
     }
     public void setPosition(int pos) {
         spinPosition = pos;
