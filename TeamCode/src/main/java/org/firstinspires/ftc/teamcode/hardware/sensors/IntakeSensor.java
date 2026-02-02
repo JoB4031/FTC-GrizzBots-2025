@@ -24,4 +24,14 @@ public class IntakeSensor {
         return artifactLoaded;
     }
 
+    public boolean isNothingDetected() {
+        if (artifactedIntakeDetector.getDistance(DistanceUnit.INCH) <= 2) {
+            if (nothingDetected) {
+                artifactLoaded = true;
+                nothingDetected = false;
+            } else artifactLoaded = false;
+        } else if (artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 4) nothingDetected= true;
+        return nothingDetected;
+    }
+
 }

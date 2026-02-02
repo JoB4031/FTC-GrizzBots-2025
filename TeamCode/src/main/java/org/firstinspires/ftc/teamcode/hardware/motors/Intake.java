@@ -15,17 +15,21 @@ public class Intake {
         rightIntake = hw.get(Servo.class, "rightIntake");
     }
 
-    public void setPower(double power) {
-        intake.setPower(power);
+    public void setPower(double exteriorPower, double interiorPower) {
+        intake.setPower(exteriorPower);
 
-        if (power <= 0) {
-            leftIntake.setPosition(0.5);
-            rightIntake.setPosition(0.5);
-        } else {
-            leftIntake.setPosition(0);
-            rightIntake.setPosition(1);
-        }
+        leftIntake.setPosition((-interiorPower/2)+0.5);
+        rightIntake.setPosition((interiorPower/2)+0.5);
     }
+
+    public void on() {
+        setPower(1,1);
+    }
+
+    public void off() {
+        setPower(0,0);
+    }
+
     public boolean isPowered() {
         return (intake.getPower() > 0);
     }

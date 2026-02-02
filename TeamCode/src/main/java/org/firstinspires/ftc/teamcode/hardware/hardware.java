@@ -57,8 +57,10 @@ public class hardware {
         intakeSensor = new IntakeSensor();
         intakeSensor.initIntakeSensor(hw);
 
-        pathFollower = new PathFollower();
+        poseLib = new PoseLibrary();
+        poseLib.configureAlliancePaths();
 
+        pathFollower = new PathFollower();
         pathFollower.init(hw, poseLib);
 
         launchZoneTracker = new LaunchZoneTracker();
@@ -66,16 +68,13 @@ public class hardware {
         pathBuilder = new PathBuilder();
         pathBuilder.initPathBuilder(pathFollower.follower, poseLib);
 
-        poseLib = new PoseLibrary();
-        poseLib.configureAlliancePaths();
-
         vision = new Vision();
         vision.initVision(hw);
     }
 
     public void update() {
         flywheel.update();
-        fidgetTech.update(flywheel.getVelocity() > 0, doNotSpin);
+        fidgetTech.update(flywheel.isPowered(), doNotSpin);
         pathFollower.update();
         launchZoneTracker.update(pathFollower.getPosition(), poseLib.targetPoint);
         vision.update();
@@ -98,10 +97,13 @@ public class hardware {
                 update();
             }
         }
+        if (!intakeSensor.isNothingDetected()) {
+            intake.setPower(1,0);
+        }
     }
 
     public void shootAllBalls() {
-        intake.setPower(0);
+        intake.off();
         fidgetTech.setPosition(11);
 
         for (int i = 0; i < 3; i++) {

@@ -30,9 +30,9 @@ public class Flywheel {
     }
 
     public void setFlywheelFireDistance(double distance) {
-        controller.setSetPoint((6.3 * Math.sqrt(398210 * distance)
+        controller.setSetPoint(RPMToVelocity(6.3 * Math.sqrt(398210 * distance)
                 - 900 * Math.sqrt(distance)
-                + (Math.ceil(distance / 5) * 400)) * (28.0 / 60.0));
+                + (Math.ceil(distance / 5) * 400)));
     }
     public void off() {
         setFlywheelFireDistance(0);
@@ -49,10 +49,18 @@ public class Flywheel {
             rightFlywheel.setPower(power);
         }
     }
+    public double RPMToVelocity(double RPM) {
+        return RPM*0.41;
+    }
     public double getVelocity() {
         return rightFlywheel.getVelocity();
     }
-
+    public double getRPM() {
+        return rightFlywheel.getVelocity()*2.439;
+    }
+    public boolean isPowered() {
+        return rightFlywheel.getPower() > 0;
+    }
     public boolean isAtSpeed() {
        return (Math.abs(controller.getSetPoint() - rightFlywheel.getVelocity()) < 30);
     }

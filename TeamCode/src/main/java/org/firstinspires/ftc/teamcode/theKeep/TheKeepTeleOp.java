@@ -51,7 +51,7 @@ public class TheKeepTeleOp extends OpMode {
         // This tells the follower to activate manual drive mode if it is not following a path -Jason
         if (!robot.automatedDrive) {
             if (TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE && !TheKeepAuto.robotCentric) {
-                if (robot.intake.isPowered() || robot.flywheel.getVelocity() > 0) {
+                if (robot.intake.isPowered() || robot.flywheel.isPowered()) {
                     robot.pathFollower.follower.setTeleOpDrive(
                             -gamepad1.left_stick_y*movementMultiplier,
                             -gamepad1.left_stick_x*movementMultiplier,
@@ -67,7 +67,7 @@ public class TheKeepTeleOp extends OpMode {
                     );
                 }
             } else {
-                if (robot.intake.isPowered() || robot.flywheel.getVelocity() > 0) {
+                if (robot.intake.isPowered() || robot.flywheel.isPowered()) {
                     robot.pathFollower.follower.setTeleOpDrive(
                             -gamepad1.left_stick_y*movementMultiplier,
                             -gamepad1.left_stick_x*movementMultiplier,
@@ -106,7 +106,7 @@ public class TheKeepTeleOp extends OpMode {
         // These lines set the flywheel to the required speed depending on the distance if the circle button is pressed and 0% if its not
         if ((gamepad1.left_trigger > 0 || gamepad1.cross)) {
             robot.flywheel.setFlywheelFireDistance(robot.launchZoneTracker.shootDistance);
-            robot.intake.setPower(0);
+            robot.intake.off();
         } else {
             robot.flywheel.off();
         }
@@ -122,9 +122,9 @@ public class TheKeepTeleOp extends OpMode {
         // This if statement turns the intake on when the circle is pressed and off when the square is pressed - Jason
         if (gamepad1.circleWasPressed()) {
             if (!robot.intake.isPowered()) {
-                robot.intake.setPower(1);
+                robot.intake.on();
                 robot.fidgetTech.setPosition(12);
-            } else robot.intake.setPower(0);
+            } else robot.intake.off();
         }
 
         if (robot.intake.isPowered()) {
@@ -156,7 +156,7 @@ public class TheKeepTeleOp extends OpMode {
         }
 
         // These lines add the fidget tech's position and the bot's position to the telemetry - Jason
-        telemetry.addData("Flywheel Speed",robot.flywheel.getVelocity());
+        telemetry.addData("Flywheel Speed In RPM",robot.flywheel.getRPM());
         telemetry.addData("Fidget Tech Position", robot.fidgetTech.getPosition());
         telemetry.addData("Bot Position", robot.pathFollower.getPosition());
         telemetry.addData("Distance to Goal", robot.launchZoneTracker.shootDistance);

@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.tests;
 
-import com.arcrobotics.ftclib.controller.PIDFController;
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -44,6 +43,7 @@ public class FlywheelGraph extends OpMode {
         currentVelocity = shooter.getVelocity();  // You must implement this
         telemetry.addData("Target Velocity", targetVelocity);
         telemetry.addData("Flywheel Velocity", currentVelocity);
+        telemetry.addData("Flywheel RPM", shooter.getRPM());
         telemetry.addData("Flywheel Power", shooter.rightFlywheel.getPower());
         telemetry.update();
     }

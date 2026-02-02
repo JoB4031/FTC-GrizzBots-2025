@@ -49,8 +49,8 @@ public class TheKeepAuto extends OpMode {
         alliance = prompter.get("alliance");
         startLocation = prompter.get("startLocation");
         robotCentric = prompter.get("robotCentric");
-        robot.startPosition(true);
         robot.initHardware(hardwareMap);
+        robot.startPosition(true);
         telemetry.addData("Selected Alliance", alliance);
         telemetry.addData("Selected Start Location", startLocation);
         telemetry.addData("Selected Start Position", robot.pathFollower.getPosition());
@@ -110,7 +110,7 @@ public class TheKeepAuto extends OpMode {
             case 2:
                 if (!robot.pathingIsBusy()) {
                     robot.flywheel.off();
-                    robot.intake.setPower(1);
+                    robot.intake.on();
                     robot.fidgetTech.setPosition(12);
                     robot.update();
                     robot.followPath(robot.pathBuilder.grabFirstArtifacts());
@@ -126,6 +126,7 @@ public class TheKeepAuto extends OpMode {
                         robot.update();
                         robot.automaticPickup();
                     }
+                    robot.intake.setPower(0,-1);
                     robot.setFlywheelToShootDistance();
                     robot.followPath(robot.pathBuilder.scoreFirstArtifacts());
                     robot.pathBuilder.setPathState(4);
@@ -140,7 +141,7 @@ public class TheKeepAuto extends OpMode {
             case 5:
                 if (!robot.pathingIsBusy()) {
                     robot.flywheel.off();
-                    robot.intake.setPower(1);
+                    robot.intake.on();
                     robot.fidgetTech.setPosition(12);
                     robot.update();
                     robot.followPath(robot.pathBuilder.grabSecondArtifacts());
@@ -170,6 +171,7 @@ public class TheKeepAuto extends OpMode {
             case 8:
                 if (!robot.pathingIsBusy()) {
                     robot.flywheel.off();
+                    robot.intake.off();
                     robot.update();
                     robot.followPath(robot.pathBuilder.leaveLaunchZone());
                     robot.pathBuilder.setPathState(-1);
