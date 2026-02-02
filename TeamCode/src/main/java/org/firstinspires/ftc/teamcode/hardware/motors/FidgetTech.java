@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class FidgetTech {
 
     private Servo indexer;
-    private static int spinPosition = 15;
+    private static int snapPoint = 15;
 
     private final double[] positions = {
             0,0,0.04,0.08,0.12,0.15,0.19,0.22,0.26,0.3,0.33,0.37,0.41,
@@ -20,21 +20,24 @@ public class FidgetTech {
 
     public void update(boolean flywheelRunning, boolean doNotSpin) {
         if (!flywheelRunning || doNotSpin) {
-            if (spinPosition % 2 == 1) spinPosition += (spinPosition >= 15 ? -1 : 1);
+            if (snapPoint % 2 == 1) snapPoint += (snapPoint >= 15 ? -1 : 1);
         } else {
-            if (spinPosition % 2 == 0) spinPosition += (spinPosition >= 15 ? -1 : 1);
+            if (snapPoint % 2 == 0) snapPoint += (snapPoint >= 15 ? -1 : 1);
         }
-
-        indexer.setPosition(positions[spinPosition]);
+        try {
+            indexer.setPosition(positions[snapPoint]);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            snapPoint = 15;
+        }
     }
 
     public void advance() {
-        spinPosition += 2;
+        snapPoint += 2;
     }
-    public void setPosition(int pos) {
-        spinPosition = pos;
+    public void setSnapPoint(int pos) {
+        snapPoint = pos;
     }
-    public int getPosition() {
-        return spinPosition;
+    public int getSnapPoint() {
+        return snapPoint;
     }
 }

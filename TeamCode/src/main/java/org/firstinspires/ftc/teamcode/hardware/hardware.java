@@ -86,17 +86,17 @@ public class hardware {
     public void automaticPickup() {
         if (intake.isPowered() && intakeSensor.isArtifactLoaded()) {
             update();
-            if (fidgetTech.getPosition() == 12 ) {
+            if (fidgetTech.getSnapPoint() == 12 ) {
                 fidgetTech.advance();
                 update();
-            } else if(fidgetTech.getPosition() == 14) {
+            } else if(fidgetTech.getSnapPoint() == 14) {
                 fidgetTech.advance();
                 update();
-            } else if(fidgetTech.getPosition() == 16) {
+            } else if(fidgetTech.getSnapPoint() == 16) {
                 fidgetTech.advance();
                 update();
             } else {
-                fidgetTech.setPosition(12);
+                fidgetTech.setSnapPoint(12);
                 update();
             }
         }
@@ -107,7 +107,7 @@ public class hardware {
 
     public void shootAllBalls() {
         intake.off();
-        fidgetTech.setPosition(11);
+        fidgetTech.setSnapPoint(11);
         timer.reset();
         while (timer.seconds() < 0.1) update();
 

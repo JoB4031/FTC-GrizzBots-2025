@@ -82,7 +82,7 @@ public class TheKeepAuto extends OpMode {
         }
 
         // These lines add the fidget tech's position and the bots position to the telemetry - Jason
-        telemetry.addData("Fidget Tech Position", robot.fidgetTech.getPosition());
+        telemetry.addData("Fidget Tech Position", robot.fidgetTech.getSnapPoint());
         telemetry.addData("Bot Position", robot.pathFollower.getPosition());
         telemetry.update();
 
@@ -111,7 +111,7 @@ public class TheKeepAuto extends OpMode {
                 if (!robot.pathingIsBusy()) {
                     robot.flywheel.off();
                     robot.intake.on();
-                    robot.fidgetTech.setPosition(12);
+                    robot.fidgetTech.setSnapPoint(12);
                     robot.update();
                     robot.followPath(robot.pathBuilder.grabFirstArtifacts());
                     robot.pathBuilder.setPathState(3);
@@ -142,7 +142,7 @@ public class TheKeepAuto extends OpMode {
                 if (!robot.pathingIsBusy()) {
                     robot.flywheel.off();
                     robot.intake.on();
-                    robot.fidgetTech.setPosition(12);
+                    robot.fidgetTech.setSnapPoint(12);
                     robot.update();
                     robot.followPath(robot.pathBuilder.grabSecondArtifacts());
                     robot.pathBuilder.setPathState(3);

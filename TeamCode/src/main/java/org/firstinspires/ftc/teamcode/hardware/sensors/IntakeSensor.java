@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class IntakeSensor {
-    private RevColorSensorV3 artifactedIntakeDetector;
+    public RevColorSensorV3 artifactedIntakeDetector;
     private boolean artifactLoaded;
     private boolean nothingDetected;
     public void initIntakeSensor(HardwareMap hw) {
