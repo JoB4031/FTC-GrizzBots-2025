@@ -137,9 +137,10 @@ public class hardware {
     public void shootAllBalls() {
         // Runs a chain of commands that shoots all the balls in the Fidget Tech
         intake.off();
-        fidgetTech.setSnapPoint(11);
+        fidgetTech.setSnapPoint(12);
+        setFlywheelToShootDistance();
         timer.reset();
-        while (timer.seconds() < 0.1) {
+        while (timer.seconds() < 0.25) {
             update();
             if (stopRequested) break;
         }
