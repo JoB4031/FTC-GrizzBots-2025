@@ -9,7 +9,7 @@ public class PoseLibrary {
     public static Pose startPose;
     public static Pose trueStart;
     public Pose allianceGoalPose = new Pose(16, 140);
-    public Pose baseZone = new Pose(39, 33.8, Math.toRadians(90));
+    public Pose baseZone = new Pose(40.16, 33.2, Math.toRadians(88));
 
     public Pose alliance1 = new Pose(63, 9, Math.toRadians(90));
     public Pose alliance2 = new Pose(44.8, 140.8, Math.toRadians(180));
