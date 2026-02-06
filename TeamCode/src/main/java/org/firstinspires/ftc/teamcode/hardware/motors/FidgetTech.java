@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.hardware.motors;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.hardware.sensors.IntakeSensor;
+
 public class FidgetTech {
 
     private Servo indexer;
@@ -13,6 +15,11 @@ public class FidgetTech {
             0.45,0.48,0.52,0.56,0.61,0.64,0.68,0.72,0.75,0.79,0.83,
             0.86,0.9,0.93,0.97
     };
+    public static IntakeSensor.detectedColor[] artifactsLoaded = {
+            IntakeSensor.detectedColor.NONE, IntakeSensor.detectedColor.NONE, IntakeSensor.detectedColor.NONE
+    };
+
+    public int colorSnapPoint;
 
     public void initFidgetTech(HardwareMap hw) {
         indexer = hw.get(Servo.class, "spinIndexer");
@@ -31,9 +38,14 @@ public class FidgetTech {
         }
     }
 
-    public void advance() {
+    public void next() {
         snapPoint += 2;
     }
+
+    public void previous() {
+        snapPoint -= 2;
+    }
+
     public void setSnapPoint(int pos) {
         snapPoint = pos;
     }

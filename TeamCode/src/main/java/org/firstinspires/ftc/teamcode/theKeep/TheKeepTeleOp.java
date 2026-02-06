@@ -7,12 +7,11 @@ Also fixed a few bugs that surfaced during the 1/17/2026
 scrimmage.
 */
 package org.firstinspires.ftc.teamcode.theKeep;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.hardware.hardware;
+import org.firstinspires.ftc.teamcode.hardware.centralHub.hardware;
+import org.firstinspires.ftc.teamcode.hardware.motors.FidgetTech;
 import org.firstinspires.ftc.teamcode.hardware.vision.Vision;
 
 @TeleOp(name="The Keep TeleOp", group="The Keep")
@@ -22,11 +21,10 @@ public class TheKeepTeleOp extends OpMode {
     private hardware robot;
     private double additionalLaunchPower = 0;
     private double movementMultiplier;
-    private static TelemetryManager telemetryM;
+    private boolean drive = false;
 
     @Override
     public void init() {
-        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         // Creates a new instance of the hardware classes - Jason
         robot = new hardware();
         robot.initHardware(hardwareMap, false);
@@ -44,8 +42,10 @@ public class TheKeepTeleOp extends OpMode {
     @Override
     public void start() {
         telemetry.clear();
+        robot.autoTime.reset();
         // Turns Pedro Path into TeleOp drive mode - Jason
         robot.pathFollower.follower.startTeleopDrive();
+
     } // This runs once when the play button is pressed
     @Override
     public void loop() {
@@ -90,10 +90,10 @@ public class TheKeepTeleOp extends OpMode {
         }
 
         // Turns the bots heading to face the alliance goal - Jason
-        if (gamepad1.crossWasPressed() && robot.launchZoneTracker.robotInRange) {
+        if ((gamepad1.crossWasPressed() && robot.launchZoneTracker.robotInRange) || (gamepad1.crossWasPressed() && gamepad1.dpad_up)) {
             robot.doNotSpin = true;
             robot.fidgetTech.setSnapPoint(12);
-            robot.flywheel.setFlywheelFireDistance(robot.launchZoneTracker.shootDistance);
+            robot.setFlywheelToShootDistance();
             robot.followPath(robot.pathFollower.turnToGoal.get());
             robot.timer.reset();
             while (robot.pathingIsBusy() || robot.timer.seconds() < 2) {
@@ -105,10 +105,24 @@ public class TheKeepTeleOp extends OpMode {
             robot.automatedDrive = false;
         }
 
+        if (gamepad1.dpad_right) {
+            drive = true;
+            robot.followPath(robot.pathFollower.returnToStart.get());
+            robot.update();
+        } else {
+            if (drive) {
+                robot.pathFollower.follower.startTeleopDrive();
+                robot.automatedDrive = false;
+                drive = false;
+            }
+
+
+        }
+
 
         // These lines set the flywheel to the required speed depending on the distance if the circle button is pressed and 0% if its not
         if ((gamepad1.left_trigger > 0 || gamepad1.cross)) {
-            robot.flywheel.setFlywheelFireDistance(robot.launchZoneTracker.shootDistance);
+            robot.setFlywheelToShootDistance();
             robot.intake.off();
         } else {
             robot.flywheel.off();
@@ -135,7 +149,7 @@ public class TheKeepTeleOp extends OpMode {
         }
 
         // This if loop makes the robot shoot all the artifacts - Nikola
-        if (gamepad1.triangleWasPressed() && robot.launchZoneTracker.robotInRange) {
+        if ((gamepad1.triangleWasPressed() && robot.launchZoneTracker.robotInRange) || ((gamepad1.triangleWasPressed() && gamepad1.dpad_up))) {
             robot.shootAllBalls();
         }
 
@@ -148,11 +162,13 @@ public class TheKeepTeleOp extends OpMode {
         }
 
         // Moves the Fidget Tech forward or backward one step depending on which trigger was pressed
-        if (gamepad1.leftBumperWasPressed()) robot.fidgetTech.setSnapPoint(robot.fidgetTech.getSnapPoint() - 2);
-        if (gamepad1.rightBumperWasPressed()) robot.fidgetTech.setSnapPoint(robot.fidgetTech.getSnapPoint() + 2);
+        if (gamepad1.leftBumperWasPressed()) robot.fidgetTech.previous();
+        if (gamepad1.rightBumperWasPressed()) robot.fidgetTech.next();
 
         if (gamepad2.leftBumperWasPressed()) additionalLaunchPower -= 0.1;
         if (gamepad2.rightBumperWasPressed()) additionalLaunchPower += 0.1;
+
+        if (gamepad1.dpadDownWasPressed()) robot.infiniteRun = true;
         // These lines write any april tag data to the telemetry - Jason
         if (Vision.pattern != null) {
            telemetry.addData("Pattern Is", Vision.pattern);
@@ -167,14 +183,11 @@ public class TheKeepTeleOp extends OpMode {
         telemetry.addData("Distance to Goal", robot.launchZoneTracker.shootDistance);
         telemetry.addData("Goal in range", robot.launchZoneTracker.robotInRange);
         telemetry.addData("Additional Power", additionalLaunchPower);
+        telemetry.addData("Artifacts Held", FidgetTech.artifactsLoaded[0]);
+        telemetry.addData("Artifacts Held", FidgetTech.artifactsLoaded[1]);
+        telemetry.addData("Artifacts Held", FidgetTech.artifactsLoaded[2]);
+        telemetry.addData("Infinite Run", robot.infiniteRun);
         telemetry.update();
-        telemetryM.addData("Flywheel Speed In RPM",robot.flywheel.getRPM());
-        telemetryM.addData("Fidget Tech Position", robot.fidgetTech.getSnapPoint());
-        telemetryM.addData("Bot Position", robot.pathFollower.getPosition());
-        telemetryM.addData("Distance to Goal", robot.launchZoneTracker.shootDistance);
-        telemetryM.addData("Goal in range", robot.launchZoneTracker.robotInRange);
-        telemetryM.addData("Additional Power", additionalLaunchPower);
-        telemetryM.update();
 
     } // This section holds all the controls used during TeleOp
 

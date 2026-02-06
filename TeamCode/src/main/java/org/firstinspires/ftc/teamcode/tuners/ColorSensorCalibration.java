@@ -1,0 +1,27 @@
+package org.firstinspires.ftc.teamcode.tuners;
+
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+
+import org.firstinspires.ftc.teamcode.hardware.sensors.IntakeSensor;
+@TeleOp(name="Color Sensor Tuner", group="Tuners")
+@Disabled
+public class ColorSensorCalibration extends OpMode {
+    private float gain = 1;
+    IntakeSensor intakeSensor;
+    @Override
+    public void init() {
+        intakeSensor = new IntakeSensor();
+        intakeSensor.initIntakeSensor(hardwareMap);
+    }
+
+    @Override
+    public void loop() {
+        if (gamepad1.rightBumperWasPressed()) gain += 1;
+        if (gamepad1.rightBumperWasPressed()) gain -= 1;
+        intakeSensor.artifactColorDetector.setGain(gain);
+        intakeSensor.getDetectedColor(telemetry);
+
+    }
+}

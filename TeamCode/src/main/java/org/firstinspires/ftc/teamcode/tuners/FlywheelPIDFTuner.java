@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.tests;
+package org.firstinspires.ftc.teamcode.tuners;
 
 import com.bylazar.configurables.annotations.Configurable;
 
@@ -7,11 +7,10 @@ import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.hardware.motors.Flywheel;
-import org.firstinspires.ftc.teamcode.hardware.sensors.IntakeSensor;
 
 @Configurable
-@TeleOp(name="FlywheelGraph", group="Tests")
-public class FlywheelGraph extends OpMode {
+@TeleOp(name="FlywheelGraph", group="Tuners")
+public class FlywheelPIDFTuner extends OpMode {
 
     public Flywheel shooter;
     public static double kP = 0.006;
@@ -22,7 +21,6 @@ public class FlywheelGraph extends OpMode {
     // Add these:
     public static double currentVelocity = 0;
     public static double targetVelocity = 1000;
-    private IntakeSensor color;
     static TelemetryManager telemetryM;
 
 
@@ -30,8 +28,6 @@ public class FlywheelGraph extends OpMode {
     public void init() {
         telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         shooter = new Flywheel();
-        color = new IntakeSensor();
-        color.initIntakeSensor(hardwareMap);
         shooter.initFlywheel(hardwareMap);
     }
 

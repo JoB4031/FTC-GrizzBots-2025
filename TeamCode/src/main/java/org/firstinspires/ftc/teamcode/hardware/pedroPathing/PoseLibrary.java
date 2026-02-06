@@ -7,6 +7,7 @@ import org.firstinspires.ftc.teamcode.theKeep.TheKeepAuto;
 public class PoseLibrary {
 
     public static Pose startPose;
+    public static Pose trueStart;
     public Pose allianceGoalPose = new Pose(10, 140);
     public Pose baseZone = new Pose(39, 33.8, Math.toRadians(90));
 
@@ -33,6 +34,10 @@ public class PoseLibrary {
         startPose = (TheKeepAuto.startLocation == 1) ? alliance1 : alliance2;
         if (TheKeepAuto.alliance == TheKeepAuto.Alliance.RED) {
             startPose = startPose.mirror();
+        }
+        trueStart = (TheKeepAuto.startLocation == 1) ? alliance1 : alliance2;
+        if (TheKeepAuto.alliance == TheKeepAuto.Alliance.RED) {
+            trueStart = trueStart.mirror();
         }
     }
     public void saveStartPose(PathFollower pathFollower) {

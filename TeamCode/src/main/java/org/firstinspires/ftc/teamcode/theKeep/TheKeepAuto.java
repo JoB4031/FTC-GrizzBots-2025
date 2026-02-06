@@ -12,8 +12,9 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.skeletonarmy.marrow.prompts.BooleanPrompt;
 import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
+import com.skeletonarmy.marrow.prompts.ValuePrompt;
 
-import org.firstinspires.ftc.teamcode.hardware.hardware;
+import org.firstinspires.ftc.teamcode.hardware.centralHub.hardware;
 import org.firstinspires.ftc.teamcode.hardware.vision.Vision;
 
 @Autonomous(name="The Keep Auto",group="The Keep")
@@ -30,6 +31,7 @@ public class TheKeepAuto extends OpMode {
     public static Alliance alliance;
     public static int startLocation;
     public static boolean robotCentric;
+    private int startDelay;
 
 
     @Override
@@ -39,6 +41,7 @@ public class TheKeepAuto extends OpMode {
         //Sets up the prompter - Jason
         prompter.prompt("alliance", new OptionPrompt<>("Select Alliance", Alliance.RED, Alliance.BLUE))
                 .prompt("startLocation", new OptionPrompt<>("Select Start Location", 1, 2))
+                .prompt("Start Delay", new ValuePrompt("Start Delay", 0, 1))
                 .prompt("robotCentric", new BooleanPrompt("Robot Centric", true))
                 .onComplete(this::onPromptsComplete);
 
@@ -49,6 +52,7 @@ public class TheKeepAuto extends OpMode {
         alliance = prompter.get("alliance");
         startLocation = prompter.get("startLocation");
         robotCentric = prompter.get("robotCentric");
+        startDelay = prompter.get("Start Delay");
         robot.initHardware(hardwareMap, true);
         robot.startPosition(true);
         telemetry.addData("Selected Alliance", alliance);
@@ -67,13 +71,16 @@ public class TheKeepAuto extends OpMode {
     @Override
     public void start() {
         telemetry.clear();
+        robot.autoTime.reset();
+        robot.timer.reset();
+        while (robot.timer.seconds() < startDelay) robot.update();
     }
 
     @Override
     public void loop() {
         // Updates the hardware - Jason
         robot.update();
-        autonomousPathUpdate();
+        robot.autonomousPath();
         // These lines grab the april tag data then write any tags data to the telemetry - Jason
         if (Vision.pattern != null) {
             telemetry.addData("Pattern Is", Vision.pattern);
@@ -91,92 +98,5 @@ public class TheKeepAuto extends OpMode {
     @Override
     public void stop() {
         robot.startPosition(false);
-    }
-
-    public void autonomousPathUpdate() {
-        switch (robot.pathBuilder.pathState) {
-            case 0:
-                robot.followPath(robot.pathBuilder.scoreArtifact());
-                robot.setFlywheelToShootDistance();
-                robot.pathBuilder.setPathState(1);
-                break;
-            case 1:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if (!robot.pathingIsBusy()) {
-                    robot.shootAllBalls();
-                    robot.pathBuilder.setPathState(2);
-                }
-                break;
-            case 2:
-                if (!robot.pathingIsBusy()) {
-                    robot.flywheel.off();
-                    robot.intake.on();
-                    robot.fidgetTech.setSnapPoint(12);
-                    robot.update();
-                    robot.followPath(robot.pathBuilder.grabFirstArtifacts());
-                    robot.pathBuilder.setPathState(3);
-                }
-                break;
-            case 3:
-
-                robot.automaticPickup();
-                if (!robot.pathingIsBusy()) {
-                    robot.timer.reset();
-                    while (robot.timer.seconds() < 2) {
-                        robot.update();
-                        robot.automaticPickup();
-                    }
-                    robot.intake.setPower(0,-1);
-                    robot.setFlywheelToShootDistance();
-                    robot.followPath(robot.pathBuilder.scoreFirstArtifacts());
-                    robot.pathBuilder.setPathState(4);
-                }
-                break;
-            case 4:
-                if (!robot.pathingIsBusy()) {
-                    robot.shootAllBalls();
-                    robot.pathBuilder.setPathState(5);
-                }
-                break;
-            case 5:
-                if (!robot.pathingIsBusy()) {
-                    robot.flywheel.off();
-                    robot.intake.on();
-                    robot.fidgetTech.setSnapPoint(12);
-                    robot.update();
-                    robot.followPath(robot.pathBuilder.grabSecondArtifacts());
-                    robot.pathBuilder.setPathState(3);
-                }
-                break;
-            case 6:
-
-                robot.automaticPickup();
-                if (!robot.pathingIsBusy()) {
-                    robot.timer.reset();
-                    while (robot.timer.seconds() < 2) {
-                        robot.update();
-                        robot.automaticPickup();
-                    }
-                    robot.setFlywheelToShootDistance();
-                    robot.followPath(robot.pathBuilder.scoreSecondArtifacts());
-                    robot.pathBuilder.setPathState(7);
-                }
-                break;
-            case 7:
-                if (!robot.pathingIsBusy()) {
-                    robot.shootAllBalls();
-                    robot.pathBuilder.setPathState(8);
-                }
-                break;
-            case 8:
-                if (!robot.pathingIsBusy()) {
-                    robot.flywheel.off();
-                    robot.intake.off();
-                    robot.update();
-                    robot.followPath(robot.pathBuilder.leaveLaunchZone());
-                    robot.pathBuilder.setPathState(-1);
-                }
-                break;
-        }
     }
 }
