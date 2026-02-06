@@ -49,7 +49,7 @@ public class hardware {
         // Sets up how long the program should run for before turning off
         if (auto) {
             runTime = 30;
-        } else runTime = 120;
+        } else runTime = 999;
         // Initializes the flywheel
         flywheel = new Flywheel();
         flywheel.initFlywheel(hw);
@@ -193,6 +193,12 @@ public class hardware {
     }
     public void setFlywheelToShootDistance() {
         // Sets the flywheel to the desired speed based on the distance to the goal
-        flywheel.setFlywheelFireDistance(launchZoneTracker.shootDistance);
+        if (launchZoneTracker.shootDistance < 1.9) {
+            flywheel.setFlywheelFireDistance(launchZoneTracker.shootDistance);
+        } else if (launchZoneTracker.shootDistance > 2.7) {
+            flywheel.controller.setSetPoint(flywheel.RPMToVelocity(5500));
+        } else if (launchZoneTracker.shootDistance < 2.7) {
+            flywheel.controller.setSetPoint(flywheel.RPMToVelocity(5000));
+        }
     }
 }
