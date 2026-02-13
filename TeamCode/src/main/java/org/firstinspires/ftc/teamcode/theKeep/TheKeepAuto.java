@@ -32,6 +32,7 @@ public class TheKeepAuto extends OpMode {
     public static int startLocation;
     public static boolean robotCentric;
     private int startDelay;
+    public int artifactsToCollect;
 
 
     @Override
@@ -43,6 +44,7 @@ public class TheKeepAuto extends OpMode {
                 .prompt("startLocation", new OptionPrompt<>("Select Start Location", 1, 2))
                 .prompt("Start Delay", new ValuePrompt("Start Delay", 0, 1))
                 .prompt("robotCentric", new BooleanPrompt("Robot Centric", true))
+                .prompt("artifactsToCollect", new ValuePrompt("How many artifact sets to collect?", 0,2, 2,1))
                 .onComplete(this::onPromptsComplete);
 
     } // This initializes all the motors and sensors
@@ -53,6 +55,7 @@ public class TheKeepAuto extends OpMode {
         startLocation = prompter.get("startLocation");
         robotCentric = prompter.get("robotCentric");
         startDelay = prompter.get("Start Delay");
+        artifactsToCollect = prompter.get("artifactsToCollect");
         robot.initHardware(hardwareMap, true);
         robot.startPosition(true);
         telemetry.addData("Selected Alliance", alliance);
@@ -113,7 +116,7 @@ public class TheKeepAuto extends OpMode {
                 if (!robot.pathingIsBusy()) {
                     robot.doNotSpin = false;
                     robot.shootAllBalls();
-                    robot.pathBuilder.setPathState(2);
+                    robot.pathBuilder.setPathState(artifactsToCollect == 0 ? 8 : 2);
                 }
                 break;
             case 2:
@@ -147,7 +150,7 @@ public class TheKeepAuto extends OpMode {
                 if (!robot.pathingIsBusy()) {
                     robot.doNotSpin = false;
                     robot.shootAllBalls();
-                    robot.pathBuilder.setPathState(5);
+                    robot.pathBuilder.setPathState(artifactsToCollect == 1 ? 8 : 5);
                 }
                 break;
             case 5:

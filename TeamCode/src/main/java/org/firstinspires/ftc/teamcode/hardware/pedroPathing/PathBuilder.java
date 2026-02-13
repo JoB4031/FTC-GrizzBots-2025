@@ -49,7 +49,7 @@ public class PathBuilder {
     public PathChain scoreSecondArtifacts() {
         return follower.pathBuilder()
                 .addPath(new BezierLine(poses.secondArtifacts, poses.secondArtifactControlPoint))
-                .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
+                .setConstantHeadingInterpolation(poses.secondArtifacts.getHeading())
                 .addPath(new BezierLine(poses.secondArtifactControlPoint,poses.nearLaunchPose))
                 .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
                 .build();
