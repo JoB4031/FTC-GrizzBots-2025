@@ -1,30 +1,27 @@
 package org.firstinspires.ftc.teamcode.hardware.motors;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 
 public class Intake {
 
-    private DcMotor intake;
-    private Servo leftIntake, rightIntake;
+    private DcMotor externalIntake, internalIntake;
 
     public void initIntake(HardwareMap hw) {
-        intake = hw.get(DcMotor.class, "intake");
-        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        leftIntake = hw.get(Servo.class, "leftIntake");
-        rightIntake = hw.get(Servo.class, "rightIntake");
+        externalIntake = hw.get(DcMotor.class, "intake");
+        externalIntake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        internalIntake = hw.get(DcMotor.class, "internalIntake");
+        internalIntake.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
     public void setPower(double exteriorPower, double interiorPower) {
-        intake.setPower(exteriorPower);
-
-        leftIntake.setPosition((-interiorPower/2)+0.5);
-        rightIntake.setPosition((interiorPower/2)+0.5);
+        externalIntake.setPower(exteriorPower);
+        internalIntake.setPower(interiorPower);
     }
 
     public void on() {
-        intake.setPower(1);
+        externalIntake.setPower(1);
     }
 
     public void off() {
@@ -32,7 +29,7 @@ public class Intake {
     }
 
     public boolean isPowered() {
-        return (intake.getPower() > 0);
+        return (externalIntake.getPower() > 0);
     }
 }
 

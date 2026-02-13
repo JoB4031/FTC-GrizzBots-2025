@@ -122,7 +122,7 @@ public class TheKeepAuto extends OpMode {
                     robot.intake.on();
                     robot.fidgetTech.setSnapPoint(12);
                     robot.update();
-                    robot.followPath(robot.pathBuilder.grabFirstArtifacts());
+                    robot.pathFollower.follower.followPath(robot.pathBuilder.grabFirstArtifacts(), 0.5, true);
                     robot.pathBuilder.setPathState(3);
                 }
                 break;
@@ -139,6 +139,7 @@ public class TheKeepAuto extends OpMode {
                     robot.doNotSpin = true;
                     robot.setFlywheelToShootDistance();
                     robot.followPath(robot.pathBuilder.scoreFirstArtifacts());
+                    robot.intake.setPower(-1,-1);
                     robot.pathBuilder.setPathState(4);
                 }
                 break;
@@ -155,7 +156,7 @@ public class TheKeepAuto extends OpMode {
                     robot.intake.on();
                     robot.fidgetTech.setSnapPoint(12);
                     robot.update();
-                    robot.followPath(robot.pathBuilder.grabSecondArtifacts());
+                    robot.pathFollower.follower.followPath(robot.pathBuilder.grabSecondArtifacts(), 0.5, true);
                     robot.pathBuilder.setPathState(6);
                 }
                 break;
@@ -171,6 +172,7 @@ public class TheKeepAuto extends OpMode {
                     robot.doNotSpin = true;
                     robot.setFlywheelToShootDistance();
                     robot.followPath(robot.pathBuilder.scoreSecondArtifacts());
+                    robot.intake.setPower(-1,-1);
                     robot.pathBuilder.setPathState(7);
                 }
                 break;

@@ -22,5 +22,6 @@ public class FidgetTechTuner extends OpMode {
             position -= 0.01;
         }
         fidgetTech.setPosition(position);
+        telemetry.addData("Position", fidgetTech.getPosition());
     }
 }

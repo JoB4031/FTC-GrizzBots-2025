@@ -18,9 +18,9 @@ public class PoseLibrary {
     public Pose farLaunchPose = new Pose(61, 18.6, Math.toRadians(111.5));
     public Pose notLaunchZone = new Pose(45, 60, Math.toRadians(180));
 
-    public Pose topArtifacts = new Pose(35, 91.5, Math.toRadians(180));
-    public Pose middleArtifacts = new Pose(35, 67, Math.toRadians(180));
-    public Pose bottomArtifacts = new Pose(35, 40, Math.toRadians(180));
+    public Pose topArtifacts = new Pose(32, 91.5, Math.toRadians(180));
+    public Pose middleArtifacts = new Pose(20, 67, Math.toRadians(180));
+    public Pose bottomArtifacts = new Pose(20, 40, Math.toRadians(180));
 
     public Pose launchPose;
     public Pose firstArtifacts;

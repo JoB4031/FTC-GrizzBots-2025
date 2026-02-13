@@ -130,7 +130,7 @@ public class hardware {
             } else if(fidgetTech.getSnapPoint() == 16) {
                 FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.UNKNOWN;
             }
-            intake.setPower(1,-0.25);
+            intake.setPower(1,-0.5);
         } else intake.setPower(1,1);
     }
 
@@ -140,7 +140,7 @@ public class hardware {
         fidgetTech.setSnapPoint(12);
         setFlywheelToShootDistance();
         timer.reset();
-        while (timer.seconds() < 0.25) {
+        while (timer.seconds() < 0.5) {
             update();
             if (stopRequested) break;
         }
@@ -154,7 +154,7 @@ public class hardware {
             }
             ejector.fire();
             timer.reset();
-            while (timer.seconds() < 0.2) {
+            while (timer.seconds() < 0.4) {
                 update();
                 if (stopRequested) break;
             }
