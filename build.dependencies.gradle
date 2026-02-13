@@ -22,7 +22,8 @@ dependencies {
     implementation 'com.pedropathing:telemetry:1.0.0'
 
     // For Panels
-    implementation 'com.bylazar:fullpanels:1.0.6'
+    implementation 'com.bylazar:fullpanels:1.0.12'
+
 
     // Marrow library
     implementation 'com.skeletonarmyftc.marrow:core:1.0.0'
