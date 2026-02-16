@@ -7,28 +7,20 @@ Also added a process to hold positions during auto.
 
 package org.firstinspires.ftc.teamcode.theKeep;
 
-import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.skeletonarmy.marrow.prompts.BooleanPrompt;
 import com.skeletonarmy.marrow.prompts.OptionPrompt;
 import com.skeletonarmy.marrow.prompts.Prompter;
-import org.firstinspires.ftc.teamcode.hardware.Motors;
-import org.firstinspires.ftc.teamcode.hardware.PedroPathing;
-import org.firstinspires.ftc.teamcode.hardware.Sensors;
-import org.firstinspires.ftc.teamcode.hardware.Vision;
+import com.skeletonarmy.marrow.prompts.ValuePrompt;
+
+import org.firstinspires.ftc.teamcode.hardware.centralHub.hardware;
+import org.firstinspires.ftc.teamcode.hardware.vision.Vision;
 
 @Autonomous(name="The Keep Auto",group="The Keep")
 public class TheKeepAuto extends OpMode {
 
-    private Timer opmodeTimer;
-    private Motors motors;
-    private Vision vision;
-    private PedroPathing pathing;
-    private Sensors sensors;
-    private boolean startUpdate = false;
-    private double shotDelay = 0.75;
-
+    private hardware robot;
     // These next lines setup the variables used to store prompter values, which define the autonomous is used - Jason
     public enum Alliance {
         RED,
@@ -38,27 +30,21 @@ public class TheKeepAuto extends OpMode {
     private Prompter prompter;
     public static Alliance alliance;
     public static int startLocation;
+    public static int artifactsToCollect;
     public static boolean robotCentric;
+    private int startDelay;
 
 
     @Override
     public void init() {
-        opmodeTimer = new Timer();
-        vision = new Vision();
-        pathing = new PedroPathing();
-        motors = new Motors();
-        sensors = new Sensors();
         prompter = new Prompter(this);
-
-        // Call their init methods
-        vision.initAprilTag(hardwareMap);
-        motors.initMotors(hardwareMap);
-        sensors.initSensors(hardwareMap);
-        motors.setFlywheelVelocity(0);
+        robot =  new hardware();
         //Sets up the prompter - Jason
         prompter.prompt("alliance", new OptionPrompt<>("Select Alliance", Alliance.RED, Alliance.BLUE))
                 .prompt("startLocation", new OptionPrompt<>("Select Start Location", 1, 2))
+                .prompt("Start Delay", new ValuePrompt("Start Delay", 0, 1))
                 .prompt("robotCentric", new BooleanPrompt("Robot Centric", true))
+                .prompt("artifactsToCollect", new ValuePrompt("How many artifact sets to collect?", 0,2, 2,1))
                 .onComplete(this::onPromptsComplete);
 
     } // This initializes all the motors and sensors
@@ -68,14 +54,13 @@ public class TheKeepAuto extends OpMode {
         alliance = prompter.get("alliance");
         startLocation = prompter.get("startLocation");
         robotCentric = prompter.get("robotCentric");
-        pathing.setStartPose(true);
-        pathing.setArtifact();
-        pathing.initFollower(hardwareMap);
-        pathing.buildPaths();
-        startUpdate = true;
+        startDelay = prompter.get("Start Delay");
+        artifactsToCollect = prompter.get("artifactsToCollect");
+        robot.initHardware(hardwareMap, true);
+        robot.startPosition(true);
         telemetry.addData("Selected Alliance", alliance);
         telemetry.addData("Selected Start Location", startLocation);
-        telemetry.addData("Selected Start Position", pathing.follower.getPose());
+        telemetry.addData("Selected Start Position", robot.pathFollower.getPosition());
         telemetry.addData("Status", "Initialized");
         telemetry.update();
     }
@@ -84,29 +69,21 @@ public class TheKeepAuto extends OpMode {
     public void init_loop() {
         // Runs the prompter - Jason
         prompter.run();
-        if (startUpdate) {
-            pathing.update();
-            telemetry.addData("Start Position", pathing.follower.getPose());
-        }
     } // A loop that runs from when the init button is pressed to when the start button is hit
 
     @Override
     public void start() {
         telemetry.clear();
-        opmodeTimer.resetTimer();
-        if (startLocation == 1) {
-            shotDelay = 1.5;
-        }
+        robot.autoTime.reset();
+        robot.timer.reset();
+        while (robot.timer.seconds() < startDelay) robot.update();
     }
 
     @Override
     public void loop() {
         // Updates the hardware - Jason
-        pathing.update();
-        motors.update();
-        vision.update();
-        sensors.update();
-        autonomousPathUpdate();
+        robot.update();
+        autoPathing();
         // These lines grab the april tag data then write any tags data to the telemetry - Jason
         if (Vision.pattern != null) {
             telemetry.addData("Pattern Is", Vision.pattern);
@@ -115,254 +92,111 @@ public class TheKeepAuto extends OpMode {
         }
 
         // These lines add the fidget tech's position and the bots position to the telemetry - Jason
-        if (vision.allianceBase != null) {
-            telemetry.addData("Alliance Goal", vision.allianceBase.ftcPose.range);
-        }
-        telemetry.addData("Fidget Tech Position", motors.spinPositions[motors.spinPosition]);
-        telemetry.addData("Bot Position", pathing.follower.getPose());
+        telemetry.addData("Fidget Tech Position", robot.fidgetTech.getSnapPoint());
+        telemetry.addData("Bot Position", robot.pathFollower.getPosition());
         telemetry.update();
 
     }
 
     @Override
     public void stop() {
-        pathing.setStartPose(false);
+        robot.startPosition(false);
     }
 
-    public void autonomousPathUpdate() {
-        switch (pathing.pathState) {
+    public void autoPathing() {
+        switch (robot.pathBuilder.pathState) {
             case 0:
-                pathing.follower.followPath(pathing.scoreArtifact, true);
-                motors.doNotSpin = true;
-                motors.setFlywheelVelocity(pathing.shootDistance);
-                pathing.setPathState(1);
+                robot.doNotSpin = true;
+                robot.followPath(robot.pathBuilder.scoreArtifact());
+                robot.setFlywheelToShootDistance();
+                robot.pathBuilder.setPathState(1);
                 break;
             case 1:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if (!pathing.follower.isBusy()) {
-                    motors.time.reset();
-                    motors.setIntake(0);
-                    while (motors.time.seconds() < 1) {
-                        motors.update();
-                        pathing.update();
-                        motors.setFlywheelVelocity(pathing.shootDistance);
-                    }
-                    motors.doNotSpin = false;
-                    int shootAll = 0;
-                    motors.spinPosition = 11;
-                    while (shootAll < 3) {
-                        motors.setFlywheelVelocity(pathing.shootDistance);
-                        motors.time.reset();
-                        while (!motors.ableToShoot || motors.time.seconds() < shotDelay) {
-                            //just chill
-                            motors.update();
-                            pathing.update();
-                        }
-                        motors.ballEjector.setPosition(0.3);
-                        motors.time.reset();
-                        while (motors.time.seconds() < 0.25) {
-                            //you get to chill again
-                            motors.update();
-                            pathing.update();
-                        }
-                        motors.ballEjector.setPosition(0);
-                        motors.spinPosition += 2;
-                        shootAll += 1;
-
-                    }
-                    pathing.setPathState(2);
+                if (!robot.pathingIsBusy()) {
+                    robot.doNotSpin = false;
+                    robot.shootAllBalls();
+                    robot.pathBuilder.setPathState(artifactsToCollect == 0 ? 8 : 2);
                 }
                 break;
             case 2:
-                if (!pathing.follower.isBusy()) {
-                    motors.setFlywheelVelocity(0);
-                    motors.setIntake(1);
-                    motors.spinPosition = 12;
-                    motors.update();
-                    pathing.follower.followPath(pathing.grabFirstArtifacts, 0.75, true);
-                    pathing.setPathState(3);
+                if (!robot.pathingIsBusy()) {
+                    robot.flywheel.off();
+                    robot.intake.on();
+                    robot.fidgetTech.setSnapPoint(12);
+                    robot.update();
+                    robot.pathFollower.follower.followPath(robot.pathBuilder.grabFirstArtifacts(), 0.5, true);
+                    robot.pathBuilder.setPathState(3);
                 }
                 break;
             case 3:
 
-                if (motors.intake.getPower() > 0 && sensors.artifactLoaded) {
-                    sensors.update();
-                    if (motors.spinPosition == 12) {
-                        motors.spinPosition = 14;
-                        sensors.update();
-                    } else if (motors.spinPosition == 14) {
-                        motors.spinPosition = 16;
-                        sensors.update();
-                    } else if (motors.spinPosition == 16) {
-                        motors.spinPosition = 12;
-                        sensors.update();
-                    } else {
-                        motors.spinPosition = 12;
-                        sensors.update();
+                robot.automaticPickup();
+                if (!robot.pathingIsBusy()) {
+                    robot.timer.reset();
+                    while (robot.timer.seconds() < 2) {
+                        robot.update();
+                        robot.automaticPickup();
                     }
-                }
-                if (!pathing.follower.isBusy()) {
-                    motors.time.reset();
-                    while (motors.time.seconds() < 2) {
-                        motors.update();
-                        pathing.update();
-
-                        if (motors.intake.getPower() > 0 && sensors.artifactLoaded) {
-                            sensors.update();
-                            if (motors.spinPosition == 12) {
-                                motors.spinPosition = 14;
-                                sensors.update();
-                            } else if (motors.spinPosition == 14) {
-                                motors.spinPosition = 16;
-                                sensors.update();
-                            } else if (motors.spinPosition == 16) {
-                                motors.spinPosition = 12;
-                                sensors.update();
-                            } else {
-                                motors.spinPosition = 12;
-                                sensors.update();
-                            }
-                        }
-                    }
-                    motors.doNotSpin = true;
-                    motors.setFlywheelVelocity(pathing.shootDistance);
-                    pathing.follower.followPath(pathing.scoreFirstArtifacts, true);
-                    pathing.setPathState(4);
+                    robot.intake.setPower(0, -1);
+                    robot.doNotSpin = true;
+                    robot.setFlywheelToShootDistance();
+                    robot.followPath(robot.pathBuilder.scoreFirstArtifacts());
+                    robot.intake.setPower(-1,-1);
+                    robot.pathBuilder.setPathState(4);
                 }
                 break;
             case 4:
-                if (!pathing.follower.isBusy()) {
-                    motors.time.reset();
-                    motors.setIntake(0);
-                    while (motors.time.seconds() < 1) {
-                        motors.update();
-                        pathing.update();
-                        motors.setFlywheelVelocity(pathing.shootDistance);
-                    }
-                    motors.doNotSpin = false;
-                    int shootAll = 0;
-                    motors.spinPosition = 11;
-                    while (shootAll < 3) {
-                        motors.setFlywheelVelocity(pathing.shootDistance);
-                        motors.time.reset();
-                        while (!motors.ableToShoot || motors.time.seconds() < shotDelay) {
-                            //just chill
-                            motors.update();
-                            pathing.update();
-                        }
-                        motors.ballEjector.setPosition(0.3);
-                        motors.time.reset();
-                        while (motors.time.seconds() < 0.25) {
-                            //you get to chill again
-                            motors.update();
-                            pathing.update();
-                        }
-                        motors.ballEjector.setPosition(0);
-                        motors.spinPosition += 2;
-                        shootAll += 1;
-
-                    }
-                    pathing.setPathState(5);
+                if (!robot.pathingIsBusy()) {
+                    robot.doNotSpin = false;
+                    robot.shootAllBalls();
+                    robot.pathBuilder.setPathState(artifactsToCollect == 1 ? 8 : 5);
                 }
                 break;
             case 5:
-                if (!pathing.follower.isBusy()) {
-                    motors.setFlywheelVelocity(0);
-                    motors.setIntake(1);
-                    motors.spinPosition = 12;
-                    motors.update();
-                    pathing.follower.followPath(pathing.grabSecondArtifacts, 0.75, true);
-                    pathing.setPathState(6);
+                if (!robot.pathingIsBusy()) {
+                    robot.flywheel.off();
+                    robot.intake.on();
+                    robot.fidgetTech.setSnapPoint(12);
+                    robot.update();
+                    robot.pathFollower.follower.followPath(robot.pathBuilder.grabSecondArtifacts(), 0.5, true);
+                    robot.pathBuilder.setPathState(6);
                 }
                 break;
             case 6:
 
-                if (motors.intake.getPower() > 0 && sensors.artifactLoaded) {
-                    sensors.update();
-                    if (motors.spinPosition == 12) {
-                        motors.spinPosition = 14;
-                        sensors.update();
-                    } else if (motors.spinPosition == 14) {
-                        motors.spinPosition = 16;
-                        sensors.update();
-                    } else if (motors.spinPosition == 16) {
-                        motors.spinPosition = 12;
-                        sensors.update();
-                    } else {
-                        motors.spinPosition = 12;
-                        sensors.update();
+                robot.automaticPickup();
+                if (!robot.pathingIsBusy()) {
+                    robot.timer.reset();
+                    while (robot.timer.seconds() < 2) {
+                        robot.update();
+                        robot.automaticPickup();
                     }
-                }
-                if (!pathing.follower.isBusy()) {
-                    motors.time.reset();
-                    while (motors.time.seconds() < 2) {
-                        motors.update();
-                        pathing.update();
-
-                        if (motors.intake.getPower() > 0 && sensors.artifactLoaded) {
-                            sensors.update();
-                            if (motors.spinPosition == 12) {
-                                motors.spinPosition = 14;
-                                sensors.update();
-                            } else if (motors.spinPosition == 14) {
-                                motors.spinPosition = 16;
-                                sensors.update();
-                            } else if (motors.spinPosition == 16) {
-                                motors.spinPosition = 12;
-                                sensors.update();
-                            } else {
-                                motors.spinPosition = 12;
-                                sensors.update();
-                            }
-                        }
-                    }
-                    motors.doNotSpin = true;
-                    motors.setFlywheelVelocity(pathing.shootDistance);
-                    pathing.follower.followPath(pathing.scoreSecondArtifacts, true);
-                    pathing.setPathState(7);
+                    robot.doNotSpin = true;
+                    robot.setFlywheelToShootDistance();
+                    robot.followPath(robot.pathBuilder.scoreSecondArtifacts());
+                    robot.intake.setPower(-1,-1);
+                    robot.pathBuilder.setPathState(7);
                 }
                 break;
             case 7:
-                if (!pathing.follower.isBusy()) {
-                    motors.time.reset();
-                    motors.setIntake(0);
-                    while (motors.time.seconds() < 1) {
-                        motors.update();
-                        pathing.update();
-                        motors.setFlywheelVelocity(pathing.shootDistance);
-                    }
-                    motors.doNotSpin = false;
-                    int shootAll = 0;
-                    motors.spinPosition = 11;
-                    while (shootAll < 3) {
-                        motors.setFlywheelVelocity(pathing.shootDistance);
-                        motors.time.reset();
-                        while (!motors.ableToShoot || motors.time.seconds() < 0.75) {
-                            //just chill
-                            motors.update();
-                            pathing.update();
-                        }
-                        motors.ballEjector.setPosition(0.3);
-                        motors.time.reset();
-                        while (motors.time.seconds() < 0.25) {
-                            //you get to chill again
-                            motors.update();
-                            pathing.update();
-                        }
-                        motors.ballEjector.setPosition(0);
-                        motors.spinPosition += 2;
-                        shootAll += 1;
-
-                    }
-                    pathing.setPathState(8);
+                if (!robot.pathingIsBusy()) {
+                    robot.doNotSpin = false;
+                    robot.shootAllBalls();
+                    robot.pathBuilder.setPathState(8);
                 }
                 break;
             case 8:
-                if (!pathing.follower.isBusy()) {
-                    motors.setFlywheelVelocity(0);
-                    motors.update();
-                    pathing.setPathState(-1);
+                if (!robot.pathingIsBusy()) {
+                    robot.flywheel.off();
+                    robot.intake.off();
+                    robot.update();
+                    robot.followPath(robot.pathBuilder.leaveLaunchZone());
+                    robot.pathBuilder.setPathState(-1);
                 }
-        }
+                break;
+            }
     }
 }
+
+

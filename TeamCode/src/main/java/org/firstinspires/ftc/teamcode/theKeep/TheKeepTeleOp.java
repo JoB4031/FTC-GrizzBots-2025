@@ -10,36 +10,25 @@ package org.firstinspires.ftc.teamcode.theKeep;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.hardware.Motors;
-import org.firstinspires.ftc.teamcode.hardware.PedroPathing;
-import org.firstinspires.ftc.teamcode.hardware.Sensors;
-import org.firstinspires.ftc.teamcode.hardware.Vision;
+import org.firstinspires.ftc.teamcode.hardware.centralHub.hardware;
+import org.firstinspires.ftc.teamcode.hardware.motors.FidgetTech;
+import org.firstinspires.ftc.teamcode.hardware.vision.Vision;
+
 @TeleOp(name="The Keep TeleOp", group="The Keep")
 public class TheKeepTeleOp extends OpMode {
 
     // creates new variables to store our new instances of the hardware classes - Jason
-    private Vision vision;
-    private PedroPathing pathing;
-    private Motors motors;
-    private Sensors sensors;
-
+    private hardware robot;
+    private double additionalLaunchPower = 0;
     private double movementMultiplier;
+    private boolean drive = false;
 
-    private int rotateCount;
     @Override
     public void init() {
         // Creates a new instance of the hardware classes - Jason
-        vision = new Vision();
-        pathing = new PedroPathing();
-        motors = new Motors();
-        sensors =  new Sensors();
-        pathing.setArtifact();
+        robot = new hardware();
+        robot.initHardware(hardwareMap, false);
         // Call the hardware init methods - Jason
-        vision.initAprilTag(hardwareMap);
-        pathing.initFollower(hardwareMap);
-        motors.initMotors(hardwareMap);
-        sensors.initSensors(hardwareMap);
         if (TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE && !TheKeepAuto.robotCentric) {
             movementMultiplier = -1;
         } else movementMultiplier =  1;
@@ -53,30 +42,28 @@ public class TheKeepTeleOp extends OpMode {
     @Override
     public void start() {
         telemetry.clear();
+        robot.autoTime.reset();
         // Turns Pedro Path into TeleOp drive mode - Jason
-        pathing.follower.startTeleopDrive();
+        robot.pathFollower.follower.startTeleopDrive();
+
     } // This runs once when the play button is pressed
     @Override
     public void loop() {
-
+        robot.update();
         // Updates all the hardware - Jason
-        pathing.update();
-        motors.update();
-        vision.update();
-        sensors.update();
 
         // This tells the follower to activate manual drive mode if it is not following a path -Jason
-        if (!pathing.automatedDrive) {
+        if (!robot.automatedDrive) {
             if (TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE && !TheKeepAuto.robotCentric) {
-                if (motors.intake.getPower() > 0 || motors.velocityController.getSetPoint() > 0) {
-                    pathing.follower.setTeleOpDrive(
+                if (robot.intake.isPowered() || robot.flywheel.isPowered()) {
+                    robot.pathFollower.follower.setTeleOpDrive(
                             -gamepad1.left_stick_y*movementMultiplier,
                             -gamepad1.left_stick_x*movementMultiplier,
                             (gamepad1.right_stick_x*0.5)*movementMultiplier,
                             TheKeepAuto.robotCentric// Robot Centric
                     );
                 } else {
-                    pathing.follower.setTeleOpDrive(
+                    robot.pathFollower.follower.setTeleOpDrive(
                             -gamepad1.left_stick_y*movementMultiplier,
                             -gamepad1.left_stick_x*movementMultiplier,
                             gamepad1.right_stick_x*movementMultiplier,
@@ -84,15 +71,15 @@ public class TheKeepTeleOp extends OpMode {
                     );
                 }
             } else {
-                if (motors.intake.getPower() > 0 || motors.velocityController.getSetPoint() > 0) {
-                    pathing.follower.setTeleOpDrive(
+                if (robot.intake.isPowered() || robot.flywheel.isPowered()) {
+                    robot.pathFollower.follower.setTeleOpDrive(
                             -gamepad1.left_stick_y*movementMultiplier,
                             -gamepad1.left_stick_x*movementMultiplier,
                             -(gamepad1.right_stick_x*0.5)*movementMultiplier,
                             TheKeepAuto.robotCentric// Robot Centric
                     );
                 } else {
-                    pathing.follower.setTeleOpDrive(
+                    robot.pathFollower.follower.setTeleOpDrive(
                             -gamepad1.left_stick_y*movementMultiplier,
                             -gamepad1.left_stick_x*movementMultiplier,
                             -gamepad1.right_stick_x*movementMultiplier,
@@ -103,177 +90,67 @@ public class TheKeepTeleOp extends OpMode {
         }
 
         // Turns the bots heading to face the alliance goal - Jason
-        if (gamepad1.crossWasPressed() && pathing.robotInRange) {
-            if (pathing.farLaunch) {
-                motors.setIntake(0);
-                motors.spinPosition = 12;
-                motors.doNotSpin = true;
-                pathing.follower.followPath(pathing.turnToGoal.get(),true);
-                motors.setFlywheelVelocity(pathing.shootDistance);
-                pathing.automatedDrive = true;
-                while (pathing.follower.isBusy()) {
-                    pathing.update();
-                    motors.update();
-                    vision.update();
-                    motors.setFlywheelVelocity(pathing.shootDistance);
-                }
-                motors.time.reset();
-                while (motors.time.seconds() < 1 ) {
-                    pathing.update();
-                    motors.update();
-                    vision.update();
-                    motors.setFlywheelVelocity(pathing.shootDistance);
-                }
-                int shootAll = 0;
-                motors.spinPosition = 11;
-                motors.doNotSpin = false;
-                while (shootAll < 3) {
-                    vision.update();
-                    motors.setFlywheelVelocity(pathing.shootDistance);
-                    motors.time.reset();
-                    while (!motors.ableToShoot || motors.time.seconds() < 1.5) {
-                        //just chill
-                        motors.update();
-                        pathing.update();
-                    }
-                    motors.ballEjector.setPosition(0.3);
-                    motors.time.reset();
-                    while (motors.time.seconds() < 0.25) {
-                        //you get to chill again
-                        motors.update();
-                        pathing.update();
-                    }
-                    motors.ballEjector.setPosition(0);
-                    motors.spinPosition += 2;
-                    shootAll += 1;
-                }
-            } else {
-                motors.setIntake(0);
-                motors.spinPosition = 12;
-                motors.doNotSpin = true;
-                pathing.follower.followPath(pathing.turnToGoal.get(), true);
-                motors.setFlywheelVelocity(pathing.shootDistance);
-                pathing.automatedDrive = true;
-                while (pathing.follower.isBusy()) {
-                    pathing.update();
-                    motors.update();
-                    vision.update();
-                    motors.setFlywheelVelocity(pathing.shootDistance);
-                }
-                motors.time.reset();
-                while (motors.time.seconds() < 1) {
-                    pathing.update();
-                    motors.update();
-                    vision.update();
-                    motors.setFlywheelVelocity(pathing.shootDistance);
-                }
-                int shootAll = 0;
-                motors.spinPosition = 11;
-                motors.doNotSpin = false;
-                while (shootAll < 3) {
-                    vision.update();
-                    motors.setFlywheelVelocity(pathing.shootDistance);
-                    motors.time.reset();
-                    while (!motors.ableToShoot || motors.time.seconds() < .75) {
-                        //just chill
-                        motors.update();
-                        pathing.update();
-                    }
-                    motors.ballEjector.setPosition(0.3);
-                    motors.time.reset();
-                    while (motors.time.seconds() < 0.25) {
-                        //you get to chill again
-                        motors.update();
-                        pathing.update();
-                    }
-                    motors.ballEjector.setPosition(0);
-                    motors.spinPosition += 2;
-                    shootAll += 1;
-                }
+        if ((gamepad1.crossWasPressed() && robot.launchZoneTracker.robotInRange) || (gamepad1.crossWasPressed() && gamepad1.dpad_up)) {
+            robot.doNotSpin = true;
+            robot.fidgetTech.setSnapPoint(12);
+            robot.setFlywheelToShootDistance();
+            robot.followPath(robot.pathFollower.turnToGoal.get());
+            robot.timer.reset();
+            while (robot.pathingIsBusy() || robot.timer.seconds() < 2) {
+                robot.update();
             }
+            robot.doNotSpin = false;
+            robot.shootAllBalls();
+            robot.pathFollower.follower.startTeleopDrive();
+            robot.automatedDrive = false;
+        }
+
+        if (gamepad1.dpad_right) {
+            drive = true;
+            robot.followPath(robot.pathFollower.returnToBase.get());
+            robot.update();
+        } else {
+            if (drive) {
+                robot.pathFollower.follower.startTeleopDrive();
+                robot.automatedDrive = false;
+                drive = false;
+            }
+
 
         }
 
-        // The dpad down button is used as an emergency stop - Jason
-        if (pathing.automatedDrive && (gamepad1.dpadDownWasPressed() || !pathing.follower.isBusy())) {
-            pathing.follower.startTeleopDrive();
-            pathing.automatedDrive = false;
-        } // Switches to TeleOp drive if the follower is done - Jason
 
         // These lines set the flywheel to the required speed depending on the distance if the circle button is pressed and 0% if its not
         if ((gamepad1.left_trigger > 0 || gamepad1.cross)) {
-            motors.setFlywheelVelocity(pathing.shootDistance);
-            motors.setIntake(0);
+            robot.setFlywheelToShootDistance();
+            robot.intake.off();
         } else {
-            motors.setFlywheelVelocity(0);
+            robot.flywheel.off();
         }
 
         /* These lines check to see if the fidget tech is in the way of the ball ejector if it's not, when
         you press the triangle it will swing knocking out the ball - Jason */
-        if ((gamepad1.right_trigger > 0 && motors.spinPosition % 2 == 1 && motors.ableToShoot && pathing.robotInRange) || (gamepad1.right_trigger > 0 && gamepad1.dpad_up)) {
-                motors.ballEjector.setPosition(.3);
+        if ((gamepad1.right_trigger > 0 && robot.fidgetTech.getSnapPoint() % 2 == 1 && robot.flywheel.isAtSpeed() && robot.launchZoneTracker.robotInRange) || (gamepad1.right_trigger > 0 && gamepad1.dpad_up)) {
+                robot.ejector.fire();
         } else {
-            motors.ballEjector.setPosition(0);
+            robot.ejector.reset();
         }
 
         // This if statement turns the intake on when the circle is pressed and off when the square is pressed - Jason
         if (gamepad1.circleWasPressed()) {
-            if (motors.intake.getPower() == 0) {
-                motors.setIntake(1);
-                motors.spinPosition = 12;
-            } else motors.setIntake(0);
+            if (!robot.intake.isPowered()) {
+                robot.intake.on();
+                robot.fidgetTech.setSnapPoint(12);
+            } else robot.intake.off();
         }
 
-        if (motors.intake.getPower() > 0) {
-            if (sensors.nothingDetected) {
-                motors.leftIntake.setPosition(0);
-                motors.rightIntake.setPosition(1);
-            } else {
-                motors.leftIntake.setPosition(0.5);
-                motors.rightIntake.setPosition(0.5);
-            }
-        }
-        if (motors.intake.getPower() > 0 && sensors.artifactLoaded) {
-            sensors.update();
-            if (motors.spinPosition == 12 ) {
-                motors.spinPosition = 14;
-                sensors.update();
-            } else if(motors.spinPosition == 14) {
-                motors.spinPosition = 16;
-                sensors.update();
-            } else if(motors.spinPosition == 16) {
-                motors.spinPosition = 12;
-                sensors.update();
-            } else {
-                motors.spinPosition = 12;
-                sensors.update();
-            }
+        if (robot.intake.isPowered()) {
+            robot.automaticPickup();
         }
 
         // This if loop makes the robot shoot all the artifacts - Nikola
-        if (gamepad1.triangleWasPressed() && pathing.robotInRange) {
-            int shootAll = 0;
-            motors.setIntake(0);
-            motors.spinPosition = 11;
-            while (shootAll < 3) {
-                motors.setFlywheelVelocity(pathing.shootDistance);
-                motors.time.reset();
-                while (!motors.ableToShoot || motors.time.seconds() < .75) {
-                    //just chill
-                    motors.update();
-                    pathing.update();
-                }
-                motors.ballEjector.setPosition(0.3);
-                motors.time.reset();
-                while (motors.time.seconds() < 0.25) {
-                    //you get to chill again
-                    motors.update();
-                    pathing.update();
-                }
-                motors.ballEjector.setPosition(0);
-                motors.spinPosition += 2;
-                shootAll += 1;
-            }
+        if (gamepad1.triangleWasPressed()) {
+            robot.intake.setPower(-1,-1);
         }
 
         if (gamepad1.squareWasPressed()) {
@@ -285,27 +162,30 @@ public class TheKeepTeleOp extends OpMode {
         }
 
         // Moves the Fidget Tech forward or backward one step depending on which trigger was pressed
-        if (gamepad1.leftBumperWasPressed() && motors.spinPosition >= 2) motors.spinPosition -= 2;
-        if (gamepad1.rightBumperWasPressed() && motors.spinPosition <= 25) motors.spinPosition += 2;
+        if (gamepad1.leftBumperWasPressed()) robot.fidgetTech.previous();
+        if (gamepad1.rightBumperWasPressed()) robot.fidgetTech.next();
 
+        if (gamepad2.leftBumperWasPressed()) additionalLaunchPower -= 0.1;
+        if (gamepad2.rightBumperWasPressed()) additionalLaunchPower += 0.1;
+
+        if (gamepad1.dpadDownWasPressed()) robot.infiniteRun = true;
         // These lines write any april tag data to the telemetry - Jason
-        if (vision.allianceBase != null) {
-           telemetry.addData("Alliance Base Range", vision.allianceBase.ftcPose.range);
-        }
         if (Vision.pattern != null) {
            telemetry.addData("Pattern Is", Vision.pattern);
         } else {
            telemetry.addData("Pattern Is", "unknown");
         }
-
         // These lines add the fidget tech's position and the bot's position to the telemetry - Jason
-        telemetry.addData("Flywheel Error", motors.velocityController.getVelocityError());
-        telemetry.addData("Flywheel Speed", motors.rightFlywheel.getVelocity());
-        telemetry.addData("Fidget Tech Position", motors.spinPositions[motors.spinPosition]);
-        telemetry.addData("Bot Position", pathing.follower.getPose());
-        telemetry.addData("Artifact Distance", sensors.artifactedIntakeDetector.getDistance(DistanceUnit.INCH));
-        telemetry.addData("Distance to Goal", pathing.shootDistance);
-        telemetry.addData("Goal in range", pathing.robotInRange);
+        telemetry.addData("Flywheel Speed In RPM",robot.flywheel.getRPM());
+        telemetry.addData("Fidget Tech Position", robot.fidgetTech.getSnapPoint());
+        telemetry.addData("Bot Position", robot.pathFollower.getPosition());
+        telemetry.addData("Distance to Goal", robot.launchZoneTracker.shootDistance);
+        telemetry.addData("Goal in range", robot.launchZoneTracker.robotInRange);
+        telemetry.addData("Additional Power", additionalLaunchPower);
+        telemetry.addData("Artifacts Held", FidgetTech.artifactsLoaded[0]);
+        telemetry.addData("Artifacts Held", FidgetTech.artifactsLoaded[1]);
+        telemetry.addData("Artifacts Held", FidgetTech.artifactsLoaded[2]);
+        telemetry.addData("Infinite Run", robot.infiniteRun);
         telemetry.update();
 
     } // This section holds all the controls used during TeleOp
@@ -313,6 +193,6 @@ public class TheKeepTeleOp extends OpMode {
     @Override
     public void stop() {
         // Sets the bots starting position to our end position - Jason
-        pathing.setStartPose(false);
+        robot.startPosition(false);
     }
 }
