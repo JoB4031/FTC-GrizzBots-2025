@@ -30,9 +30,9 @@ public class TheKeepAuto extends OpMode {
     private Prompter prompter;
     public static Alliance alliance;
     public static int startLocation;
+    public static int artifactsToCollect;
     public static boolean robotCentric;
     private int startDelay;
-    public int artifactsToCollect;
 
 
     @Override

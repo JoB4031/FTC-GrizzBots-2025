@@ -149,8 +149,8 @@ public class TheKeepTeleOp extends OpMode {
         }
 
         // This if loop makes the robot shoot all the artifacts - Nikola
-        if ((gamepad1.triangleWasPressed() && robot.launchZoneTracker.robotInRange) || ((gamepad1.triangleWasPressed() && gamepad1.dpad_up))) {
-            robot.shootAllBalls();
+        if (gamepad1.triangleWasPressed()) {
+            robot.intake.setPower(-1,-1);
         }
 
         if (gamepad1.squareWasPressed()) {
@@ -175,7 +175,6 @@ public class TheKeepTeleOp extends OpMode {
         } else {
            telemetry.addData("Pattern Is", "unknown");
         }
-
         // These lines add the fidget tech's position and the bot's position to the telemetry - Jason
         telemetry.addData("Flywheel Speed In RPM",robot.flywheel.getRPM());
         telemetry.addData("Fidget Tech Position", robot.fidgetTech.getSnapPoint());

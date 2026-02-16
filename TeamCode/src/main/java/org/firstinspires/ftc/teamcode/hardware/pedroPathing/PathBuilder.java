@@ -48,16 +48,16 @@ public class PathBuilder {
 
     public PathChain scoreSecondArtifacts() {
         return follower.pathBuilder()
-                .addPath(new BezierLine(poses.secondArtifacts, poses.secondArtifactControlPoint))
+                .addPath(new BezierLine(poses.secondArtifacts, poses.secondArtifactsShootStep1))
                 .setConstantHeadingInterpolation(poses.secondArtifacts.getHeading())
-                .addPath(new BezierLine(poses.secondArtifactControlPoint,poses.nearLaunchPose))
+                .addPath(new BezierLine(poses.secondArtifactsShootStep1,poses.nearLaunchPose))
                 .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
                 .build();
     }
 
     public PathChain leaveLaunchZone() {
         return follower.pathBuilder()
-                .addPath(new BezierLine(poses.launchPose, poses.notLaunchZone))
+                .addPath(new BezierLine(follower.getPose(), poses.notLaunchZone))
                 .setLinearHeadingInterpolation(follower.getHeading(), poses.notLaunchZone.getHeading())
                 .build();
     }

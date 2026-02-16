@@ -11,9 +11,9 @@ public class FidgetTech {
     private static int snapPoint = 15;
 
     private final double[] positions = {
-            0,0.04,0.08,0.12,0.15,0.19,0.22,0.26,0.3,0.33,0.37,0.41,
-            0.45,0.48,0.52,0.56,0.61,0.64,0.68,0.72,0.75,0.79,0.83,
-            0.86,0.9,0.93,0.97
+            0,0.03,0.07,0.1,0.14,0.17,0.21,0.25,0.29,0.32,0.37,0.4,
+            0.43,0.47,0.51,0.55,0.59,0.63,0.67,0.71,0.75,0.78,0.82,
+            0.86,0.89,0.93,0.96,1
     };
     public static IntakeSensor.detectedColor[] artifactsLoaded = {
             IntakeSensor.detectedColor.NONE, IntakeSensor.detectedColor.NONE, IntakeSensor.detectedColor.NONE
@@ -33,7 +33,7 @@ public class FidgetTech {
         }
         try {
             if ((snapPoint % 2 == 0)) {
-                indexer.setPosition((positions[snapPoint])+0.01);
+                indexer.setPosition(positions[snapPoint]);
             } else indexer.setPosition(positions[snapPoint]);
 
         } catch (ArrayIndexOutOfBoundsException e) {
