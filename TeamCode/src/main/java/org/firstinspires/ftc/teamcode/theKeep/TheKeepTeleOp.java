@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.centralHub.hardware;
 import org.firstinspires.ftc.teamcode.hardware.motors.FidgetTech;
+import org.firstinspires.ftc.teamcode.hardware.sensors.IntakeSensor;
 import org.firstinspires.ftc.teamcode.hardware.vision.Vision;
 
 @TeleOp(name="The Keep TeleOp", group="The Keep")
@@ -90,9 +91,9 @@ public class TheKeepTeleOp extends OpMode {
         }
 
         // Turns the bots heading to face the alliance goal - Jason
-        if ((gamepad1.crossWasPressed() && robot.launchZoneTracker.robotInRange) || (gamepad1.crossWasPressed() && gamepad1.dpad_up)) {
+        if ((gamepad1.crossWasPressed() && robot.launchZoneTracker.robotInRange) || (gamepad1.crossWasPressed() && gamepad1.right_stick_button)) {
             robot.doNotSpin = true;
-            robot.fidgetTech.setSnapPoint(12);
+            robot.fidgetTech.setSnapPoint(robot.spinPattern[0]);
             robot.setFlywheelToShootDistance();
             robot.followPath(robot.pathFollower.turnToGoal.get());
             robot.timer.reset();
@@ -100,12 +101,12 @@ public class TheKeepTeleOp extends OpMode {
                 robot.update();
             }
             robot.doNotSpin = false;
-            robot.shootAllBalls();
+            robot.shootAllBalls(true);
             robot.pathFollower.follower.startTeleopDrive();
             robot.automatedDrive = false;
         }
 
-        if (gamepad1.dpad_right) {
+        if (gamepad1.left_stick_button) {
             drive = true;
             robot.followPath(robot.pathFollower.returnToBase.get());
             robot.update();
@@ -130,7 +131,7 @@ public class TheKeepTeleOp extends OpMode {
 
         /* These lines check to see if the fidget tech is in the way of the ball ejector if it's not, when
         you press the triangle it will swing knocking out the ball - Jason */
-        if ((gamepad1.right_trigger > 0 && robot.fidgetTech.getSnapPoint() % 2 == 1 && robot.flywheel.isAtSpeed() && robot.launchZoneTracker.robotInRange) || (gamepad1.right_trigger > 0 && gamepad1.dpad_up)) {
+        if ((gamepad1.right_trigger > 0 && robot.fidgetTech.getSnapPoint() % 2 == 1 && robot.flywheel.isAtSpeed() && robot.launchZoneTracker.robotInRange) || (gamepad1.right_trigger > 0 && gamepad1.right_stick_button)) {
                 robot.ejector.fire();
         } else {
             robot.ejector.reset();
@@ -167,8 +168,24 @@ public class TheKeepTeleOp extends OpMode {
 
         if (gamepad2.leftBumperWasPressed()) additionalLaunchPower -= 0.1;
         if (gamepad2.rightBumperWasPressed()) additionalLaunchPower += 0.1;
+        if (FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) {
 
-        if (gamepad1.dpadDownWasPressed()) robot.infiniteRun = true;
+        }
+        if (gamepad1.dpadLeftWasPressed()) {
+            if (FidgetTech.artifactsLoaded[0] != IntakeSensor.detectedColor.PURPLE) {
+                FidgetTech.artifactsLoaded[0] = IntakeSensor.detectedColor.PURPLE;
+            } else FidgetTech.artifactsLoaded[0] = IntakeSensor.detectedColor.GREEN;
+        }
+        if (gamepad1.dpadRightWasPressed()) {
+            if (FidgetTech.artifactsLoaded[1] != IntakeSensor.detectedColor.PURPLE) {
+                FidgetTech.artifactsLoaded[1] = IntakeSensor.detectedColor.PURPLE;
+            } else FidgetTech.artifactsLoaded[1] = IntakeSensor.detectedColor.GREEN;
+        }
+        if (gamepad1.dpadUpWasPressed()) {
+            if (FidgetTech.artifactsLoaded[2] != IntakeSensor.detectedColor.PURPLE) {
+                FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.PURPLE;
+            } else FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.GREEN;
+        }
         // These lines write any april tag data to the telemetry - Jason
         if (Vision.pattern != null) {
            telemetry.addData("Pattern Is", Vision.pattern);
@@ -185,6 +202,9 @@ public class TheKeepTeleOp extends OpMode {
         telemetry.addData("Artifacts Held", FidgetTech.artifactsLoaded[0]);
         telemetry.addData("Artifacts Held", FidgetTech.artifactsLoaded[1]);
         telemetry.addData("Artifacts Held", FidgetTech.artifactsLoaded[2]);
+        telemetry.addData("Artifact Spots" , robot.spinPattern[0]);
+        telemetry.addData("Artifact Spots" , robot.spinPattern[1]);
+        telemetry.addData("Artifact Spots" , robot.spinPattern[2]);
         telemetry.addData("Infinite Run", robot.infiniteRun);
         telemetry.update();
 

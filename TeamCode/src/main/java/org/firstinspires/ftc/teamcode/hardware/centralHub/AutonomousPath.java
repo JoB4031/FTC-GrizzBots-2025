@@ -15,7 +15,7 @@ public class AutonomousPath {
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if (!robot.pathingIsBusy()) {
                     robot.doNotSpin = false;
-                    robot.shootAllBalls();
+                    robot.shootAllBalls(true);
                     robot.pathBuilder.setPathState(TheKeepAuto.artifactsToCollect == 0 ? 8 : 2);
                 }
                 break;
@@ -49,7 +49,7 @@ public class AutonomousPath {
             case 4:
                 if (!robot.pathingIsBusy()) {
                     robot.doNotSpin = false;
-                    robot.shootAllBalls();
+                    robot.shootAllBalls(true);
                     robot.pathBuilder.setPathState(TheKeepAuto.artifactsToCollect == 1 ? 8 : 5);
                 }
                 break;
@@ -82,7 +82,7 @@ public class AutonomousPath {
             case 7:
                 if (!robot.pathingIsBusy()) {
                     robot.doNotSpin = false;
-                    robot.shootAllBalls();
+                    robot.shootAllBalls(true);
                     robot.pathBuilder.setPathState(8);
                 }
                 break;

@@ -44,6 +44,7 @@ public class hardware {
     public boolean doNotSpin = false;
     private boolean stopRequested = false;
     public final ElapsedTime fidgetTime = new ElapsedTime();
+    public int[] spinPattern = {0,0,0};
 
 
     public void initHardware(HardwareMap hw, boolean auto) {
@@ -97,6 +98,7 @@ public class hardware {
             pathFollower.update();
             launchZoneTracker.update(pathFollower.getPosition(), poseLib.targetPoint);
             vision.update();
+            sortAllBalls();
         } else {
             stopRequested = true;
             flywheel.off();
@@ -109,13 +111,16 @@ public class hardware {
         // Checks to see if a ball is loaded and the intake is on if so it loads the ball into the sorter
             update();
             if (fidgetTech.getSnapPoint() == 12 ) {
+                FidgetTech.artifactsLoaded[0] = IntakeSensor.detectedColor.UNKNOWN;
                 fidgetTech.next();
                 update();
             } else if(fidgetTech.getSnapPoint() == 14) {
+                FidgetTech.artifactsLoaded[1] = IntakeSensor.detectedColor.UNKNOWN;
                 fidgetTech.next();
                 update();
             } else if(fidgetTech.getSnapPoint() == 16) {
-                fidgetTech.next();
+                FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.UNKNOWN;
+                fidgetTech.setSnapPoint(12);
                 update();
             } else {
                 fidgetTech.setSnapPoint(12);
@@ -125,29 +130,36 @@ public class hardware {
         }
         // Checks to see if a ball is in the sorter's intake if it is it spins the intake backward to prevent jamming
         if (!intakeSensor.isNothingDetected()) {
-            if (fidgetTech.getSnapPoint() == 12 ) {
-                FidgetTech.artifactsLoaded[0] = IntakeSensor.detectedColor.UNKNOWN;
-            } else if(fidgetTech.getSnapPoint() == 14) {
-                FidgetTech.artifactsLoaded[1] = IntakeSensor.detectedColor.UNKNOWN;
-            } else if(fidgetTech.getSnapPoint() == 16) {
-                FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.UNKNOWN;
-            }
             intake.setPower(1,-0.1);
         } else intake.setPower(1,1);
     }
-
-    public void shootAllBalls() {
-        // Runs a chain of commands that shoots all the balls in the Fidget Tech
-        intake.off();
-        fidgetTech.setSnapPoint(12);
-        setFlywheelToShootDistance();
-        timer.reset();
-        while (timer.seconds() < 0.5) {
-            update();
-            if (stopRequested) break;
+    public void shootColorArtifact(IntakeSensor.detectedColor color) {
+        double snapPoint = 0;
+        if(color == IntakeSensor.detectedColor.PURPLE) {
+            if(FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) {
+                snapPoint = 11;
+            } else if(FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) {
+                snapPoint = 13;
+            } else if(FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE) {
+                snapPoint = 15;
+            }
         }
-        for (int i = 0; i < 3; i++) {
-            if (stopRequested) break;
+        if(color == IntakeSensor.detectedColor.GREEN) {
+            if(FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.GREEN) {
+                snapPoint = 11;
+            } else if(FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.GREEN) {
+                snapPoint = 13;
+            } else if(FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.GREEN) {
+                snapPoint = 15;
+            }
+        }
+        if(snapPoint != 0) {
+            setFlywheelToShootDistance();
+            timer.reset();
+            while (timer.seconds() < 0.5) {
+                update();
+                if (stopRequested) break;
+            }
             setFlywheelToShootDistance();
             timer.reset();
             while (!flywheel.isAtSpeed()) {
@@ -161,18 +173,111 @@ public class hardware {
                 if (stopRequested) break;
             }
             ejector.reset();
-            fidgetTech.next();
+        }
+
+    }
+    public void sortAllBalls() {
+        if (Vision.pattern == Vision.BallPattern.PPG) {
+            if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.GREEN)) {
+                spinPattern[0] = 9;
+                spinPattern[1] = 11;
+                spinPattern[2] = 13;
+            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
+                spinPattern[0] = 13;
+                spinPattern[1] = 15;
+                spinPattern[2] = 17;
+            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
+                spinPattern[0] = 11;
+                spinPattern[1] = 13;
+                spinPattern[2] = 15;
+            } else {
+                spinPattern[0] = 9;
+                spinPattern[1] = 11;
+                spinPattern[2] = 13;
+            }
+        } else if (Vision.pattern == Vision.BallPattern.PGP) {
+            if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.GREEN)) {
+                spinPattern[0] = 13;
+                spinPattern[1] = 15;
+                spinPattern[2] = 17;
+            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
+                spinPattern[0] = 11;
+                spinPattern[1] = 13;
+                spinPattern[2] = 15;
+            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
+                spinPattern[0] = 9;
+                spinPattern[1] = 11;
+                spinPattern[2] = 13;
+            } else {
+                spinPattern[0] = 11;
+                spinPattern[1] = 13;
+                spinPattern[2] = 15;
+            }
+        } else if (Vision.pattern == Vision.BallPattern.GPP) {
+            if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.GREEN)) {
+                spinPattern[0] = 9;
+                spinPattern[1] = 11;
+                spinPattern[2] = 13;
+            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
+                spinPattern[0] = 13;
+                spinPattern[1] = 15;
+                spinPattern[2] = 17;
+            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
+                spinPattern[0] = 11;
+                spinPattern[1] = 13;
+                spinPattern[2] = 15;
+            } else {
+                spinPattern[0] = 11;
+                spinPattern[1] = 13;
+                spinPattern[2] = 15;
+            }
+        } else if (Vision.pattern == null) {
+            spinPattern[0] = 11;
+            spinPattern[1] = 13;
+            spinPattern[2] = 15;
+        }
+    }
+    public void shootAllBalls(boolean sort) {
+        if (sort) {
+            // Runs a chain of commands that shoots all the balls in the Fidget Tech
+            intake.off();
+            fidgetTech.setSnapPoint(spinPattern[0]);
+            setFlywheelToShootDistance();
             timer.reset();
-            while (timer.seconds() < 0.4) {
+            while (timer.seconds() < 0.5) {
                 update();
                 if (stopRequested) break;
             }
+            for (int i = 0; i < 3; i++) {
+                if (stopRequested) break;
+                setFlywheelToShootDistance();
+                timer.reset();
+                while (!flywheel.isAtSpeed()) {
+                    update();
+                    if (stopRequested) break;
+                }
+                ejector.fire();
+                timer.reset();
+                while (timer.seconds() < 0.4) {
+                    update();
+                    if (stopRequested) break;
+                }
+                ejector.reset();
+                if(i != 2) {
+                    fidgetTech.setSnapPoint(spinPattern[i + 1]);
+                }
+                timer.reset();
+                while (timer.seconds() < 0.4) {
+                    update();
+                    if (stopRequested) break;
+                }
+            }
+            flywheel.off();
+            FidgetTech.artifactsLoaded[0] = IntakeSensor.detectedColor.NONE;
+            FidgetTech.artifactsLoaded[1] = IntakeSensor.detectedColor.NONE;
+            FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.NONE;
+            fidgetTech.setSnapPoint(12);
         }
-        FidgetTech.artifactsLoaded[0] = IntakeSensor.detectedColor.NONE;
-        FidgetTech.artifactsLoaded[1] = IntakeSensor.detectedColor.NONE;
-        FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.NONE;
-        flywheel.off();
-        fidgetTech.setSnapPoint(12);
     }
     public void startPosition(boolean atPromptEnd) {
         // Sets the start position for the bot

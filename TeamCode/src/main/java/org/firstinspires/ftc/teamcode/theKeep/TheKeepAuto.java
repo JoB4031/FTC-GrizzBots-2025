@@ -115,7 +115,7 @@ public class TheKeepAuto extends OpMode {
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if (!robot.pathingIsBusy()) {
                     robot.doNotSpin = false;
-                    robot.shootAllBalls();
+                    robot.shootAllBalls(true);
                     robot.pathBuilder.setPathState(artifactsToCollect == 0 ? 8 : 2);
                 }
                 break;
@@ -149,7 +149,7 @@ public class TheKeepAuto extends OpMode {
             case 4:
                 if (!robot.pathingIsBusy()) {
                     robot.doNotSpin = false;
-                    robot.shootAllBalls();
+                    robot.shootAllBalls(true);
                     robot.pathBuilder.setPathState(artifactsToCollect == 1 ? 8 : 5);
                 }
                 break;
@@ -182,7 +182,7 @@ public class TheKeepAuto extends OpMode {
             case 7:
                 if (!robot.pathingIsBusy()) {
                     robot.doNotSpin = false;
-                    robot.shootAllBalls();
+                    robot.shootAllBalls(true);
                     robot.pathBuilder.setPathState(8);
                 }
                 break;
