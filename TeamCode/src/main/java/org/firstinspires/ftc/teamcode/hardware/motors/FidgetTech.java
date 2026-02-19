@@ -11,9 +11,9 @@ public class FidgetTech {
     private static int snapPoint = 15;
 
     private final double[] positions = {
-            0,0.03,0.07,0.1,0.14,0.17,0.21,0.25,0.29,0.32,0.37,0.4,
-            0.43,0.47,0.51,0.55,0.59,0.63,0.67,0.71,0.75,0.78,0.82,
-            0.86,0.89,0.93,0.96,1
+            0,0.03,0.065,0.105,0.14,0.178,0.21,0.25,0.288,0.325,0.36,0.39,
+            0.436,0.478,0.517,0.558,0.6,0.635,0.67,0.708,0.745,0.78,0.818,
+            0.857,0.89,0.929,0.965,1
     };
     public static IntakeSensor.detectedColor[] artifactsLoaded = {
             IntakeSensor.detectedColor.NONE, IntakeSensor.detectedColor.NONE, IntakeSensor.detectedColor.NONE

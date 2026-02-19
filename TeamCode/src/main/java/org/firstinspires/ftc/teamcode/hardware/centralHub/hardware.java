@@ -43,6 +43,7 @@ public class hardware {
     public boolean automatedDrive = false;
     public boolean doNotSpin = false;
     private boolean stopRequested = false;
+    public final ElapsedTime fidgetTime = new ElapsedTime();
 
 
     public void initHardware(HardwareMap hw, boolean auto) {
@@ -104,8 +105,8 @@ public class hardware {
         }
     }
     public void automaticPickup() {
+        if (intakeSensor.isArtifactLoaded()) {
         // Checks to see if a ball is loaded and the intake is on if so it loads the ball into the sorter
-        if (intake.isPowered() && intakeSensor.isArtifactLoaded()) {
             update();
             if (fidgetTech.getSnapPoint() == 12 ) {
                 fidgetTech.next();
@@ -120,6 +121,7 @@ public class hardware {
                 fidgetTech.setSnapPoint(12);
                 update();
             }
+            fidgetTime.reset();
         }
         // Checks to see if a ball is in the sorter's intake if it is it spins the intake backward to prevent jamming
         if (!intakeSensor.isNothingDetected()) {
@@ -130,7 +132,7 @@ public class hardware {
             } else if(fidgetTech.getSnapPoint() == 16) {
                 FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.UNKNOWN;
             }
-            intake.setPower(1,-0.5);
+            intake.setPower(1,-0.1);
         } else intake.setPower(1,1);
     }
 

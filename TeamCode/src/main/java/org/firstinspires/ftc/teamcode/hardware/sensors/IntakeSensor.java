@@ -4,6 +4,7 @@ import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -16,6 +17,7 @@ public class IntakeSensor {
     }
     private boolean artifactLoaded;
     private boolean nothingDetected;
+    public final ElapsedTime artifactTime = new ElapsedTime();
     public void initIntakeSensor(HardwareMap hw) {
         artifactedIntakeDetector = hw.get(RevColorSensorV3.class, "color");
         artifactColorDetector = hw.get(NormalizedColorSensor.class, "color");
@@ -23,22 +25,28 @@ public class IntakeSensor {
     }
 
     public boolean isArtifactLoaded() {
-        if (artifactedIntakeDetector.getDistance(DistanceUnit.INCH) <= 2) {
-            if (nothingDetected) {
+        if (artifactedIntakeDetector.getDistance(DistanceUnit.INCH) < 2) {
+            if (nothingDetected || artifactTime.seconds() > 1) {
                 artifactLoaded = true;
+                artifactTime.reset();
                 nothingDetected = false;
-            } else artifactLoaded = false;
-        } else if (artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 4) nothingDetected= true;
+            } else {
+                artifactLoaded = false;
+            }
+        } else if (artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 2.5) {
+            nothingDetected= true;
+            artifactTime.reset();
+        }
         return artifactLoaded;
     }
 
     public boolean isNothingDetected() {
-        if (artifactedIntakeDetector.getDistance(DistanceUnit.INCH) <= 2) {
+        if (artifactedIntakeDetector.getDistance(DistanceUnit.INCH) < 2.5) {
             if (nothingDetected) {
                 artifactLoaded = true;
                 nothingDetected = false;
             } else artifactLoaded = false;
-        } else if (artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 4) nothingDetected= true;
+        } else if (artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 2.5) nothingDetected= true;
         return nothingDetected;
     }
     public detectedColor getDetectedColor(Telemetry telemetry) {

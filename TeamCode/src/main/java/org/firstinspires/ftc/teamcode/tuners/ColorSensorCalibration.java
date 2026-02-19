@@ -4,9 +4,9 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.hardware.sensors.IntakeSensor;
 @TeleOp(name="Color Sensor Tuner", group="Tuners")
-@Disabled
 public class ColorSensorCalibration extends OpMode {
     private float gain = 1;
     IntakeSensor intakeSensor;
@@ -22,6 +22,7 @@ public class ColorSensorCalibration extends OpMode {
         if (gamepad1.rightBumperWasPressed()) gain -= 1;
         intakeSensor.artifactColorDetector.setGain(gain);
         intakeSensor.getDetectedColor(telemetry);
+        telemetry.addData("Artifact Detected", intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH));
 
     }
 }

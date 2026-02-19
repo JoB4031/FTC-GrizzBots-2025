@@ -14,7 +14,6 @@ public class Intake {
         internalIntake = hw.get(DcMotor.class, "internalIntake");
         internalIntake.setDirection(DcMotorSimple.Direction.REVERSE);
     }
-
     public void setPower(double exteriorPower, double interiorPower) {
         externalIntake.setPower(exteriorPower);
         internalIntake.setPower(interiorPower);
