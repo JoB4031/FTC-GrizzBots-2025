@@ -4,6 +4,7 @@ import com.arcrobotics.ftclib.controller.PIDFController;
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Configurable
 public class Flywheel {
@@ -15,8 +16,22 @@ public class Flywheel {
     public static double kI = 0.0;
     public static double kD = 0.0;
     public static double kF = 0.0004;
+    public static double oneMeterPower = 3500;
+    public static double onePointTwoMeterPower = 3750;
+    public static double onePointFourMeterPower = 4000;
+    public static double onePointSixMeterPower = 4250;
+    public static double onePointEightMeterPower = 4500;
+    public static double twoMeterPower = 4750;
+    public static double twoPointTwoMeterPower = 3500;
+    public static double twoPointFourMeterPower = 3750;
+    public static double twoPointSixMeterPower = 4000;
+    public static double twoPointEightMeterPower = 4250;
+    public static double threeMeterPower = 4500;
+
+    public final ElapsedTime flywheelStable = new ElapsedTime();
 
     public void initFlywheel(HardwareMap hw) {
+
         rightFlywheel = hw.get(DcMotorEx.class, "rightFlywheel");
         leftFlywheel  = hw.get(DcMotorEx.class, "leftFlywheel");
 
@@ -29,14 +44,14 @@ public class Flywheel {
         controller.setSetPoint(0);
     }
 
-    public void setFlywheelFireDistance(double distance) {
-        controller.setSetPoint(RPMToVelocity(6.5 * Math.sqrt(398210 * distance)
-                - 900 * Math.sqrt(distance)
-                + (Math.ceil(distance / 5) * 400)));
+    public void setFlywheelNearFire(double distance) {
+        controller.setSetPoint(RPMToVelocity(6.1 * Math.sqrt(398210 * distance)
+                - 900 * Math.sqrt(distance) + (-667*distance)
+                + (Math.ceil(distance / 5) * (1433))));
         if (controller.getSetPoint() > 2460) controller.setSetPoint(2460);
     }
     public void off() {
-        setFlywheelFireDistance(0);
+        setFlywheelNearFire(0);
     }
 
     public void update() {
@@ -49,6 +64,9 @@ public class Flywheel {
             leftFlywheel.setPower(power);
             rightFlywheel.setPower(power);
         }
+    }
+    public void setToRPM(double rpm) {
+        controller.setSetPoint(RPMToVelocity(rpm));
     }
     public double RPMToVelocity(double RPM) {
         return RPM*0.41;
@@ -63,7 +81,14 @@ public class Flywheel {
         return rightFlywheel.getPower() > 0;
     }
     public boolean isAtSpeed() {
-       return (Math.abs(controller.getSetPoint() - rightFlywheel.getVelocity()) < 30);
+        if (Math.abs(controller.getSetPoint() - rightFlywheel.getVelocity()) < 60) {
+            if (flywheelStable.seconds() > 0.25) {
+                return true;
+            }
+        } else {
+            flywheelStable.reset();
+        }
+        return false;
     }
 }
 

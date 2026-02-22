@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.tuners;
 
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -14,10 +16,12 @@ public class FidgetTechTuner extends OpMode {
     private double position = 0;
     List<Double> list = new ArrayList<>(Arrays.asList(
     ));
+    private TelemetryManager telemetryM;
 
     @Override
     public void init() {
         fidgetTech = hardwareMap.get(Servo.class, "spinIndexer");
+        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
     }
 
     @Override
@@ -34,9 +38,17 @@ public class FidgetTechTuner extends OpMode {
         if (gamepad1.dpadDownWasPressed()) {
             position -= 0.005;
         }
-        if (gamepad1.circleWasPressed()) list.add(position);
+        if (gamepad1.rightBumperWasPressed()) {
+            position += 0.001;
+        }
+        if (gamepad1.leftBumperWasPressed()) {
+            position -= 0.001;
+        }
+        double roundedPosition = ((double) Math.round(position * 1000) /1000);
+        if (gamepad1.circleWasPressed()) list.add(roundedPosition);
         fidgetTech.setPosition(position);
-        telemetry.addData("Position", fidgetTech.getPosition());
-        telemetry.addData("Positions", list);
+        telemetryM.addData("Position", fidgetTech.getPosition());
+        telemetryM.addData("Positions", list);
+        telemetryM.update(telemetry);
     }
 }

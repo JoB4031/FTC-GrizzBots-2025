@@ -12,11 +12,15 @@ public class Ejector {
     }
 
     public void fire() {
-        ejector.setPosition(0.3);
+        ejector.setPosition(0.35);
     }
 
     public void reset() {
         ejector.setPosition(0);
+    }
+
+    public double getPosition() {
+        return ejector.getPosition();
     }
 }
 

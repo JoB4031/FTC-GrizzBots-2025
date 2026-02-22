@@ -15,16 +15,34 @@ public class PathFollower {
 
     public Follower follower;
     public Supplier<PathChain> turnToGoal;
+    public Supplier<PathChain> moveToFarLaunch;
+    public Supplier<PathChain> moveToNearLaunch;
     public Supplier<PathChain> returnToBase;
     public Supplier<PathChain> returnToStart;
+    public Supplier<PathChain> moveToLaunch;
 
-    public void init(HardwareMap map, PoseLibrary poses) {
+    public void init(HardwareMap map, PoseLibrary poses, LaunchZoneTracker tracker) {
         follower = Constants.createFollower(map);
         follower.setStartingPose(PoseLibrary.startPose);
         follower.update();
 
         turnToGoal = () -> follower.pathBuilder()
                 .addPath(new BezierPoint(follower::getPose))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
+                .build();
+
+        moveToLaunch = () -> follower.pathBuilder()
+                .addPath(new BezierLine(follower.getPose(), tracker.closestPoseToZone(tracker.robotLaunchZone, poses.nearLaunchPose, poses.farLaunchPose)))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
+                .build();
+
+        moveToFarLaunch = () -> follower.pathBuilder()
+                .addPath(new BezierLine(follower.getPose(), poses.farLaunchPose))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
+                .build();
+
+        moveToNearLaunch = () -> follower.pathBuilder()
+                .addPath(new BezierLine(follower.getPose(), poses.nearLaunchPose))
                 .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
                 .build();
 

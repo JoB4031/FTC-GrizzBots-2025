@@ -7,6 +7,8 @@ Also fixed a few bugs that surfaced during the 1/17/2026
 scrimmage.
 */
 package org.firstinspires.ftc.teamcode.theKeep;
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -23,17 +25,18 @@ public class TheKeepTeleOp extends OpMode {
     private double additionalLaunchPower = 0;
     private double movementMultiplier;
     private boolean drive = false;
+    private TelemetryManager telemetryM;
 
     @Override
     public void init() {
         // Creates a new instance of the hardware classes - Jason
+        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         robot = new hardware();
-        robot.initHardware(hardwareMap, false);
+        robot.initHardware(hardwareMap, false, telemetryM);
         // Call the hardware init methods - Jason
         if (TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE && !TheKeepAuto.robotCentric) {
             movementMultiplier = -1;
         } else movementMultiplier =  1;
-
         // Reports the status - Jason
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -91,7 +94,33 @@ public class TheKeepTeleOp extends OpMode {
         }
 
         // Turns the bots heading to face the alliance goal - Jason
-        if ((gamepad1.crossWasPressed() && robot.launchZoneTracker.robotInRange) || (gamepad1.crossWasPressed() && gamepad1.right_stick_button)) {
+        if (gamepad1.dpadLeftWasPressed()) {
+            robot.doNotSpin = true;
+            robot.setFlywheelToShootDistance();
+            robot.followPath(robot.pathFollower.turnToGoal.get());
+            while (robot.pathingIsBusy()) {
+                robot.update();
+            }
+            robot.doNotSpin = false;
+            robot.shootColorArtifact(IntakeSensor.detectedColor.PURPLE);
+            robot.pathFollower.follower.startTeleopDrive();
+            robot.automatedDrive = false;
+        }
+
+        if (gamepad1.dpadRightWasPressed()) {
+            robot.doNotSpin = true;
+            robot.setFlywheelToShootDistance();
+            robot.followPath(robot.pathFollower.turnToGoal.get());
+            while (robot.pathingIsBusy()) {
+                robot.update();
+            }
+            robot.doNotSpin = false;
+            robot.shootColorArtifact(IntakeSensor.detectedColor.GREEN);
+            robot.pathFollower.follower.startTeleopDrive();
+            robot.automatedDrive = false;
+        }
+
+        if (gamepad1.dpadUpWasPressed()) {
             robot.doNotSpin = true;
             robot.fidgetTech.setSnapPoint(robot.spinPattern[0]);
             robot.setFlywheelToShootDistance();
@@ -106,7 +135,22 @@ public class TheKeepTeleOp extends OpMode {
             robot.automatedDrive = false;
         }
 
-        if (gamepad1.left_stick_button) {
+        if (gamepad1.dpadDownWasPressed()) {
+            robot.doNotSpin = true;
+            robot.fidgetTech.setSnapPoint(11);
+            robot.setFlywheelToShootDistance();
+            robot.followPath(robot.pathFollower.turnToGoal.get());
+            robot.timer.reset();
+            while (robot.pathingIsBusy() || robot.timer.seconds() < 2) {
+                robot.update();
+            }
+            robot.doNotSpin = false;
+            robot.shootAllBalls(false);
+            robot.pathFollower.follower.startTeleopDrive();
+            robot.automatedDrive = false;
+        }
+
+        if (gamepad1.cross) {
             drive = true;
             robot.followPath(robot.pathFollower.returnToBase.get());
             robot.update();
@@ -116,13 +160,11 @@ public class TheKeepTeleOp extends OpMode {
                 robot.automatedDrive = false;
                 drive = false;
             }
-
-
         }
 
 
         // These lines set the flywheel to the required speed depending on the distance if the circle button is pressed and 0% if its not
-        if ((gamepad1.left_trigger > 0 || gamepad1.cross)) {
+        if ((gamepad1.left_trigger > 0)) {
             robot.setFlywheelToShootDistance();
             robot.intake.off();
         } else {
@@ -139,15 +181,19 @@ public class TheKeepTeleOp extends OpMode {
 
         // This if statement turns the intake on when the circle is pressed and off when the square is pressed - Jason
         if (gamepad1.circleWasPressed()) {
+            if (robot.fidgetTechIsFull()) {
+                FidgetTech.artifactsLoaded[0] = IntakeSensor.detectedColor.NONE;
+                FidgetTech.artifactsLoaded[1] = IntakeSensor.detectedColor.NONE;
+                FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.NONE;
+            }
             if (!robot.intake.isPowered()) {
                 robot.intake.on();
-                robot.fidgetTech.setSnapPoint(12);
             } else robot.intake.off();
         }
 
         if (robot.intake.isPowered()) {
             robot.automaticPickup();
-        }
+        } else robot.doNotSpin = false;
 
         // This if loop makes the robot shoot all the artifacts - Nikola
         if (gamepad1.triangleWasPressed()) {
@@ -157,8 +203,10 @@ public class TheKeepTeleOp extends OpMode {
         if (gamepad1.squareWasPressed()) {
             if (movementMultiplier == 1 || movementMultiplier ==-1) {
                 movementMultiplier = movementMultiplier*.5;
+                robot.led.yellow();
             } else {
                 movementMultiplier = movementMultiplier*2;
+                robot.led.purple();
             }
         }
 
@@ -168,24 +216,6 @@ public class TheKeepTeleOp extends OpMode {
 
         if (gamepad2.leftBumperWasPressed()) additionalLaunchPower -= 0.1;
         if (gamepad2.rightBumperWasPressed()) additionalLaunchPower += 0.1;
-        if (FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) {
-
-        }
-        if (gamepad1.dpadLeftWasPressed()) {
-            if (FidgetTech.artifactsLoaded[0] != IntakeSensor.detectedColor.PURPLE) {
-                FidgetTech.artifactsLoaded[0] = IntakeSensor.detectedColor.PURPLE;
-            } else FidgetTech.artifactsLoaded[0] = IntakeSensor.detectedColor.GREEN;
-        }
-        if (gamepad1.dpadRightWasPressed()) {
-            if (FidgetTech.artifactsLoaded[1] != IntakeSensor.detectedColor.PURPLE) {
-                FidgetTech.artifactsLoaded[1] = IntakeSensor.detectedColor.PURPLE;
-            } else FidgetTech.artifactsLoaded[1] = IntakeSensor.detectedColor.GREEN;
-        }
-        if (gamepad1.dpadUpWasPressed()) {
-            if (FidgetTech.artifactsLoaded[2] != IntakeSensor.detectedColor.PURPLE) {
-                FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.PURPLE;
-            } else FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.GREEN;
-        }
         // These lines write any april tag data to the telemetry - Jason
         if (Vision.pattern != null) {
            telemetry.addData("Pattern Is", Vision.pattern);
@@ -207,6 +237,11 @@ public class TheKeepTeleOp extends OpMode {
         telemetry.addData("Artifact Spots" , robot.spinPattern[2]);
         telemetry.addData("Infinite Run", robot.infiniteRun);
         telemetry.update();
+
+        telemetryM.addData("Flywheel RPM", robot.flywheel.getRPM());
+        telemetryM.addData("Ejector Position", robot.ejector.getPosition());
+        telemetryM.addData("Launch Distance", robot.launchZoneTracker.shootDistance);
+        telemetryM.update();
 
     } // This section holds all the controls used during TeleOp
 

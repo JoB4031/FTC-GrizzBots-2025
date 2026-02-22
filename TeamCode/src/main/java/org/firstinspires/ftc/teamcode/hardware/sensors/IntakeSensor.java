@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware.sensors;
 
+import android.graphics.Color;
+
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -9,6 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.hardware.motors.FidgetTech;
 import org.firstinspires.ftc.teamcode.tuners.ColorSensorCalibration;
 
 @Configurable
@@ -37,12 +40,13 @@ public class IntakeSensor {
     public void initIntakeSensor(HardwareMap hw) {
         artifactedIntakeDetector = hw.get(RevColorSensorV3.class, "color");
         artifactColorDetector = hw.get(NormalizedColorSensor.class, "color");
+        artifactColorDetector.setGain(10);
 
     }
 
     public boolean isArtifactLoaded() {
         if (artifactedIntakeDetector.getDistance(DistanceUnit.INCH) < 2) {
-            if (nothingDetected || artifactTime.seconds() > 1) {
+            if ((nothingDetected || artifactTime.seconds() > 0.5) && getDetectedColor() != detectedColor.NONE) {
                 artifactLoaded = true;
                 artifactTime.reset();
                 nothingDetected = false;
@@ -65,19 +69,21 @@ public class IntakeSensor {
         } else if (artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 2.5) nothingDetected= true;
         return nothingDetected;
     }
-    public detectedColor getDetectedColor(Telemetry telemetry) {
+    public detectedColor getDetectedColor() {
+        // Read raw sensor values
         NormalizedRGBA colors = artifactColorDetector.getNormalizedColors();
-        float normRed, normGreen, normBlue;
-        normRed = colors.red / colors.alpha;
-        normGreen = colors.green / colors.alpha;
-        normBlue = colors.blue / colors.alpha;
-        telemetry.addData("Green", artifactedIntakeDetector.green());
-        telemetry.addData("Blue", normBlue);
-        telemetry.addData("gain", ColorSensorCalibration.gain);
-        if(normGreen > 1 && normGreen < 1.25) {
-            return detectedColor.GREEN;
-        } else return detectedColor.PURPLE;
 
+// Convert to HSV and store in an array
+        float[] hsvValues = new float[3];
+        Color.colorToHSV(colors.toColor(), hsvValues);
+        float hue = hsvValues[0];
+        if(hue >= 200 && hue <= 240) {
+            return detectedColor.PURPLE;
+        }
+        if(hue >= 150 && hue <= 163) {
+            return detectedColor.GREEN;
+        }
+        return detectedColor.NONE;
     }
 
 }

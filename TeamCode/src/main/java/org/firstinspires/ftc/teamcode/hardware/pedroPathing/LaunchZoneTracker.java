@@ -12,7 +12,7 @@ public class LaunchZoneTracker {
             new PolygonZone(new Point(48, 0), new Point(72, 24), new Point(96, 0));
 
     private final PolygonZone robotToGoalZone = new PolygonZone(1, 1);
-    private final PolygonZone robotLaunchZone = new PolygonZone(17, 17.5);
+    public final PolygonZone robotLaunchZone = new PolygonZone(17, 17.5);
 
     public boolean robotInRange;
     public boolean farLaunch;
@@ -34,5 +34,26 @@ public class LaunchZoneTracker {
 
         farLaunch = robotLaunchZone.isInside(farLaunchArea);
     }
+    public Pose closestPoseToZone(PolygonZone zone, Pose... poses) {
+        if (poses == null || poses.length == 0) {
+            throw new IllegalArgumentException("At least one pose must be provided");
+        }
+
+        Pose closest = poses[0];
+        double closestDistance = zone.distanceTo(new Point(closest.getX(), closest.getY()));
+
+        for (int i = 1; i < poses.length; i++) {
+            Pose current = poses[i];
+            double currentDistance = zone.distanceTo(new Point(current.getX(), current.getY()));
+
+            if (currentDistance < closestDistance) {
+                closest = current;
+                closestDistance = currentDistance;
+            }
+        }
+
+        return closest;
+    }
+
 }
 

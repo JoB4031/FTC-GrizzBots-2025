@@ -7,6 +7,8 @@ Also added a process to hold positions during auto.
 
 package org.firstinspires.ftc.teamcode.theKeep;
 
+import com.bylazar.telemetry.PanelsTelemetry;
+import com.bylazar.telemetry.TelemetryManager;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.skeletonarmy.marrow.prompts.BooleanPrompt;
@@ -15,6 +17,7 @@ import com.skeletonarmy.marrow.prompts.Prompter;
 import com.skeletonarmy.marrow.prompts.ValuePrompt;
 
 import org.firstinspires.ftc.teamcode.hardware.centralHub.hardware;
+import org.firstinspires.ftc.teamcode.hardware.motors.FidgetTech;
 import org.firstinspires.ftc.teamcode.hardware.vision.Vision;
 
 @Autonomous(name="The Keep Auto",group="The Keep")
@@ -33,10 +36,13 @@ public class TheKeepAuto extends OpMode {
     public static int artifactsToCollect;
     public static boolean robotCentric;
     private int startDelay;
+    private boolean prompterDone = false;
 
+    private TelemetryManager telemetryM;
 
     @Override
     public void init() {
+        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
         prompter = new Prompter(this);
         robot =  new hardware();
         //Sets up the prompter - Jason
@@ -56,8 +62,9 @@ public class TheKeepAuto extends OpMode {
         robotCentric = prompter.get("robotCentric");
         startDelay = prompter.get("Start Delay");
         artifactsToCollect = prompter.get("artifactsToCollect");
-        robot.initHardware(hardwareMap, true);
+        robot.initHardware(hardwareMap, true, telemetryM);
         robot.startPosition(true);
+        prompterDone = true;
         telemetry.addData("Selected Alliance", alliance);
         telemetry.addData("Selected Start Location", startLocation);
         telemetry.addData("Selected Start Position", robot.pathFollower.getPosition());
@@ -69,10 +76,23 @@ public class TheKeepAuto extends OpMode {
     public void init_loop() {
         // Runs the prompter - Jason
         prompter.run();
+        if (prompterDone) {
+            telemetry.addData("Artifact 1", FidgetTech.artifactsLoaded[0]);
+            telemetry.addData("Artifact 2", FidgetTech.artifactsLoaded[1]);
+            telemetry.addData("Artifact 3", FidgetTech.artifactsLoaded[2]);
+            robot.update();
+            if(gamepad1.circle) {
+                robot.intake.on();
+            } else robot.intake.off();
+            if(robot.intake.isPowered()) {
+                robot.automaticPickup();
+            }
+        }
     } // A loop that runs from when the init button is pressed to when the start button is hit
 
     @Override
     public void start() {
+        Vision.pattern = null;
         telemetry.clear();
         robot.autoTime.reset();
         robot.timer.reset();
@@ -82,6 +102,9 @@ public class TheKeepAuto extends OpMode {
     @Override
     public void loop() {
         // Updates the hardware - Jason
+        if(Vision.pattern != null) {
+            robot.led.yellow();
+        } else robot.led.white();
         robot.update();
         autoPathing();
         // These lines grab the april tag data then write any tags data to the telemetry - Jason
@@ -94,6 +117,9 @@ public class TheKeepAuto extends OpMode {
         // These lines add the fidget tech's position and the bots position to the telemetry - Jason
         telemetry.addData("Fidget Tech Position", robot.fidgetTech.getSnapPoint());
         telemetry.addData("Bot Position", robot.pathFollower.getPosition());
+        telemetry.addData("Artifact One", FidgetTech.artifactsLoaded[0]);
+        telemetry.addData("Artifact Two", FidgetTech.artifactsLoaded[1]);
+        telemetry.addData("Artifact Three", FidgetTech.artifactsLoaded[2]);
         telemetry.update();
 
     }
@@ -114,6 +140,8 @@ public class TheKeepAuto extends OpMode {
             case 1:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
                 if (!robot.pathingIsBusy()) {
+                    robot.intake.off();
+                    robot.fidgetTech.setSnapPoint(robot.spinPattern[0]);
                     robot.doNotSpin = false;
                     robot.shootAllBalls(true);
                     robot.pathBuilder.setPathState(artifactsToCollect == 0 ? 8 : 2);
@@ -122,33 +150,36 @@ public class TheKeepAuto extends OpMode {
             case 2:
                 if (!robot.pathingIsBusy()) {
                     robot.flywheel.off();
-                    robot.intake.on();
-                    robot.fidgetTech.setSnapPoint(12);
                     robot.update();
-                    robot.pathFollower.follower.followPath(robot.pathBuilder.grabFirstArtifacts(), 0.5, true);
+                    robot.pathFollower.follower.followPath(robot.pathBuilder.grabFirstArtifacts(), true);
                     robot.pathBuilder.setPathState(3);
                 }
                 break;
             case 3:
-
+                robot.intake.on();
                 robot.automaticPickup();
                 if (!robot.pathingIsBusy()) {
-                    robot.timer.reset();
-                    while (robot.timer.seconds() < 2) {
-                        robot.update();
-                        robot.automaticPickup();
-                    }
-                    robot.intake.setPower(0, -1);
-                    robot.doNotSpin = true;
                     robot.setFlywheelToShootDistance();
                     robot.followPath(robot.pathBuilder.scoreFirstArtifacts());
-                    robot.intake.setPower(-1,-1);
                     robot.pathBuilder.setPathState(4);
                 }
                 break;
             case 4:
+                robot.automaticPickup();
                 if (!robot.pathingIsBusy()) {
+                    robot.timer.reset();
+                    while(!robot.fidgetTechIsFull() || robot.timer.seconds() < 2) {
+                        robot.automaticPickup();
+                        robot.update();
+                    }
+                    robot.intake.off();
                     robot.doNotSpin = false;
+                    robot.fidgetTech.setSnapPoint(robot.spinPattern[0]);
+                    robot.timer.reset();
+                    while(robot.timer.seconds() < 1) {
+                        robot.setFlywheelToShootDistance();
+                        robot.update();
+                    }
                     robot.shootAllBalls(true);
                     robot.pathBuilder.setPathState(artifactsToCollect == 1 ? 8 : 5);
                 }
@@ -156,32 +187,36 @@ public class TheKeepAuto extends OpMode {
             case 5:
                 if (!robot.pathingIsBusy()) {
                     robot.flywheel.off();
-                    robot.intake.on();
-                    robot.fidgetTech.setSnapPoint(12);
                     robot.update();
-                    robot.pathFollower.follower.followPath(robot.pathBuilder.grabSecondArtifacts(), 0.5, true);
+                    robot.pathFollower.follower.followPath(robot.pathBuilder.grabSecondArtifacts(), true);
                     robot.pathBuilder.setPathState(6);
                 }
                 break;
             case 6:
-
+                robot.intake.on();
                 robot.automaticPickup();
                 if (!robot.pathingIsBusy()) {
-                    robot.timer.reset();
-                    while (robot.timer.seconds() < 2) {
-                        robot.update();
-                        robot.automaticPickup();
-                    }
-                    robot.doNotSpin = true;
                     robot.setFlywheelToShootDistance();
                     robot.followPath(robot.pathBuilder.scoreSecondArtifacts());
-                    robot.intake.setPower(-1,-1);
                     robot.pathBuilder.setPathState(7);
                 }
                 break;
             case 7:
+                robot.automaticPickup();
                 if (!robot.pathingIsBusy()) {
+                    robot.timer.reset();
+                    while(!robot.fidgetTechIsFull() || robot.timer.seconds() < 2) {
+                        robot.automaticPickup();
+                        robot.update();
+                    }
+                    robot.intake.off();
                     robot.doNotSpin = false;
+                    robot.fidgetTech.setSnapPoint(robot.spinPattern[0]);
+                    robot.timer.reset();
+                    while(robot.timer.seconds() < 1) {
+                        robot.setFlywheelToShootDistance();
+                        robot.update();
+                    }
                     robot.shootAllBalls(true);
                     robot.pathBuilder.setPathState(8);
                 }

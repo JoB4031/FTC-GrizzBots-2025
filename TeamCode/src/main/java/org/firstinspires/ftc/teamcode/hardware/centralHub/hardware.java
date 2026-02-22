@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.hardware.centralHub;
 
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.teamcode.hardware.pedroPathing.PathBuilder;
 import org.firstinspires.ftc.teamcode.hardware.pedroPathing.PathFollower;
 import org.firstinspires.ftc.teamcode.hardware.pedroPathing.PoseLibrary;
 import org.firstinspires.ftc.teamcode.hardware.sensors.IntakeSensor;
+import org.firstinspires.ftc.teamcode.hardware.sensors.LED;
 import org.firstinspires.ftc.teamcode.hardware.vision.Vision;
 
 public class hardware {
@@ -26,6 +28,7 @@ public class hardware {
 
     // Sensor Wrappers
     public IntakeSensor intakeSensor;
+    public LED led;
 
     // Pedro Pathing Wrappers
     public PathFollower pathFollower;
@@ -45,9 +48,12 @@ public class hardware {
     private boolean stopRequested = false;
     public final ElapsedTime fidgetTime = new ElapsedTime();
     public int[] spinPattern = {0,0,0};
+    private int intakeState = 0;
+
+    private TelemetryManager telemetryM;
 
 
-    public void initHardware(HardwareMap hw, boolean auto) {
+    public void initHardware(HardwareMap hw, boolean auto , TelemetryManager telemetryManager) {
         // Sets up how long the program should run for before turning off
         if (auto) {
             runTime = 30;
@@ -69,6 +75,9 @@ public class hardware {
         intakeSensor = new IntakeSensor();
         intakeSensor.initIntakeSensor(hw);
 
+        led = new LED();
+        led.initLED(hw);
+
         // Initializes the pedro pathing positions based on alliance and start position
         poseLib = new PoseLibrary();
         poseLib.configureAlliancePaths();
@@ -77,7 +86,7 @@ public class hardware {
         }
         // Initializes the pedro pathing follower
         pathFollower = new PathFollower();
-        pathFollower.init(hw, poseLib);
+        pathFollower.init(hw, poseLib, launchZoneTracker);
         // Initializes the launch zone tracker
         launchZoneTracker = new LaunchZoneTracker();
         // Initializes the path builder
@@ -88,6 +97,8 @@ public class hardware {
         // Initializes the vision
         vision = new Vision();
         vision.initVision(hw);
+
+        telemetryM = telemetryManager;
     }
 
     public void update() {
@@ -99,27 +110,27 @@ public class hardware {
             launchZoneTracker.update(pathFollower.getPosition(), poseLib.targetPoint);
             vision.update();
             sortAllBalls();
-        } else {
-            stopRequested = true;
-            flywheel.off();
-            flywheel.update();
-            intake.off();
+            telemetryM.addData("Flywheel RPM", flywheel.getRPM());
+            telemetryM.addData("Ejector Position", ejector.getPosition());
+            telemetryM.addData("Launch Distance", launchZoneTracker.shootDistance);
+            telemetryM.update();
         }
     }
     public void automaticPickup() {
+        doNotSpin = true;
         if (intakeSensor.isArtifactLoaded()) {
-        // Checks to see if a ball is loaded and the intake is on if so it loads the ball into the sorter
+            // Checks to see if a ball is loaded and the intake is on if so it loads the ball into the sorter
             update();
             if (fidgetTech.getSnapPoint() == 12 ) {
-                FidgetTech.artifactsLoaded[0] = IntakeSensor.detectedColor.UNKNOWN;
+                FidgetTech.artifactsLoaded[0] = intakeSensor.getDetectedColor();
                 fidgetTech.next();
                 update();
             } else if(fidgetTech.getSnapPoint() == 14) {
-                FidgetTech.artifactsLoaded[1] = IntakeSensor.detectedColor.UNKNOWN;
+                FidgetTech.artifactsLoaded[1] = intakeSensor.getDetectedColor();
                 fidgetTech.next();
                 update();
             } else if(fidgetTech.getSnapPoint() == 16) {
-                FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.UNKNOWN;
+                FidgetTech.artifactsLoaded[2] = intakeSensor.getDetectedColor();
                 fidgetTech.setSnapPoint(12);
                 update();
             } else {
@@ -128,54 +139,12 @@ public class hardware {
             }
             fidgetTime.reset();
         }
-        // Checks to see if a ball is in the sorter's intake if it is it spins the intake backward to prevent jamming
+
         if (!intakeSensor.isNothingDetected()) {
             intake.setPower(1,-0.1);
         } else intake.setPower(1,1);
     }
-    public void shootColorArtifact(IntakeSensor.detectedColor color) {
-        double snapPoint = 0;
-        if(color == IntakeSensor.detectedColor.PURPLE) {
-            if(FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) {
-                snapPoint = 11;
-            } else if(FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) {
-                snapPoint = 13;
-            } else if(FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE) {
-                snapPoint = 15;
-            }
-        }
-        if(color == IntakeSensor.detectedColor.GREEN) {
-            if(FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.GREEN) {
-                snapPoint = 11;
-            } else if(FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.GREEN) {
-                snapPoint = 13;
-            } else if(FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.GREEN) {
-                snapPoint = 15;
-            }
-        }
-        if(snapPoint != 0) {
-            setFlywheelToShootDistance();
-            timer.reset();
-            while (timer.seconds() < 0.5) {
-                update();
-                if (stopRequested) break;
-            }
-            setFlywheelToShootDistance();
-            timer.reset();
-            while (!flywheel.isAtSpeed()) {
-                update();
-                if (stopRequested) break;
-            }
-            ejector.fire();
-            timer.reset();
-            while (timer.seconds() < 0.4) {
-                update();
-                if (stopRequested) break;
-            }
-            ejector.reset();
-        }
 
-    }
     public void sortAllBalls() {
         if (Vision.pattern == Vision.BallPattern.PPG) {
             if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.GREEN)) {
@@ -197,17 +166,17 @@ public class hardware {
             }
         } else if (Vision.pattern == Vision.BallPattern.PGP) {
             if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.GREEN)) {
-                spinPattern[0] = 13;
-                spinPattern[1] = 15;
-                spinPattern[2] = 17;
-            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
                 spinPattern[0] = 11;
                 spinPattern[1] = 13;
                 spinPattern[2] = 15;
-            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
+            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
                 spinPattern[0] = 9;
                 spinPattern[1] = 11;
                 spinPattern[2] = 13;
+            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
+                spinPattern[0] = 13;
+                spinPattern[1] = 15;
+                spinPattern[2] = 17;
             } else {
                 spinPattern[0] = 11;
                 spinPattern[1] = 13;
@@ -215,17 +184,17 @@ public class hardware {
             }
         } else if (Vision.pattern == Vision.BallPattern.GPP) {
             if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.GREEN)) {
-                spinPattern[0] = 9;
-                spinPattern[1] = 11;
-                spinPattern[2] = 13;
-            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
                 spinPattern[0] = 13;
                 spinPattern[1] = 15;
                 spinPattern[2] = 17;
-            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
+            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
                 spinPattern[0] = 11;
                 spinPattern[1] = 13;
                 spinPattern[2] = 15;
+            } else if ((FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.GREEN) && (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) && (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE)) {
+                spinPattern[0] = 9;
+                spinPattern[1] = 11;
+                spinPattern[2] = 13;
             } else {
                 spinPattern[0] = 11;
                 spinPattern[1] = 13;
@@ -237,11 +206,90 @@ public class hardware {
             spinPattern[2] = 15;
         }
     }
+    public void shootColorArtifact(IntakeSensor.detectedColor color){
+        int ballFired = 0;
+        if(color == IntakeSensor.detectedColor.PURPLE) {
+            if (FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.PURPLE) {
+                fidgetTech.setSnapPoint(9);
+            } else if (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.PURPLE) {
+                fidgetTech.setSnapPoint(11);
+                ballFired = 1;
+            } else if (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.PURPLE) {
+                fidgetTech.setSnapPoint(13);
+                ballFired = 2;
+
+            } else {
+                fidgetTech.setSnapPoint(11);
+                ballFired = 1;
+            }
+        } else {
+            if(FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.GREEN) {
+                fidgetTech.setSnapPoint(9);
+            } else if(FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.GREEN) {
+                fidgetTech.setSnapPoint(11);
+                ballFired = 1;
+            } else if(FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.GREEN) {
+                fidgetTech.setSnapPoint(13);
+                ballFired = 2;
+            } else {
+                fidgetTech.setSnapPoint(11);
+                ballFired = 1;
+            }
+        }
+        FidgetTech.artifactsLoaded[ballFired] = IntakeSensor.detectedColor.NONE;
+
+    }
     public void shootAllBalls(boolean sort) {
         if (sort) {
             // Runs a chain of commands that shoots all the balls in the Fidget Tech
             intake.off();
             fidgetTech.setSnapPoint(spinPattern[0]);
+            setFlywheelToShootDistance();
+            timer.reset();
+            while (timer.seconds() < 0.5) {
+                setFlywheelToShootDistance();
+                update();
+                if (stopRequested) break;
+            }
+            for (int i = 0; i < 3; i++) {
+                if (stopRequested) break;
+                setFlywheelToShootDistance();
+                timer.reset();
+                flywheel.flywheelStable.reset();
+                while (!flywheel.isAtSpeed()) {
+                    update();
+                    if (timer.seconds() > 3) {
+                        break;
+                    }
+                    if (stopRequested) break;
+                }
+                ejector.fire();
+                timer.reset();
+                while (timer.seconds() < 0.4) {
+                    setFlywheelToShootDistance();
+                    update();
+                    if (stopRequested) break;
+                }
+                ejector.reset();
+                if(i != 2) {
+                    fidgetTech.setSnapPoint(spinPattern[i + 1]);
+                }
+                timer.reset();
+                while (timer.seconds() < 0.4) {
+                    setFlywheelToShootDistance();
+                    update();
+                    if (stopRequested) break;
+                }
+            }
+            flywheel.off();
+            FidgetTech.artifactsLoaded[0] = IntakeSensor.detectedColor.NONE;
+            FidgetTech.artifactsLoaded[1] = IntakeSensor.detectedColor.NONE;
+            FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.NONE;
+            fidgetTech.setSnapPoint(12);
+        } else {
+            // Runs a chain of commands that shoots all the balls in the Fidget Tech
+            intake.off();
+            fidgetTech.setSnapPoint(11);
             setFlywheelToShootDistance();
             timer.reset();
             while (timer.seconds() < 0.5) {
@@ -252,8 +300,12 @@ public class hardware {
                 if (stopRequested) break;
                 setFlywheelToShootDistance();
                 timer.reset();
+                flywheel.flywheelStable.reset();
                 while (!flywheel.isAtSpeed()) {
                     update();
+                    if (timer.seconds() > 3) {
+                        break;
+                    }
                     if (stopRequested) break;
                 }
                 ejector.fire();
@@ -263,9 +315,7 @@ public class hardware {
                     if (stopRequested) break;
                 }
                 ejector.reset();
-                if(i != 2) {
-                    fidgetTech.setSnapPoint(spinPattern[i + 1]);
-                }
+                fidgetTech.next();
                 timer.reset();
                 while (timer.seconds() < 0.4) {
                     update();
@@ -299,13 +349,19 @@ public class hardware {
         autonomousPath.autonomousPathUpdate(this);
     }
     public void setFlywheelToShootDistance() {
-        // Sets the flywheel to the desired speed based on the distance to the goal
-        if (launchZoneTracker.shootDistance < 1.9) {
-            flywheel.setFlywheelFireDistance(launchZoneTracker.shootDistance);
-        } else if (launchZoneTracker.shootDistance > 2.7) {
-            flywheel.controller.setSetPoint(flywheel.RPMToVelocity(5500));
-        } else if (launchZoneTracker.shootDistance < 2.7) {
-            flywheel.controller.setSetPoint(flywheel.RPMToVelocity(5000));
+        if(launchZoneTracker.farLaunch) {
+
+        } else {
+            flywheel.setFlywheelNearFire(launchZoneTracker.shootDistance);
         }
+    }
+    public void getClosestShoot() {
+
+    }
+    public boolean fidgetTechIsFull() {
+        return (FidgetTech.artifactsLoaded[0] != IntakeSensor.detectedColor.NONE) && (FidgetTech.artifactsLoaded[1] != IntakeSensor.detectedColor.NONE) && (FidgetTech.artifactsLoaded[2] != IntakeSensor.detectedColor.NONE);
+    }
+    public double getFidgetWaitTime(double toSnapTime) {
+        return ((Math.abs(toSnapTime - fidgetTech.getSnapPoint()))*0.4);
     }
 }
