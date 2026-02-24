@@ -36,16 +36,6 @@ public class PathFollower {
                 .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
                 .build();
 
-        moveToFarLaunch = () -> follower.pathBuilder()
-                .addPath(new BezierLine(follower.getPose(), poses.farLaunchPose))
-                .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
-                .build();
-
-        moveToNearLaunch = () -> follower.pathBuilder()
-                .addPath(new BezierLine(follower.getPose(), poses.nearLaunchPose))
-                .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
-                .build();
-
         returnToBase = () -> follower.pathBuilder()
                 .addPath(new BezierLine(follower::getPose, poses.baseZone))
                 .setLinearHeadingInterpolation(follower.getHeading(), poses.baseZone.getHeading())

@@ -22,7 +22,7 @@ public class PathBuilder {
     public PathChain scoreArtifact() {
         return follower.pathBuilder()
                 .addPath(new BezierLine(PoseLibrary.startPose, poses.launchPose))
-                .setLinearHeadingInterpolation(PoseLibrary.startPose.getHeading(), Math.toRadians(90))
+                .setLinearHeadingInterpolation(PoseLibrary.startPose.getHeading(), Math.toRadians(70))
                 .addPath(new BezierLine(follower.getPose(), poses.launchPose))
                 .setHeadingInterpolation(HeadingInterpolator.facingPoint(PoseLibrary.allianceGoalPose))
                 .build();

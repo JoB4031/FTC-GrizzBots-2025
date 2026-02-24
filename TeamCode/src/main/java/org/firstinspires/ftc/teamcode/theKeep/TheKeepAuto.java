@@ -97,6 +97,7 @@ public class TheKeepAuto extends OpMode {
         robot.autoTime.reset();
         robot.timer.reset();
         while (robot.timer.seconds() < startDelay) robot.update();
+        robot.fidgetTech.setSnapPoint(robot.spinPattern[0]);
     }
 
     @Override
@@ -151,7 +152,7 @@ public class TheKeepAuto extends OpMode {
                 if (!robot.pathingIsBusy()) {
                     robot.flywheel.off();
                     robot.update();
-                    robot.pathFollower.follower.followPath(robot.pathBuilder.grabFirstArtifacts(), true);
+                    robot.pathFollower.follower.followPath(robot.pathBuilder.grabFirstArtifacts(), 0.75, true);
                     robot.pathBuilder.setPathState(3);
                 }
                 break;
@@ -168,7 +169,7 @@ public class TheKeepAuto extends OpMode {
                 robot.automaticPickup();
                 if (!robot.pathingIsBusy()) {
                     robot.timer.reset();
-                    while(!robot.fidgetTechIsFull() || robot.timer.seconds() < 2) {
+                    while(!robot.fidgetTechIsFull()) {
                         robot.automaticPickup();
                         robot.update();
                     }
@@ -188,7 +189,7 @@ public class TheKeepAuto extends OpMode {
                 if (!robot.pathingIsBusy()) {
                     robot.flywheel.off();
                     robot.update();
-                    robot.pathFollower.follower.followPath(robot.pathBuilder.grabSecondArtifacts(), true);
+                    robot.pathFollower.follower.followPath(robot.pathBuilder.grabSecondArtifacts(), 0.75,true);
                     robot.pathBuilder.setPathState(6);
                 }
                 break;
@@ -205,7 +206,7 @@ public class TheKeepAuto extends OpMode {
                 robot.automaticPickup();
                 if (!robot.pathingIsBusy()) {
                     robot.timer.reset();
-                    while(!robot.fidgetTechIsFull() || robot.timer.seconds() < 2) {
+                    while(!robot.fidgetTechIsFull()) {
                         robot.automaticPickup();
                         robot.update();
                     }

@@ -5,6 +5,7 @@ import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.hardware.motors.Ejector;
 import org.firstinspires.ftc.teamcode.hardware.motors.FidgetTech;
 import org.firstinspires.ftc.teamcode.hardware.motors.Flywheel;
@@ -20,6 +21,9 @@ import org.firstinspires.ftc.teamcode.hardware.vision.Vision;
 public class hardware {
     private double runTime;
     public final ElapsedTime autoTime = new ElapsedTime();
+    private final ElapsedTime fidgetReady = new ElapsedTime();
+    public boolean resetFidgetReady = true;
+    private boolean spinReady = false;
     // Motor Wrappers
     public Flywheel flywheel;
     public Intake intake;
@@ -46,9 +50,7 @@ public class hardware {
     public boolean automatedDrive = false;
     public boolean doNotSpin = false;
     private boolean stopRequested = false;
-    public final ElapsedTime fidgetTime = new ElapsedTime();
     public int[] spinPattern = {0,0,0};
-    private int intakeState = 0;
 
     private TelemetryManager telemetryM;
 
@@ -116,7 +118,7 @@ public class hardware {
             telemetryM.update();
         }
     }
-    public void automaticPickup() {
+    public void automaticPickup2() {
         doNotSpin = true;
         if (intakeSensor.isArtifactLoaded()) {
             // Checks to see if a ball is loaded and the intake is on if so it loads the ball into the sorter
@@ -137,11 +139,56 @@ public class hardware {
                 fidgetTech.setSnapPoint(12);
                 update();
             }
-            fidgetTime.reset();
         }
+
 
         if (!intakeSensor.isNothingDetected()) {
             intake.setPower(1,-0.1);
+        } else intake.setPower(1,1);
+    }
+
+    public void automaticPickup() {
+        doNotSpin = true;
+        if(resetFidgetReady) {
+            fidgetReady.reset();
+            resetFidgetReady = false;
+            spinReady = false;
+        }
+        if(fidgetTechIsFull()) {
+            update();
+            resetFidgetReady = true;
+        } else if(FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.NONE) {
+            fidgetTech.setSnapPoint(12);
+            if(intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 2.5 || fidgetReady.seconds() > 1) {
+                spinReady = true;
+            }
+            if (spinReady && ((intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) < 2) && intakeSensor.getDetectedColor() != IntakeSensor.detectedColor.NONE)) {
+                FidgetTech.artifactsLoaded[0] = intakeSensor.getDetectedColor();
+                resetFidgetReady = true;
+            }
+        } else if(FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.NONE) {
+            fidgetTech.setSnapPoint(14);
+            if(intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 2.5 || fidgetReady.seconds() > 1) {
+                spinReady = true;
+            }
+            if (spinReady && ((intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) < 2) && intakeSensor.getDetectedColor() != IntakeSensor.detectedColor.NONE)) {
+                FidgetTech.artifactsLoaded[1] = intakeSensor.getDetectedColor();
+                resetFidgetReady = true;
+            }
+        } else if(FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.NONE) {
+            fidgetTech.setSnapPoint(16);
+            if(intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 2.5 || fidgetReady.seconds() > 1) {
+                spinReady = true;
+            }
+            if (spinReady && ((intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) < 2) && intakeSensor.getDetectedColor() != IntakeSensor.detectedColor.NONE)) {
+                FidgetTech.artifactsLoaded[2] = intakeSensor.getDetectedColor();
+                resetFidgetReady = true;
+            }
+        }
+        if (!intakeSensor.isNothingDetected()) {
+            if(fidgetTechIsFull()) {
+                intake.off();
+            } else intake.setPower(1,-0.1);
         } else intake.setPower(1,1);
     }
 
@@ -245,12 +292,6 @@ public class hardware {
             intake.off();
             fidgetTech.setSnapPoint(spinPattern[0]);
             setFlywheelToShootDistance();
-            timer.reset();
-            while (timer.seconds() < 0.5) {
-                setFlywheelToShootDistance();
-                update();
-                if (stopRequested) break;
-            }
             for (int i = 0; i < 3; i++) {
                 if (stopRequested) break;
                 setFlywheelToShootDistance();
@@ -265,7 +306,7 @@ public class hardware {
                 }
                 ejector.fire();
                 timer.reset();
-                while (timer.seconds() < 0.4) {
+                while (timer.seconds() < 0.2) {
                     setFlywheelToShootDistance();
                     update();
                     if (stopRequested) break;
@@ -349,19 +390,13 @@ public class hardware {
         autonomousPath.autonomousPathUpdate(this);
     }
     public void setFlywheelToShootDistance() {
-        if(launchZoneTracker.farLaunch) {
-
+        if(launchZoneTracker.shootDistance > 2.6) {
+            flywheel.setFlywheelFarFire(launchZoneTracker.shootDistance);
         } else {
             flywheel.setFlywheelNearFire(launchZoneTracker.shootDistance);
         }
     }
-    public void getClosestShoot() {
-
-    }
     public boolean fidgetTechIsFull() {
         return (FidgetTech.artifactsLoaded[0] != IntakeSensor.detectedColor.NONE) && (FidgetTech.artifactsLoaded[1] != IntakeSensor.detectedColor.NONE) && (FidgetTech.artifactsLoaded[2] != IntakeSensor.detectedColor.NONE);
-    }
-    public double getFidgetWaitTime(double toSnapTime) {
-        return ((Math.abs(toSnapTime - fidgetTech.getSnapPoint()))*0.4);
     }
 }

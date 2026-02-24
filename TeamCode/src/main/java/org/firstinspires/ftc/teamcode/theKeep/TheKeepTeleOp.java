@@ -181,13 +181,15 @@ public class TheKeepTeleOp extends OpMode {
 
         // This if statement turns the intake on when the circle is pressed and off when the square is pressed - Jason
         if (gamepad1.circleWasPressed()) {
-            if (robot.fidgetTechIsFull()) {
-                FidgetTech.artifactsLoaded[0] = IntakeSensor.detectedColor.NONE;
-                FidgetTech.artifactsLoaded[1] = IntakeSensor.detectedColor.NONE;
-                FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.NONE;
-            }
+
             if (!robot.intake.isPowered()) {
                 robot.intake.on();
+                robot.resetFidgetReady = true;
+                if (robot.fidgetTechIsFull()) {
+                    FidgetTech.artifactsLoaded[0] = IntakeSensor.detectedColor.NONE;
+                    FidgetTech.artifactsLoaded[1] = IntakeSensor.detectedColor.NONE;
+                    FidgetTech.artifactsLoaded[2] = IntakeSensor.detectedColor.NONE;
+                }
             } else robot.intake.off();
         }
 

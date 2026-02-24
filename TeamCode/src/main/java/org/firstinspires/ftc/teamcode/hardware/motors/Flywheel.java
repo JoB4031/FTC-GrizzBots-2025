@@ -12,22 +12,11 @@ public class Flywheel {
     public DcMotorEx leftFlywheel, rightFlywheel;
     public PIDFController controller;
 
+    public static double shotMultiplier = 6;
     public static double kP = 0.006;
     public static double kI = 0.0;
     public static double kD = 0.0;
     public static double kF = 0.0004;
-    public static double oneMeterPower = 3500;
-    public static double onePointTwoMeterPower = 3750;
-    public static double onePointFourMeterPower = 4000;
-    public static double onePointSixMeterPower = 4250;
-    public static double onePointEightMeterPower = 4500;
-    public static double twoMeterPower = 4750;
-    public static double twoPointTwoMeterPower = 3500;
-    public static double twoPointFourMeterPower = 3750;
-    public static double twoPointSixMeterPower = 4000;
-    public static double twoPointEightMeterPower = 4250;
-    public static double threeMeterPower = 4500;
-
     public final ElapsedTime flywheelStable = new ElapsedTime();
 
     public void initFlywheel(HardwareMap hw) {
@@ -45,7 +34,13 @@ public class Flywheel {
     }
 
     public void setFlywheelNearFire(double distance) {
-        controller.setSetPoint(RPMToVelocity(6.1 * Math.sqrt(398210 * distance)
+        controller.setSetPoint(RPMToVelocity(shotMultiplier * Math.sqrt(398210 * distance)
+                - 900 * Math.sqrt(distance) + (-667*distance)
+                + (Math.ceil(distance / 5) * (1433))));
+        if (controller.getSetPoint() > 2460) controller.setSetPoint(2460);
+    }
+    public void setFlywheelFarFire(double distance) {
+        controller.setSetPoint(RPMToVelocity((shotMultiplier+0.4) * Math.sqrt(398210 * distance)
                 - 900 * Math.sqrt(distance) + (-667*distance)
                 + (Math.ceil(distance / 5) * (1433))));
         if (controller.getSetPoint() > 2460) controller.setSetPoint(2460);
@@ -81,8 +76,8 @@ public class Flywheel {
         return rightFlywheel.getPower() > 0;
     }
     public boolean isAtSpeed() {
-        if (Math.abs(controller.getSetPoint() - rightFlywheel.getVelocity()) < 60) {
-            if (flywheelStable.seconds() > 0.25) {
+        if (Math.abs(controller.getSetPoint() - rightFlywheel.getVelocity()) < 50) {
+            if (flywheelStable.seconds() > 0.5) {
                 return true;
             }
         } else {
