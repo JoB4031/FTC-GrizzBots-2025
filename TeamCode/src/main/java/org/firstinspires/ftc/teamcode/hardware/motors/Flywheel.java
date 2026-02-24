@@ -12,7 +12,7 @@ public class Flywheel {
     public DcMotorEx leftFlywheel, rightFlywheel;
     public PIDFController controller;
 
-    public static double shotMultiplier = 6;
+    public static double shotMultiplier = 5.8;
     public static double kP = 0.006;
     public static double kI = 0.0;
     public static double kD = 0.0;
@@ -40,7 +40,7 @@ public class Flywheel {
         if (controller.getSetPoint() > 2460) controller.setSetPoint(2460);
     }
     public void setFlywheelFarFire(double distance) {
-        controller.setSetPoint(RPMToVelocity((shotMultiplier+0.4) * Math.sqrt(398210 * distance)
+        controller.setSetPoint(RPMToVelocity((shotMultiplier+0.5) * Math.sqrt(398210 * distance)
                 - 900 * Math.sqrt(distance) + (-667*distance)
                 + (Math.ceil(distance / 5) * (1433))));
         if (controller.getSetPoint() > 2460) controller.setSetPoint(2460);

@@ -19,12 +19,16 @@ public class PathBuilder {
     public void setPathState(int state) {
         pathState = state;
     }
-    public PathChain scoreArtifact() {
+    public PathChain getAprilTag() {
         return follower.pathBuilder()
                 .addPath(new BezierLine(PoseLibrary.startPose, poses.launchPose))
                 .setLinearHeadingInterpolation(PoseLibrary.startPose.getHeading(), Math.toRadians(70))
+                .build();
+    }
+    public PathChain scoreArtifact() {
+        return follower.pathBuilder()
                 .addPath(new BezierLine(follower.getPose(), poses.launchPose))
-                .setHeadingInterpolation(HeadingInterpolator.facingPoint(PoseLibrary.allianceGoalPose))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
                 .build();
     }
 
@@ -38,7 +42,7 @@ public class PathBuilder {
     public PathChain scoreFirstArtifacts() {
         return follower.pathBuilder()
                 .addPath(new BezierLine(poses.firstArtifacts, poses.launchPose))
-                .setHeadingInterpolation(HeadingInterpolator.facingPoint(PoseLibrary.allianceGoalPose))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
                 .build();
     }
 
@@ -54,7 +58,7 @@ public class PathBuilder {
                 .addPath(new BezierLine(poses.secondArtifacts, poses.secondArtifactsShootStep1))
                 .setConstantHeadingInterpolation(poses.secondArtifacts.getHeading())
                 .addPath(new BezierLine(poses.secondArtifactsShootStep1,poses.nearLaunchPose))
-                .setHeadingInterpolation(HeadingInterpolator.facingPoint(PoseLibrary.allianceGoalPose))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
                 .build();
     }
 

@@ -37,6 +37,7 @@ public class TheKeepAuto extends OpMode {
     public static boolean robotCentric;
     private int startDelay;
     private boolean prompterDone = false;
+    private boolean visionMove = false;
 
     private TelemetryManager telemetryM;
 
@@ -134,9 +135,15 @@ public class TheKeepAuto extends OpMode {
         switch (robot.pathBuilder.pathState) {
             case 0:
                 robot.doNotSpin = true;
-                robot.followPath(robot.pathBuilder.scoreArtifact());
+                if(!visionMove) {
+                    robot.followPath(robot.pathBuilder.getAprilTag());
+                    visionMove = true;
+                }
                 robot.setFlywheelToShootDistance();
-                robot.pathBuilder.setPathState(1);
+                if(Vision.pattern != null) {
+                    robot.followPath(robot.pathBuilder.scoreArtifact());
+                    robot.pathBuilder.setPathState(1);
+                }
                 break;
             case 1:
                 /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
@@ -169,20 +176,21 @@ public class TheKeepAuto extends OpMode {
                 robot.automaticPickup();
                 if (!robot.pathingIsBusy()) {
                     robot.timer.reset();
-                    while(!robot.fidgetTechIsFull()) {
+                    if(!robot.fidgetTechIsFull()) {
                         robot.automaticPickup();
                         robot.update();
+                    } else {
+                        robot.intake.off();
+                        robot.doNotSpin = false;
+                        robot.fidgetTech.setSnapPoint(robot.spinPattern[0]);
+                        robot.timer.reset();
+                        while (robot.timer.seconds() < 1) {
+                            robot.setFlywheelToShootDistance();
+                            robot.update();
+                        }
+                        robot.shootAllBalls(true);
+                        robot.pathBuilder.setPathState(artifactsToCollect == 1 ? 8 : 5);
                     }
-                    robot.intake.off();
-                    robot.doNotSpin = false;
-                    robot.fidgetTech.setSnapPoint(robot.spinPattern[0]);
-                    robot.timer.reset();
-                    while(robot.timer.seconds() < 1) {
-                        robot.setFlywheelToShootDistance();
-                        robot.update();
-                    }
-                    robot.shootAllBalls(true);
-                    robot.pathBuilder.setPathState(artifactsToCollect == 1 ? 8 : 5);
                 }
                 break;
             case 5:
@@ -206,20 +214,22 @@ public class TheKeepAuto extends OpMode {
                 robot.automaticPickup();
                 if (!robot.pathingIsBusy()) {
                     robot.timer.reset();
-                    while(!robot.fidgetTechIsFull()) {
+                    if(!robot.fidgetTechIsFull()) {
                         robot.automaticPickup();
                         robot.update();
                     }
-                    robot.intake.off();
-                    robot.doNotSpin = false;
-                    robot.fidgetTech.setSnapPoint(robot.spinPattern[0]);
-                    robot.timer.reset();
-                    while(robot.timer.seconds() < 1) {
-                        robot.setFlywheelToShootDistance();
-                        robot.update();
+                    {
+                        robot.intake.off();
+                        robot.doNotSpin = false;
+                        robot.fidgetTech.setSnapPoint(robot.spinPattern[0]);
+                        robot.timer.reset();
+                        while (robot.timer.seconds() < 1) {
+                            robot.setFlywheelToShootDistance();
+                            robot.update();
+                        }
+                        robot.shootAllBalls(true);
+                        robot.pathBuilder.setPathState(8);
                     }
-                    robot.shootAllBalls(true);
-                    robot.pathBuilder.setPathState(8);
                 }
                 break;
             case 8:

@@ -9,10 +9,10 @@ public class PoseLibrary {
 
     public static Pose startPose;
     public static Pose trueStart;
-    public static Pose allianceGoalPose = new Pose(10, 140);
+    public Pose allianceGoalPose = new Pose(10, 140);
     public Pose baseZone = new Pose(100.2, 31.9, Math.toRadians(88));
 
-    public Pose alliance1 = new Pose(63, 9, Math.toRadians(90));
+    public Pose alliance1 = new Pose(65.4, 9, Math.toRadians(90));
     public Pose alliance2 = new Pose(44.8, 140.8, Math.toRadians(180));
 
     public Pose nearLaunchPose = new Pose(57, 91.5, Math.toRadians(135));
@@ -20,15 +20,15 @@ public class PoseLibrary {
     public Pose notLaunchZone = new Pose(30, 120, Math.toRadians(-135));
 
     public Pose topArtifacts = new Pose(32, 91.5, Math.toRadians(180));
-    public Pose middleArtifacts = new Pose(20, 67, Math.toRadians(180));
-    public Pose bottomArtifacts = new Pose(20, 40, Math.toRadians(180));
+    public Pose middleArtifacts = new Pose(22, 67, Math.toRadians(180));
+    public Pose bottomArtifacts = new Pose(22, 45, Math.toRadians(180));
 
     public Pose launchPose;
     public Pose firstArtifacts;
-    public Pose firstArtifactControlPoint = new Pose(76.5,35);
+    public Pose firstArtifactControlPoint = new Pose(76.5,45);
     public Pose secondArtifacts;
     public Pose secondArtifactControlPoint = new Pose(76.5, 67);
-    public Pose secondArtifactsShootStep1 = new Pose(65,67);
+    public Pose secondArtifactsShootStep1 = new Pose(60,67);
     public Pose thirdArtifacts;
 
     public Point targetPoint = new Point(16, 131);
