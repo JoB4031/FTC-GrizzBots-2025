@@ -14,6 +14,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.centralHub.hardware;
 import org.firstinspires.ftc.teamcode.hardware.motors.FidgetTech;
+import org.firstinspires.ftc.teamcode.hardware.motors.Flywheel;
 import org.firstinspires.ftc.teamcode.hardware.sensors.IntakeSensor;
 import org.firstinspires.ftc.teamcode.hardware.vision.Vision;
 
@@ -22,7 +23,6 @@ public class TheKeepTeleOp extends OpMode {
 
     // creates new variables to store our new instances of the hardware classes - Jason
     private hardware robot;
-    private double additionalLaunchPower = 0;
     private double movementMultiplier;
     private boolean drive = false;
     private TelemetryManager telemetryM;
@@ -202,27 +202,33 @@ public class TheKeepTeleOp extends OpMode {
             robot.intake.setPower(-1,-1);
         }
 
-        if (gamepad1.squareWasPressed()) {
-            if (movementMultiplier == 1 || movementMultiplier ==-1) {
-                movementMultiplier = movementMultiplier*.5;
-                robot.led.yellow();
-            } else {
-                movementMultiplier = movementMultiplier*2;
-                robot.led.purple();
+        if (gamepad1.square) {
+            if (Math.abs(movementMultiplier) == 1) {
+                movementMultiplier = movementMultiplier*.25;
             }
+        } else if (Math.abs(movementMultiplier) == 0.25){
+            movementMultiplier = movementMultiplier*4;
         }
 
         // Moves the Fidget Tech forward or backward one step depending on which trigger was pressed
         if (gamepad1.leftBumperWasPressed()) robot.fidgetTech.previous();
         if (gamepad1.rightBumperWasPressed()) robot.fidgetTech.next();
 
-        if (gamepad2.leftBumperWasPressed()) additionalLaunchPower -= 0.1;
-        if (gamepad2.rightBumperWasPressed()) additionalLaunchPower += 0.1;
+        if (gamepad2.leftBumperWasPressed()) Flywheel.shotMultiplier -= 0.1;
+        if (gamepad2.rightBumperWasPressed()) Flywheel.shotMultiplier += 0.1;
         // These lines write any april tag data to the telemetry - Jason
         if (Vision.pattern != null) {
            telemetry.addData("Pattern Is", Vision.pattern);
         } else {
            telemetry.addData("Pattern Is", "unknown");
+        }
+
+        if(robot.fidgetTechIsFull()) {
+            if(robot.launchZoneTracker.robotInRange) {
+                if(TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE) {
+                    robot.led.blue();
+                } else robot.led.red();
+            } else robot.led.white();
         }
         // These lines add the fidget tech's position and the bot's position to the telemetry - Jason
         telemetry.addData("Flywheel Speed In RPM",robot.flywheel.getRPM());
@@ -230,7 +236,7 @@ public class TheKeepTeleOp extends OpMode {
         telemetry.addData("Bot Position", robot.pathFollower.getPosition());
         telemetry.addData("Distance to Goal", robot.launchZoneTracker.shootDistance);
         telemetry.addData("Goal in range", robot.launchZoneTracker.robotInRange);
-        telemetry.addData("Additional Power", additionalLaunchPower);
+        telemetry.addData("Additional Power", Flywheel.shotMultiplier);
         telemetry.addData("Artifacts Held", FidgetTech.artifactsLoaded[0]);
         telemetry.addData("Artifacts Held", FidgetTech.artifactsLoaded[1]);
         telemetry.addData("Artifacts Held", FidgetTech.artifactsLoaded[2]);

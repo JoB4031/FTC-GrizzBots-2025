@@ -28,9 +28,7 @@ public class LaunchZoneTracker {
         shootDistance = ((robotToGoalZone.distanceTo(targetPoint) * 0.0254) - 0.2);
 
         robotInRange =
-                (robotLaunchZone.isInside(closeLaunchArea) ||
-                        robotLaunchZone.isInside(farLaunchArea))
-                        && shootDistance >= 0.9;
+                (shootDistance >= 0.9);
 
         farLaunch = robotLaunchZone.isInside(farLaunchArea);
     }

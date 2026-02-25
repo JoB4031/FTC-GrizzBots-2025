@@ -18,6 +18,9 @@ import org.firstinspires.ftc.teamcode.hardware.sensors.IntakeSensor;
 import org.firstinspires.ftc.teamcode.hardware.sensors.LED;
 import org.firstinspires.ftc.teamcode.hardware.vision.Vision;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class hardware {
     private double runTime;
     public final ElapsedTime autoTime = new ElapsedTime();
@@ -50,12 +53,12 @@ public class hardware {
     public boolean automatedDrive = false;
     public boolean doNotSpin = false;
     private boolean stopRequested = false;
-    public int[] spinPattern = {0,0,0};
+    public int[] spinPattern = {0, 0, 0};
 
     private TelemetryManager telemetryM;
 
 
-    public void initHardware(HardwareMap hw, boolean auto , TelemetryManager telemetryManager) {
+    public void initHardware(HardwareMap hw, boolean auto, TelemetryManager telemetryManager) {
         // Sets up how long the program should run for before turning off
         if (auto) {
             runTime = 30;
@@ -64,13 +67,13 @@ public class hardware {
         flywheel = new Flywheel();
         flywheel.initFlywheel(hw);
         // Initializes the intake
-        intake   = new Intake();
+        intake = new Intake();
         intake.initIntake(hw);
         // Initializes the Fidget Tech
         fidgetTech = new FidgetTech();
         fidgetTech.initFidgetTech(hw);
         // Initializes the ejector
-        ejector  = new Ejector();
+        ejector = new Ejector();
         ejector.initEjector(hw);
 
         // Initializes the intake sensor
@@ -116,68 +119,40 @@ public class hardware {
             telemetryM.addData("Ejector Position", ejector.getPosition());
             telemetryM.addData("Launch Distance", launchZoneTracker.shootDistance);
             telemetryM.update();
-        }
-    }
-    public void automaticPickup2() {
-        doNotSpin = true;
-        if (intakeSensor.isArtifactLoaded()) {
-            // Checks to see if a ball is loaded and the intake is on if so it loads the ball into the sorter
-            update();
-            if (fidgetTech.getSnapPoint() == 12 ) {
-                FidgetTech.artifactsLoaded[0] = intakeSensor.getDetectedColor();
-                fidgetTech.next();
-                update();
-            } else if(fidgetTech.getSnapPoint() == 14) {
-                FidgetTech.artifactsLoaded[1] = intakeSensor.getDetectedColor();
-                fidgetTech.next();
-                update();
-            } else if(fidgetTech.getSnapPoint() == 16) {
-                FidgetTech.artifactsLoaded[2] = intakeSensor.getDetectedColor();
-                fidgetTech.setSnapPoint(12);
-                update();
-            } else {
-                fidgetTech.setSnapPoint(12);
-                update();
-            }
-        }
-
-
-        if (!intakeSensor.isNothingDetected()) {
-            intake.setPower(1,-0.1);
-        } else intake.setPower(1,1);
+        } else stopRequested = true;
     }
 
     public void automaticPickup() {
         doNotSpin = true;
-        if(resetFidgetReady) {
+        if (resetFidgetReady) {
             fidgetReady.reset();
             resetFidgetReady = false;
             spinReady = false;
         }
-        if(fidgetTechIsFull()) {
+        if (fidgetTechIsFull()) {
             update();
             resetFidgetReady = true;
-        } else if(FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.NONE) {
+        } else if (FidgetTech.artifactsLoaded[0] == IntakeSensor.detectedColor.NONE) {
             fidgetTech.setSnapPoint(12);
-            if(intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 2.5 || fidgetReady.seconds() > 1) {
+            if (intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 2.5 || fidgetReady.seconds() > 1) {
                 spinReady = true;
             }
             if (spinReady && ((intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) < 2) && intakeSensor.getDetectedColor() != IntakeSensor.detectedColor.NONE)) {
                 FidgetTech.artifactsLoaded[0] = intakeSensor.getDetectedColor();
                 resetFidgetReady = true;
             }
-        } else if(FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.NONE) {
+        } else if (FidgetTech.artifactsLoaded[1] == IntakeSensor.detectedColor.NONE) {
             fidgetTech.setSnapPoint(14);
-            if(intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 2.5 || fidgetReady.seconds() > 1) {
+            if (intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 2.5 || fidgetReady.seconds() > 1) {
                 spinReady = true;
             }
             if (spinReady && ((intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) < 2) && intakeSensor.getDetectedColor() != IntakeSensor.detectedColor.NONE)) {
                 FidgetTech.artifactsLoaded[1] = intakeSensor.getDetectedColor();
                 resetFidgetReady = true;
             }
-        } else if(FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.NONE) {
+        } else if (FidgetTech.artifactsLoaded[2] == IntakeSensor.detectedColor.NONE) {
             fidgetTech.setSnapPoint(16);
-            if(intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 2.5 || fidgetReady.seconds() > 1) {
+            if (intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) > 2.5 || fidgetReady.seconds() > 1) {
                 spinReady = true;
             }
             if (spinReady && ((intakeSensor.artifactedIntakeDetector.getDistance(DistanceUnit.INCH) < 2) && intakeSensor.getDetectedColor() != IntakeSensor.detectedColor.NONE)) {
@@ -186,10 +161,10 @@ public class hardware {
             }
         }
         if (!intakeSensor.isNothingDetected()) {
-            if(fidgetTechIsFull()) {
+            if (fidgetTechIsFull()) {
                 intake.off();
-            } else intake.setPower(1,-0.1);
-        } else intake.setPower(1,1);
+            } else intake.setPower(1, -0.1);
+        } else intake.setPower(1, 1);
     }
 
     public void sortAllBalls() {

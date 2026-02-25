@@ -20,6 +20,7 @@ public class Flywheel {
     public final ElapsedTime flywheelStable = new ElapsedTime();
 
     public void initFlywheel(HardwareMap hw) {
+        shotMultiplier = 5.8;
 
         rightFlywheel = hw.get(DcMotorEx.class, "rightFlywheel");
         leftFlywheel  = hw.get(DcMotorEx.class, "leftFlywheel");

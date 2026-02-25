@@ -17,7 +17,8 @@ public class PoseLibrary {
 
     public Pose nearLaunchPose = new Pose(57, 91.5, Math.toRadians(135));
     public Pose farLaunchPose = new Pose(61, 18.6, Math.toRadians(111.5));
-    public Pose notLaunchZone = new Pose(30, 120, Math.toRadians(-135));
+    public Pose notLaunchZoneNear = new Pose(30, 120, Math.toRadians(-135));
+    public Pose notLaunchZoneFar = new Pose(40, 15, Math.toRadians(90));
 
     public Pose topArtifacts = new Pose(32, 91.5, Math.toRadians(180));
     public Pose middleArtifacts = new Pose(22, 67, Math.toRadians(180));
@@ -65,7 +66,8 @@ public class PoseLibrary {
             nearLaunchPose = nearLaunchPose.mirror();
 
             allianceGoalPose = allianceGoalPose.mirror();
-            notLaunchZone = notLaunchZone.mirror();
+            notLaunchZoneNear = notLaunchZoneNear.mirror();
+            notLaunchZoneFar = notLaunchZoneFar.mirror();
             firstArtifacts = firstArtifacts.mirror();
             firstArtifactControlPoint = firstArtifactControlPoint.mirror();
             secondArtifacts = secondArtifacts.mirror();

@@ -40,6 +40,7 @@ public class TheKeepAuto extends OpMode {
     private boolean visionMove = false;
 
     private TelemetryManager telemetryM;
+    private boolean emergencyStop = false;
 
     @Override
     public void init() {
@@ -105,10 +106,16 @@ public class TheKeepAuto extends OpMode {
     public void loop() {
         // Updates the hardware - Jason
         if(Vision.pattern != null) {
-            robot.led.yellow();
+            if(TheKeepAuto.alliance == Alliance.BLUE) {
+                robot.led.blue();
+            } else robot.led.red();
         } else robot.led.white();
         robot.update();
         autoPathing();
+        if(robot.autoTime.seconds() > 27 && !emergencyStop) {
+            robot.pathBuilder.setPathState(8);
+            emergencyStop = true;
+        }
         // These lines grab the april tag data then write any tags data to the telemetry - Jason
         if (Vision.pattern != null) {
             telemetry.addData("Pattern Is", Vision.pattern);
@@ -151,6 +158,10 @@ public class TheKeepAuto extends OpMode {
                     robot.intake.off();
                     robot.fidgetTech.setSnapPoint(robot.spinPattern[0]);
                     robot.doNotSpin = false;
+                    if(robot.autoTime.seconds() > 25) {
+                        robot.pathBuilder.setPathState(8);
+                        break;
+                    }
                     robot.shootAllBalls(true);
                     robot.pathBuilder.setPathState(artifactsToCollect == 0 ? 8 : 2);
                 }
@@ -188,6 +199,10 @@ public class TheKeepAuto extends OpMode {
                             robot.setFlywheelToShootDistance();
                             robot.update();
                         }
+                        if(robot.autoTime.seconds() > 25) {
+                            robot.pathBuilder.setPathState(8);
+                            break;
+                        }
                         robot.shootAllBalls(true);
                         robot.pathBuilder.setPathState(artifactsToCollect == 1 ? 8 : 5);
                     }
@@ -217,8 +232,7 @@ public class TheKeepAuto extends OpMode {
                     if(!robot.fidgetTechIsFull()) {
                         robot.automaticPickup();
                         robot.update();
-                    }
-                    {
+                    } else {
                         robot.intake.off();
                         robot.doNotSpin = false;
                         robot.fidgetTech.setSnapPoint(robot.spinPattern[0]);
@@ -226,6 +240,10 @@ public class TheKeepAuto extends OpMode {
                         while (robot.timer.seconds() < 1) {
                             robot.setFlywheelToShootDistance();
                             robot.update();
+                        }
+                        if(robot.autoTime.seconds() > 25) {
+                            robot.pathBuilder.setPathState(8);
+                            break;
                         }
                         robot.shootAllBalls(true);
                         robot.pathBuilder.setPathState(8);

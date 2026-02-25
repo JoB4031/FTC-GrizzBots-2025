@@ -2,8 +2,11 @@ package org.firstinspires.ftc.teamcode.hardware.pedroPathing;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.BezierPoint;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.PathChain;
+
+import org.firstinspires.ftc.teamcode.theKeep.TheKeepAuto;
 
 public class PathBuilder {
 
@@ -31,7 +34,18 @@ public class PathBuilder {
                 .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
                 .build();
     }
-
+    public PathChain scoreFarArtifact() {
+        return follower.pathBuilder()
+                .addPath(new BezierLine(follower.getPose(), poses.farLaunchPose))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
+                .build();
+    }
+    public PathChain scoreNearArtifact() {
+        return follower.pathBuilder()
+                .addPath(new BezierLine(follower.getPose(), poses.nearLaunchPose))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
+                .build();
+    }
     public PathChain grabFirstArtifacts() {
         return follower.pathBuilder()
                 .addPath(new BezierCurve(poses.launchPose, poses.firstArtifactControlPoint, poses.firstArtifacts))
@@ -63,9 +77,35 @@ public class PathBuilder {
     }
 
     public PathChain leaveLaunchZone() {
+        if(TheKeepAuto.artifactsToCollect == 2 || TheKeepAuto.startLocation == 2) {
+            return follower.pathBuilder()
+                    .addPath(new BezierLine(follower.getPose(), poses.notLaunchZoneNear))
+                    .setLinearHeadingInterpolation(follower.getHeading(), poses.notLaunchZoneNear.getHeading())
+                    .build();
+        } else  return follower.pathBuilder()
+                .addPath(new BezierLine(follower.getPose(), poses.notLaunchZoneFar))
+                .setLinearHeadingInterpolation(follower.getHeading(), poses.notLaunchZoneFar.getHeading())
+                .build();
+    }
+
+    public PathChain turnToGoal() {
         return follower.pathBuilder()
-                .addPath(new BezierLine(follower.getPose(), poses.notLaunchZone))
-                .setLinearHeadingInterpolation(follower.getHeading(), poses.notLaunchZone.getHeading())
+                .addPath(new BezierLine(follower.getPose(), follower.getPose()))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
+                .build();
+    }
+
+    public PathChain moveToLaunch() {
+        return follower.pathBuilder()
+                .addPath(new BezierLine(follower.getPose(), tracker.closestPoseToZone(tracker.robotLaunchZone, poses.nearLaunchPose, poses.farLaunchPose)))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(poses.allianceGoalPose))
+                .build();
+    }
+
+    public PathChain returnToBase() {
+        return follower.pathBuilder()
+                .addPath(new BezierLine(follower.getPose(), poses.baseZone))
+                .setLinearHeadingInterpolation(follower.getHeading(), poses.baseZone.getHeading())
                 .build();
     }
 }
