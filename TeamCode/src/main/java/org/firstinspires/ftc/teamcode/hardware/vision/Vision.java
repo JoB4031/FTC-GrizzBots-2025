@@ -1,7 +1,11 @@
 package org.firstinspires.ftc.teamcode.hardware.vision;
 
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.theKeep.TheKeepAuto;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -102,5 +106,29 @@ public class Vision {
                 }
             }
         }
+    }
+    public Pose getLocation() {
+        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        for (AprilTagDetection detection : currentDetections) {
+            if (TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE) {
+                if (detection.id == 20) {
+                    Position robotPosition;
+                    YawPitchRollAngles robotAngle;
+                    robotPosition = detection.robotPose.getPosition();
+                    robotAngle = detection.robotPose.getOrientation();
+                    return new Pose(robotPosition.x, robotPosition.y, robotAngle.getYaw());
+                }
+            }
+            if (TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE) {
+                if (detection.id == 24) {
+                    Position robotPosition;
+                    YawPitchRollAngles robotAngle;
+                    robotPosition = detection.robotPose.getPosition();
+                    robotAngle = detection.robotPose.getOrientation();
+                    return new Pose(robotPosition.x, robotPosition.y, robotAngle.getYaw());
+                }
+            }
+        }
+        return null;
     }
 }
