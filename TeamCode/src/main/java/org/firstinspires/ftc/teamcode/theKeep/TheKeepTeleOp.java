@@ -229,7 +229,7 @@ public class TheKeepTeleOp extends OpMode {
                     robot.led.blue();
                 } else robot.led.red();
             } else robot.led.white();
-        }
+        } else robot.led.white();
 
         // These lines add the fidget tech's position and the bot's position to the telemetry - Jason
         telemetry.addData("Flywheel Speed In RPM",robot.flywheel.getRPM());

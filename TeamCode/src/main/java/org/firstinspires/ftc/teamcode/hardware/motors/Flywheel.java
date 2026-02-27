@@ -34,14 +34,14 @@ public class Flywheel {
         controller.setSetPoint(0);
     }
 
-    public void setFlywheelNearFire(double distance) {
-        controller.setSetPoint(RPMToVelocity(shotMultiplier * Math.sqrt(398210 * distance)
+    public void setFlywheelNearFire(double distance) {;
+        controller.setSetPoint(RPMToVelocity((shotMultiplier-0.1) * Math.sqrt(398210 * distance)
                 - 900 * Math.sqrt(distance) + (-667*distance)
                 + (Math.ceil(distance / 5) * (1433))));
         if (controller.getSetPoint() > 2460) controller.setSetPoint(2460);
     }
     public void setFlywheelFarFire(double distance) {
-        controller.setSetPoint(RPMToVelocity((shotMultiplier+0.6) * Math.sqrt(398210 * distance)
+        controller.setSetPoint(RPMToVelocity((shotMultiplier+0.5) * Math.sqrt(398210 * distance)
                 - 900 * Math.sqrt(distance) + (-667*distance)
                 + (Math.ceil(distance / 5) * (1433))));
         if (controller.getSetPoint() > 2460) controller.setSetPoint(2460);

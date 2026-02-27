@@ -120,7 +120,7 @@ public class hardware {
             telemetryM.addData("Ejector Position", ejector.getPosition());
             telemetryM.addData("Launch Distance", launchZoneTracker.shootDistance);
             telemetryM.update();
-        } else stopRequested = true;
+        }
     }
 
     public void automaticPickup() {
