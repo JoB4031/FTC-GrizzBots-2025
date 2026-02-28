@@ -23,10 +23,18 @@ public class PathBuilder {
         pathState = state;
     }
     public PathChain getAprilTag() {
-        return follower.pathBuilder()
-                .addPath(new BezierLine(PoseLibrary.startPose, poses.launchPose))
-                .setLinearHeadingInterpolation(PoseLibrary.startPose.getHeading(), Math.toRadians(70))
-                .build();
+        if(TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE) {
+            return follower.pathBuilder()
+                    .addPath(new BezierLine(PoseLibrary.startPose, poses.launchPose))
+                    .setLinearHeadingInterpolation(PoseLibrary.startPose.getHeading(), Math.toRadians(70))
+                    .build();
+        } else {
+            return follower.pathBuilder()
+                    .addPath(new BezierLine(PoseLibrary.startPose, poses.launchPose))
+                    .setLinearHeadingInterpolation(PoseLibrary.startPose.getHeading(), Math.toRadians(110))
+                    .build();
+        }
+
     }
     public PathChain scoreArtifact() {
         return follower.pathBuilder()

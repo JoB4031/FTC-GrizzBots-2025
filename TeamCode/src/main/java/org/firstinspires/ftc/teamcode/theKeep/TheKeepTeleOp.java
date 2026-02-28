@@ -229,7 +229,8 @@ public class TheKeepTeleOp extends OpMode {
                     robot.led.blue();
                 } else robot.led.red();
             } else robot.led.white();
-        }
+        } else robot.led.white();
+
         // These lines add the fidget tech's position and the bot's position to the telemetry - Jason
         telemetry.addData("Flywheel Speed In RPM",robot.flywheel.getRPM());
         telemetry.addData("Fidget Tech Position", robot.fidgetTech.getSnapPoint());
@@ -244,6 +245,7 @@ public class TheKeepTeleOp extends OpMode {
         telemetry.addData("Artifact Spots" , robot.spinPattern[1]);
         telemetry.addData("Artifact Spots" , robot.spinPattern[2]);
         telemetry.addData("Infinite Run", robot.infiniteRun);
+        telemetry.addData("AprilTag Data", robot.vision.getLocation());
         telemetry.update();
 
         telemetryM.addData("Flywheel RPM", robot.flywheel.getRPM());

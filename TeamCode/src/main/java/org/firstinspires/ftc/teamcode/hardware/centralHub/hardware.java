@@ -63,6 +63,7 @@ public class hardware {
         if (auto) {
             runTime = 30;
         } else runTime = 999;
+        autoTime.reset();
         // Initializes the flywheel
         flywheel = new Flywheel();
         flywheel.initFlywheel(hw);
@@ -119,7 +120,7 @@ public class hardware {
             telemetryM.addData("Ejector Position", ejector.getPosition());
             telemetryM.addData("Launch Distance", launchZoneTracker.shootDistance);
             telemetryM.update();
-        } else stopRequested = true;
+        }
     }
 
     public void automaticPickup() {
@@ -365,7 +366,7 @@ public class hardware {
         autonomousPath.autonomousPathUpdate(this);
     }
     public void setFlywheelToShootDistance() {
-        if(launchZoneTracker.shootDistance > 2.6) {
+        if(launchZoneTracker.shootDistance > 2.5) {
             flywheel.setFlywheelFarFire(launchZoneTracker.shootDistance);
         } else {
             flywheel.setFlywheelNearFire(launchZoneTracker.shootDistance);

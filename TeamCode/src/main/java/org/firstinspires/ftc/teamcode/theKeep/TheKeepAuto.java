@@ -187,7 +187,7 @@ public class TheKeepAuto extends OpMode {
                 robot.automaticPickup();
                 if (!robot.pathingIsBusy()) {
                     robot.timer.reset();
-                    if(!robot.fidgetTechIsFull()) {
+                    if(!robot.fidgetTechIsFull() || (robot.timer.seconds() > 2)) {
                         robot.automaticPickup();
                         robot.update();
                     } else {
@@ -229,7 +229,7 @@ public class TheKeepAuto extends OpMode {
                 robot.automaticPickup();
                 if (!robot.pathingIsBusy()) {
                     robot.timer.reset();
-                    if(!robot.fidgetTechIsFull()) {
+                    if(!robot.fidgetTechIsFull() || (robot.timer.seconds() > 2)) {
                         robot.automaticPickup();
                         robot.update();
                     } else {
