@@ -1,8 +1,4 @@
-package org.firstinspires.ftc.teamcode.hardware.motors;
-
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.HardwareMap;
+package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
@@ -13,16 +9,26 @@ public class IntakeSubsystem implements Subsystem {
     public static final IntakeSubsystem INSTANCE = new IntakeSubsystem();
     private IntakeSubsystem() {}
 
-    private
     private MotorEx externalIntake = new MotorEx("externalIntake").floatMode();
     private MotorEx internalIntake = new MotorEx("internalIntake").floatMode();
 
-    public void setPower(double exteriorPower, double interiorPower) {
-        externalIntake.setPower(exteriorPower);
-        internalIntake.setPower(interiorPower);
+    public Command setPower(double exteriorPower, double interiorPower) {
+        return new Command() {
+
+            @Override
+            public void start() {
+                externalIntake.setPower(exteriorPower);
+                internalIntake.setPower(interiorPower);
+            }
+
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+        }.requires(externalIntake, internalIntake);
     }
 
-    public Command externalOn(double power)  {
+    public Command externalPower(double power)  {
         return new SetPower(externalIntake, power).requires(externalIntake);
     }
 
@@ -33,5 +39,6 @@ public class IntakeSubsystem implements Subsystem {
     public boolean isPowered() {
         return (externalIntake.getPower() > 0);
     }
+
 }
 

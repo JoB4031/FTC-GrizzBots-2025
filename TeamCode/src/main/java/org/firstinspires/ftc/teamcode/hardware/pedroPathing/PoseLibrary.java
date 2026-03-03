@@ -2,10 +2,17 @@ package org.firstinspires.ftc.teamcode.hardware.pedroPathing;
 
 import com.bylazar.configurables.annotations.Configurable;
 import com.pedropathing.geometry.Pose;
+import com.skeletonarmy.marrow.settings.Settings;
 import com.skeletonarmy.marrow.zones.Point;
 import org.firstinspires.ftc.teamcode.theKeep.TheKeepAuto;
+import org.firstinspires.ftc.teamcode.tuners.SettingsSetter;
+
+import dev.nextftc.core.subsystems.Subsystem;
+
 @Configurable
-public class PoseLibrary {
+public class PoseLibrary implements Subsystem {
+    public static final PoseLibrary INSTANCE = new PoseLibrary();
+    private PoseLibrary() {}
 
     public static Pose startPose;
     public static Pose trueStart;
@@ -33,23 +40,21 @@ public class PoseLibrary {
     public Pose secondArtifactsShootStep1 = new Pose(60,67);
     public Pose thirdArtifacts;
 
-    public Point targetPoint = new Point(16, 131);
+    public static Point targetPoint = new Point(16, 131);
 
     public void assignStartPose() {
-        startPose = (TheKeepAuto.startLocation == 1) ? alliance1 : alliance2;
-        if (TheKeepAuto.alliance == TheKeepAuto.Alliance.RED) {
+        startPose = (Settings.get("start position", SettingsSetter.startLocations.FAR) == SettingsSetter.startLocations.NEAR) ? alliance1 : alliance2;
+        if (Settings.get("alliance", SettingsSetter.alliance.BLUE) == SettingsSetter.alliance.RED) {
             startPose = startPose.mirror();
         }
-        trueStart = (TheKeepAuto.startLocation == 1) ? alliance1 : alliance2;
-        if (TheKeepAuto.alliance == TheKeepAuto.Alliance.RED) {
+        trueStart = (Settings.get("start position", SettingsSetter.startLocations.FAR) == SettingsSetter.startLocations.NEAR) ? alliance1 : alliance2;
+        if (Settings.get("alliance", SettingsSetter.alliance.BLUE) == SettingsSetter.alliance.RED) {
             trueStart = trueStart.mirror();
         }
     }
-    public void saveStartPose(PathFollower pathFollower) {
-        startPose = pathFollower.getPosition();
-    }
     public void configureAlliancePaths() {
-        if (TheKeepAuto.startLocation == 1) {
+        targetPoint = new Point(16, 131);
+        if (Settings.get("start position", SettingsSetter.startLocations.NEAR) == SettingsSetter.startLocations.FAR) {
             launchPose = farLaunchPose;
             firstArtifacts = bottomArtifacts;
             thirdArtifacts = topArtifacts;
@@ -62,7 +67,7 @@ public class PoseLibrary {
 
         secondArtifacts = middleArtifacts;
 
-        if (TheKeepAuto.alliance == TheKeepAuto.Alliance.RED) {
+        if (Settings.get("alliance", SettingsSetter.alliance.BLUE) == SettingsSetter.alliance.RED) {
             launchPose = launchPose.mirror();
             nearLaunchPose = nearLaunchPose.mirror();
 
@@ -79,6 +84,11 @@ public class PoseLibrary {
             baseZone = baseZone.mirror();
             targetPoint = new Point(((72 - targetPoint.getX()) + 72), targetPoint.getY());
         }
+    }
+
+    @Override
+    public void initialize() {
+        configureAlliancePaths();
     }
 }
 

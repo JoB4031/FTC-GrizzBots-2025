@@ -1,7 +1,4 @@
-package org.firstinspires.ftc.teamcode.hardware.motors;
-
-import com.qualcomm.robotcore.hardware.Servo;
-import com.arcrobotics.ftclib.command.SubsystemBase;
+package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;

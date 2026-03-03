@@ -1,11 +1,4 @@
 package org.firstinspires.ftc.teamcode.hardware.vision;
-
-import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
-import org.firstinspires.ftc.robotcore.external.navigation.Position;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.theKeep.TheKeepAuto;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -16,7 +9,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.List;
 
-public class Vision {
+import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.ftc.ActiveOpMode;
+
+public class Vision implements Subsystem {
+    public static final Vision INSTANCE = new Vision();
+    Vision() {}
     public AprilTagProcessor aprilTag;
     public VisionPortal visionPortal;
     // A custom class that allows variables of this class to be set to the ball pattern - Jason
@@ -25,7 +23,7 @@ public class Vision {
     // We set set this variable to static so it will remember the pattern even when you exit the program - Jason
     public static BallPattern pattern = null;
 
-    public void initVision(HardwareMap hw) {
+    public void initialize() {
 
         // Create the AprilTag processor - Jason
         aprilTag = new AprilTagProcessor.Builder()
@@ -59,7 +57,7 @@ public class Vision {
         VisionPortal.Builder builder = new VisionPortal.Builder();
 
         // Set the camera (webcam vs. built-in RC phone camera).
-        builder.setCamera(hw.get(WebcamName.class, "Webcam 1"));
+        builder.setCamera(ActiveOpMode.hardwareMap().get(WebcamName.class, "Webcam 1"));
 
         // Choose a camera resolution. Not all cameras support all resolutions.
         //builder.setCameraResolution(new Size(640, 480));
@@ -87,7 +85,8 @@ public class Vision {
     }
 
     // Gets the april tag data from all tags the camera sees - Jason
-    public void update() {
+    @Override
+    public void periodic() {
         if (pattern == null) {
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             for (AprilTagDetection detection : currentDetections) {
@@ -106,29 +105,5 @@ public class Vision {
                 }
             }
         }
-    }
-    public Pose getLocation() {
-        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-        for (AprilTagDetection detection : currentDetections) {
-            if (TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE) {
-                if (detection.id == 20) {
-                    Position robotPosition;
-                    YawPitchRollAngles robotAngle;
-                    robotPosition = detection.robotPose.getPosition();
-                    robotAngle = detection.robotPose.getOrientation();
-                    return new Pose(robotPosition.x, robotPosition.y, robotAngle.getYaw());
-                }
-            }
-            if (TheKeepAuto.alliance == TheKeepAuto.Alliance.BLUE) {
-                if (detection.id == 24) {
-                    Position robotPosition;
-                    YawPitchRollAngles robotAngle;
-                    robotPosition = detection.robotPose.getPosition();
-                    robotAngle = detection.robotPose.getOrientation();
-                    return new Pose(robotPosition.x, robotPosition.y, robotAngle.getYaw());
-                }
-            }
-        }
-        return null;
     }
 }

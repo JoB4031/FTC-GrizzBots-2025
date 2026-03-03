@@ -1,9 +1,17 @@
 package org.firstinspires.ftc.teamcode.hardware.pedroPathing;
+import static org.firstinspires.ftc.teamcode.hardware.pedroPathing.PoseLibrary.targetPoint;
+
+import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 
-public class LaunchZoneTracker {
+import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.extensions.pedro.PedroComponent;
+
+public class LaunchZoneTracker implements Subsystem {
+    public static final LaunchZoneTracker INSTANCE = new LaunchZoneTracker();
+    private LaunchZoneTracker() {}
 
     private final PolygonZone closeLaunchArea =
             new PolygonZone(new Point(144, 144), new Point(72, 72), new Point(0, 144));
@@ -18,12 +26,14 @@ public class LaunchZoneTracker {
     public boolean farLaunch;
     public double shootDistance;
 
-    public void update(Pose pose, Point targetPoint) {
-        robotToGoalZone.setPosition(pose.getX(), pose.getY());
-        robotToGoalZone.setRotation(pose.getHeading());
+    @Override
+    public void periodic() {
+        Follower pedro = PedroComponent.follower();
+        robotToGoalZone.setPosition(pedro.getPose().getX(), pedro.getPose().getY());
+        robotToGoalZone.setRotation(pedro.getHeading());
 
-        robotLaunchZone.setPosition(pose.getX(), pose.getY());
-        robotLaunchZone.setRotation(pose.getHeading());
+        robotLaunchZone.setPosition(pedro.getPose().getX(), pedro.getPose().getY());
+        robotLaunchZone.setRotation(pedro.getHeading());
 
         shootDistance = ((robotToGoalZone.distanceTo(targetPoint) * 0.0254) - 0.2);
 
