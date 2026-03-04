@@ -25,10 +25,10 @@ public class LaunchZoneTracker implements Subsystem {
     public boolean robotInRange;
     public boolean farLaunch;
     public double shootDistance;
+    private final Follower pedro = PedroComponent.follower();
 
     @Override
     public void periodic() {
-        Follower pedro = PedroComponent.follower();
         robotToGoalZone.setPosition(pedro.getPose().getX(), pedro.getPose().getY());
         robotToGoalZone.setRotation(pedro.getHeading());
 

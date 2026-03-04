@@ -1,26 +1,26 @@
 package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
 import com.qualcomm.robotcore.util.ElapsedTime;
-import org.firstinspires.ftc.teamcode.hardware.sensors.IntakeSensorSubsystem;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.ServoEx;
 import dev.nextftc.hardware.positionable.SetPosition;
 
-public class FidgetTechSubsystem implements Subsystem {
+public class FidgetTech implements Subsystem {
 
-    public static final FidgetTechSubsystem INSTANCE = new FidgetTechSubsystem();
-    private FidgetTechSubsystem() {}
+    public static final FidgetTech INSTANCE = new FidgetTech();
+    private FidgetTech() {}
 
     private static final ElapsedTime spinTime = new ElapsedTime();
     private static final double TIME_PER_SNAP = 0.25;
 
-    private ServoEx fidgetTech = new ServoEx("fidgetTech", 0.001);
+    private final ServoEx fidgetTech = new ServoEx("fidgetTech", 0.001);
 
     private int snapPoint = 0;
     private int snapPointsMoved = 0;
-    public boolean spinComplete;
+    public boolean spinComplete = false;
 
     public enum artifactColor { PURPLE, GREEN, NONE }
 
@@ -115,22 +115,26 @@ public class FidgetTechSubsystem implements Subsystem {
         @Override
         public void start() {
             snapPoint = (snapPoint + 1) % 28;
+            snapPointsMoved = 2;
+            spinTime.reset();
             new SetPosition(fidgetTech, positions[snapPoint]);
         }
         @Override
         public boolean isDone() { return true; }
-    }.requires(this);
+    }.requires(spinComplete);
 
     /** Manual previous. */
     public Command previous = new Command() {
         @Override
         public void start() {
             snapPoint = (snapPoint - 1 + 28) % 28;
+            snapPointsMoved = 2;
+            spinTime.reset();
             new SetPosition(fidgetTech, positions[snapPoint]);
         }
         @Override
         public boolean isDone() { return true; }
-    }.requires(this);
+    }.requires(spinComplete);
 
     /** Move to a specific snapPoint. */
     public Command setSnapPoint(int point) {
@@ -143,14 +147,13 @@ public class FidgetTechSubsystem implements Subsystem {
                 int forward = (newPoint - snapPoint + total) % total;
                 int backward = (snapPoint - newPoint + total) % total;
                 snapPointsMoved = Math.min(forward, backward);
-
                 spinTime.reset();
                 snapPoint = newPoint;
                 new SetPosition(fidgetTech, positions[snapPoint]);
             }
 
             @Override
-            public boolean isDone() { return true; }
+            public boolean isDone() { return spinComplete; }
         }.requires(this);
     }
 
@@ -212,7 +215,7 @@ public class FidgetTechSubsystem implements Subsystem {
         spinComplete = spinTime.seconds() >= snapPointsMoved * TIME_PER_SNAP;
 
         if (spinComplete && isIntakePosition(snapPoint)) {
-            artifactColor detected = IntakeSensorSubsystem.INSTANCE.getArtifact();
+            artifactColor detected = ArtifactSensor.INSTANCE.getArtifact();
             if (detected != artifactColor.NONE) {
                 artifactsHeld[getCurrentSlot()] = detected;
             }

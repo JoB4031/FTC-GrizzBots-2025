@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.hardware.vision;
+package org.firstinspires.ftc.teamcode.hardware.subsystems;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;

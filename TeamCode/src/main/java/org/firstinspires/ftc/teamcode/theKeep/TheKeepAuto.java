@@ -12,11 +12,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.hardware.centralHub.AutoProgram;
 import org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchZoneTracker;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.DriveChainSubsystem;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.EjectorSubsystem;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTechSubsystem;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.FlywheelSubsystem;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.IntakeSubsystem;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Drive;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
@@ -29,11 +29,11 @@ public class TheKeepAuto extends NextFTCOpMode {
     public void AutonomousProgram() {
         addComponents(
                 new SubsystemComponent(
-                        EjectorSubsystem.INSTANCE,
-                        FlywheelSubsystem.INSTANCE,
-                        FidgetTechSubsystem.INSTANCE,
-                        IntakeSubsystem.INSTANCE,
-                        DriveChainSubsystem.INSTANCE,
+                        Ejector.INSTANCE,
+                        Flywheel.INSTANCE,
+                        FidgetTech.INSTANCE,
+                        Intake.INSTANCE,
+                        Drive.INSTANCE,
                         LaunchZoneTracker.INSTANCE
                 ),
                 BulkReadComponent.INSTANCE,

@@ -5,12 +5,12 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.powerable.SetPower;
 
-public class IntakeSubsystem implements Subsystem {
-    public static final IntakeSubsystem INSTANCE = new IntakeSubsystem();
-    private IntakeSubsystem() {}
+public class Intake implements Subsystem {
+    public static final Intake INSTANCE = new Intake();
+    private Intake() {}
 
-    private MotorEx externalIntake = new MotorEx("externalIntake").floatMode();
-    private MotorEx internalIntake = new MotorEx("internalIntake").floatMode();
+    private final MotorEx externalIntake = new MotorEx("externalIntake").floatMode();
+    private final MotorEx internalIntake = new MotorEx("internalIntake").floatMode();
 
     public Command setPower(double exteriorPower, double interiorPower) {
         return new Command() {
@@ -25,7 +25,7 @@ public class IntakeSubsystem implements Subsystem {
             public boolean isDone() {
                 return true;
             }
-        }.requires(externalIntake, internalIntake);
+        }.requires(this);
     }
 
     public Command externalPower(double power)  {

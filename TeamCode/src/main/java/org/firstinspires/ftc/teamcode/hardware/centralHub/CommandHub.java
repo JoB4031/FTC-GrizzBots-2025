@@ -1,32 +1,36 @@
 package org.firstinspires.ftc.teamcode.hardware.centralHub;
 
-import org.firstinspires.ftc.teamcode.hardware.subsystems.EjectorSubsystem;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.FlywheelSubsystem;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTechSubsystem;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.hardware.sensors.IntakeSensorSubsystem;
-import org.firstinspires.ftc.teamcode.hardware.vision.Vision;
+import com.pedropathing.geometry.Pose;
+
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Drive;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Vision;
 
 import dev.nextftc.core.commands.Command;
-import dev.nextftc.core.commands.delays.Delay;
 import dev.nextftc.core.commands.groups.SequentialGroup;
+import dev.nextftc.core.subsystems.Subsystem;
 
-public class CommandHub {
+public class CommandHub implements Subsystem {
     public static final CommandHub INSTANCE = new CommandHub();
     CommandHub() {}
-    private final FlywheelSubsystem cannon = FlywheelSubsystem.INSTANCE;
-    private final FidgetTechSubsystem sorter = FidgetTechSubsystem.INSTANCE;
-    private final IntakeSubsystem intake = IntakeSubsystem.INSTANCE;
-    private final IntakeSensorSubsystem colorSensor = IntakeSensorSubsystem.INSTANCE;
-    private final EjectorSubsystem boot = EjectorSubsystem.INSTANCE;
+    private final Flywheel cannon = Flywheel.INSTANCE;
+    private final FidgetTech sorter = FidgetTech.INSTANCE;
+    private final Intake intake = Intake.INSTANCE;
+    private final ArtifactSensor colorSensor = ArtifactSensor.INSTANCE;
+    private final Ejector boot = Ejector.INSTANCE;
+    private final Drive drive = Drive.INSTANCE;
     public Command waitForArtifact = new Command() {
         @Override
         public boolean isDone() {
-            return (colorSensor.getArtifact() != FidgetTechSubsystem.artifactColor.NONE);
+            return (colorSensor.getArtifact() != FidgetTech.artifactColor.NONE);
         }
     };
 
-    public SequentialGroup fireColor(FidgetTechSubsystem.artifactColor color) {
+    public SequentialGroup fireColor(FidgetTech.artifactColor color) {
         return new SequentialGroup(
         cannon.setVelocity(3500).and(sorter.goToColorArtifact(color)),
                 boot.fire.thenWait(0.2),
@@ -38,29 +42,29 @@ public class CommandHub {
     public SequentialGroup firePattern() {
         if(Vision.pattern == Vision.BallPattern.PPG) {
             return new SequentialGroup(
-                    fireColor(FidgetTechSubsystem.artifactColor.PURPLE),
-                    fireColor(FidgetTechSubsystem.artifactColor.PURPLE),
-                    fireColor(FidgetTechSubsystem.artifactColor.GREEN)
+                    fireColor(FidgetTech.artifactColor.PURPLE),
+                    fireColor(FidgetTech.artifactColor.PURPLE),
+                    fireColor(FidgetTech.artifactColor.GREEN)
             );
         }
         if(Vision.pattern == Vision.BallPattern.PGP) {
             return new SequentialGroup(
-                    fireColor(FidgetTechSubsystem.artifactColor.PURPLE),
-                    fireColor(FidgetTechSubsystem.artifactColor.GREEN),
-                    fireColor(FidgetTechSubsystem.artifactColor.PURPLE)
+                    fireColor(FidgetTech.artifactColor.PURPLE),
+                    fireColor(FidgetTech.artifactColor.GREEN),
+                    fireColor(FidgetTech.artifactColor.PURPLE)
             );
         }
         if(Vision.pattern == Vision.BallPattern.GPP) {
             return new SequentialGroup(
-                    fireColor(FidgetTechSubsystem.artifactColor.GREEN),
-                    fireColor(FidgetTechSubsystem.artifactColor.PURPLE),
-                    fireColor(FidgetTechSubsystem.artifactColor.PURPLE)
+                    fireColor(FidgetTech.artifactColor.GREEN),
+                    fireColor(FidgetTech.artifactColor.PURPLE),
+                    fireColor(FidgetTech.artifactColor.PURPLE)
             );
         }
         return new SequentialGroup(
-                fireColor(FidgetTechSubsystem.artifactColor.PURPLE),
-                fireColor(FidgetTechSubsystem.artifactColor.GREEN),
-                fireColor(FidgetTechSubsystem.artifactColor.PURPLE)
+                fireColor(FidgetTech.artifactColor.PURPLE),
+                fireColor(FidgetTech.artifactColor.GREEN),
+                fireColor(FidgetTech.artifactColor.PURPLE)
         );
     }
 
@@ -69,5 +73,12 @@ public class CommandHub {
                     .and(sorter.goToIntake(sorter.findEmptySlot()))
                     .then(waitForArtifact)
     );
+
+    public SequentialGroup followPath(Pose pose) {
+        return new SequentialGroup(
+                drive.goTo(pose),
+                drive.driverControlled
+        );
+    }
 
 }

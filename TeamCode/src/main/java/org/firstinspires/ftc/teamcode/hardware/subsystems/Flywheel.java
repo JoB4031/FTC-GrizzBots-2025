@@ -8,9 +8,9 @@ import dev.nextftc.hardware.controllable.RunToVelocity;
 import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.powerable.SetPower;
 
-public class FlywheelSubsystem implements Subsystem {
-    public static final FlywheelSubsystem INSTANCE = new FlywheelSubsystem();
-    private FlywheelSubsystem() { }
+public class Flywheel implements Subsystem {
+    public static final Flywheel INSTANCE = new Flywheel();
+    private Flywheel() { }
 
     private double goal = 0;
     private final MotorEx leftFlywheel = new MotorEx("leftFlywheel").reversed().floatMode();

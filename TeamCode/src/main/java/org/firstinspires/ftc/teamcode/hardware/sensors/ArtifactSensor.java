@@ -9,16 +9,16 @@ import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTechSubsystem;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
 
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
 @Configurable
-public class IntakeSensorSubsystem implements Subsystem {
+public class ArtifactSensor implements Subsystem {
 
-    public static final IntakeSensorSubsystem INSTANCE = new IntakeSensorSubsystem();
-    private IntakeSensorSubsystem() {}
+    public static final ArtifactSensor INSTANCE = new ArtifactSensor();
+    private ArtifactSensor() {}
 
     // ------------------------------------------------------------
     // HARDWARE
@@ -50,15 +50,15 @@ public class IntakeSensorSubsystem implements Subsystem {
     // ARTIFACT DETECTION LOGIC
     // ------------------------------------------------------------
 
-    public FidgetTechSubsystem.artifactColor getArtifact() {
+    public FidgetTech.artifactColor getArtifact() {
         double dist = distanceSensor.getDistance(DistanceUnit.INCH);
 
-        if (dist < 2 && (getDetectedColor() != FidgetTechSubsystem.artifactColor.NONE)) {
+        if (dist < 2 && (getDetectedColor() != FidgetTech.artifactColor.NONE)) {
             return getDetectedColor();
 
         }
 
-        return FidgetTechSubsystem.artifactColor.NONE;
+        return FidgetTech.artifactColor.NONE;
     }
 
     public boolean fidgetBlocked() {
@@ -70,7 +70,7 @@ public class IntakeSensorSubsystem implements Subsystem {
     // COLOR DETECTION LOGIC
     // ------------------------------------------------------------
 
-    public FidgetTechSubsystem.artifactColor getDetectedColor() {
+    public FidgetTech.artifactColor getDetectedColor() {
         NormalizedRGBA colors = colorSensor.getNormalizedColors();
 
         float[] hsv = new float[3];
@@ -78,10 +78,10 @@ public class IntakeSensorSubsystem implements Subsystem {
 
         float hue = hsv[0];
 
-        if (hue >= 200 && hue <= 240) return FidgetTechSubsystem.artifactColor.PURPLE;
-        if (hue >= 150 && hue <= 163) return FidgetTechSubsystem.artifactColor.GREEN;
+        if (hue >= 200 && hue <= 240) return FidgetTech.artifactColor.PURPLE;
+        if (hue >= 150 && hue <= 163) return FidgetTech.artifactColor.GREEN;
 
-        return FidgetTechSubsystem.artifactColor.NONE;
+        return FidgetTech.artifactColor.NONE;
     }
 
 
