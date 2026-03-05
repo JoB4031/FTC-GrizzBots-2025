@@ -78,7 +78,7 @@ public class CommandHub implements Subsystem {
     public SequentialGroup followPath(Pose pose) {
         return new SequentialGroup(
                 drive.goTo(pose),
-                drive.driverControlled
+                drive.teleOpDrive
         );
     }
 

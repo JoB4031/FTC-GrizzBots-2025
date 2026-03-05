@@ -7,6 +7,7 @@ Also fixed a few bugs that surfaced during the 1/17/2026
 scrimmage.
 */
 package org.firstinspires.ftc.teamcode.theKeep;
+import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.centralHub.CommandHub;
@@ -50,7 +51,7 @@ public class TheKeepTeleOp extends NextFTCOpMode {
     }
     @Override
     public void onStartButtonPressed() {
-        Drive.INSTANCE.driverControlled.schedule();
+        Drive.INSTANCE.teleOpDrive.schedule();
 
         Gamepads.gamepad1().rightBumper()
                         .whenBecomesTrue(FidgetTech.INSTANCE.next);
@@ -73,7 +74,7 @@ public class TheKeepTeleOp extends NextFTCOpMode {
                 .whenBecomesTrue(CommandHub.INSTANCE.fireColor(FidgetTech.artifactColor.GREEN));
 
         Gamepads.gamepad1().cross()
-                .whenBecomesTrue(CommandHub.INSTANCE.followPath(PoseLibrary.INSTANCE.nearLaunchPose));
+                .whenBecomesTrue(Drive.INSTANCE.turnToTarget(new Pose(PoseLibrary.targetPoint.getX(), PoseLibrary.targetPoint.getY())));
 
     }
 }
