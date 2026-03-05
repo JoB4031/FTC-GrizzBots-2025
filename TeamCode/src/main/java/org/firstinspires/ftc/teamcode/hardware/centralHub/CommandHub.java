@@ -17,6 +17,7 @@ import dev.nextftc.core.subsystems.Subsystem;
 public class CommandHub implements Subsystem {
     public static final CommandHub INSTANCE = new CommandHub();
     CommandHub() {}
+    
     private final Flywheel cannon = Flywheel.INSTANCE;
     private final FidgetTech sorter = FidgetTech.INSTANCE;
     private final Intake intake = Intake.INSTANCE;
