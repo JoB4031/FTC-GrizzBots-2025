@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.hardware.centralHub;
 
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech.artifactsHeld;
+
 import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Drive;
@@ -9,8 +11,6 @@ import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Vision;
-
-import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.subsystems.Subsystem;
 
@@ -24,17 +24,11 @@ public class CommandHub implements Subsystem {
     private final ArtifactSensor colorSensor = ArtifactSensor.INSTANCE;
     private final Ejector boot = Ejector.INSTANCE;
     private final Drive drive = Drive.INSTANCE;
-    public Command waitForArtifact = new Command() {
-        @Override
-        public boolean isDone() {
-            return (colorSensor.getArtifact() != FidgetTech.artifactColor.NONE);
-        }
-    };
 
     public SequentialGroup fireColor(FidgetTech.artifactColor color) {
         return new SequentialGroup(
         cannon.setVelocity(3500).and(sorter.shootArtifact(color)),
-                boot.fire.thenWait(0.2),
+                boot.fire,
                 boot.reset
 
         );
@@ -72,7 +66,7 @@ public class CommandHub implements Subsystem {
     public SequentialGroup intakeOneArtifact = new SequentialGroup(
             intake.setPower(1,1)
                     .and(sorter.goEmptyIntakeSlot)
-                    .then(waitForArtifact)
+                    .then(colorSensor.findArtifact)
     );
 
     public SequentialGroup followPath(Pose pose) {
@@ -80,6 +74,13 @@ public class CommandHub implements Subsystem {
                 drive.goTo(pose),
                 drive.teleOpDrive
         );
+    }
+
+    @Override
+    public void periodic(){
+        if(sorter.spinComplete && (colorSensor.getArtifact() != FidgetTech.artifactColor.NONE)) {
+            artifactsHeld[sorter.currentSlot] = colorSensor.getArtifact();
+        }
     }
 
 }

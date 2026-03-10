@@ -7,7 +7,6 @@ Also fixed a few bugs that surfaced during the 1/17/2026
 scrimmage.
 */
 package org.firstinspires.ftc.teamcode.theKeep;
-import com.pedropathing.geometry.Pose;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.hardware.centralHub.CommandHub;
@@ -42,7 +41,8 @@ public class TheKeepTeleOp extends NextFTCOpMode {
                         Vision.INSTANCE,
                         ArtifactSensor.INSTANCE,
                         LaunchZoneTracker.INSTANCE,
-                        PoseLibrary.INSTANCE
+                        PoseLibrary.INSTANCE,
+                        CommandHub.INSTANCE
                 ),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE,

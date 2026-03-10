@@ -90,7 +90,7 @@ public class FidgetTech implements Subsystem {
             0.89, 0.925, 0.96, 0.995
     };
     private int snapPosition = 14;
-    private int currentSlot = 1;
+    public int currentSlot = 1;
 
     public boolean inIntakePosition = true;
 
