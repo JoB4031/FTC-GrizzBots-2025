@@ -25,7 +25,7 @@ public class Intake implements Subsystem {
             public boolean isDone() {
                 return true;
             }
-        }.requires(this);
+        }.requires(externalIntake, internalIntake);
     }
 
     public Command externalPower(double power)  {
@@ -34,10 +34,6 @@ public class Intake implements Subsystem {
 
     public Command internalPower(double power) {
         return new SetPower(internalIntake, power).requires(internalIntake);
-    }
-
-    public boolean isPowered() {
-        return (externalIntake.getPower() > 0);
     }
 
 }

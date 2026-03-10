@@ -4,8 +4,8 @@ import com.pedropathing.geometry.Pose;
 
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Vision;
@@ -33,7 +33,7 @@ public class CommandHub implements Subsystem {
 
     public SequentialGroup fireColor(FidgetTech.artifactColor color) {
         return new SequentialGroup(
-        cannon.setVelocity(3500).and(sorter.goToColorArtifact(color)),
+        cannon.setVelocity(3500).and(sorter.shootArtifact(color)),
                 boot.fire.thenWait(0.2),
                 boot.reset
 
@@ -71,7 +71,7 @@ public class CommandHub implements Subsystem {
 
     public SequentialGroup intakeOneArtifact = new SequentialGroup(
             intake.setPower(1,1)
-                    .and(sorter.goToIntake(sorter.findEmptySlot()))
+                    .and(sorter.goEmptyIntakeSlot)
                     .then(waitForArtifact)
     );
 

@@ -11,11 +11,10 @@ import dev.nextftc.hardware.powerable.SetPower;
 public class Flywheel implements Subsystem {
     public static final Flywheel INSTANCE = new Flywheel();
     private Flywheel() { }
-
     private double goal = 0;
     private final MotorEx leftFlywheel = new MotorEx("leftFlywheel").reversed().floatMode();
     private final MotorEx rightFlywheel = new MotorEx("rightFlywheel").floatMode();
-    private final MotorGroup flywheel = new MotorGroup(leftFlywheel, rightFlywheel);
+    private final MotorGroup flywheel = new MotorGroup(rightFlywheel, leftFlywheel);
 
     private final ControlSystem velocityController = ControlSystem.builder()
             .velPid(0.006, 0.0, 0.0)
@@ -44,7 +43,6 @@ public class Flywheel implements Subsystem {
             flywheel.setPower(0);
             return;
         }
-
         flywheel.setPower(velocityController.calculate(flywheel.getState()));
     }
 }

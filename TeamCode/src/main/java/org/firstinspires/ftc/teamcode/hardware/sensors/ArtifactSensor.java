@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
 
+import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
@@ -60,6 +61,17 @@ public class ArtifactSensor implements Subsystem {
 
         return FidgetTech.artifactColor.NONE;
     }
+
+    public Command findArtifact = new Command() {
+        @Override
+        public void update() {
+            getArtifact();
+        }
+        @Override
+        public boolean isDone() {
+            return getDetectedColor() != FidgetTech.artifactColor.NONE;
+        }
+    };
 
     public boolean fidgetBlocked() {
         double dist = distanceSensor.getDistance(DistanceUnit.INCH);

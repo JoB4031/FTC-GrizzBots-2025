@@ -16,8 +16,8 @@ import org.firstinspires.ftc.teamcode.hardware.pedroPathing.PoseLibrary;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Vision;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -53,28 +53,6 @@ public class TheKeepTeleOp extends NextFTCOpMode {
     public void onStartButtonPressed() {
         Drive.INSTANCE.teleOpDrive.schedule();
 
-        Gamepads.gamepad1().rightBumper()
-                        .whenBecomesTrue(FidgetTech.INSTANCE.next);
-
-        Gamepads.gamepad1().leftBumper()
-                .whenBecomesTrue(FidgetTech.INSTANCE.previous);
-
-        Gamepads.gamepad1().circle()
-                        .toggleOnBecomesTrue()
-                                .whenBecomesTrue(Intake.INSTANCE.setPower(1,1))
-                                .whenBecomesFalse(Intake.INSTANCE.setPower(0,0));
-
-        Gamepads.gamepad1().dpadUp()
-                .whenBecomesTrue(CommandHub.INSTANCE.firePattern());
-
-        Gamepads.gamepad1().dpadLeft()
-                .whenBecomesTrue(CommandHub.INSTANCE.fireColor(FidgetTech.artifactColor.PURPLE));
-
-        Gamepads.gamepad1().dpadRight()
-                .whenBecomesTrue(CommandHub.INSTANCE.fireColor(FidgetTech.artifactColor.GREEN));
-
-        Gamepads.gamepad1().cross()
-                .whenBecomesTrue(Drive.INSTANCE.turnToTarget(new Pose(PoseLibrary.targetPoint.getX(), PoseLibrary.targetPoint.getY())));
 
     }
 }
