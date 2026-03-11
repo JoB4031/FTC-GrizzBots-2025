@@ -26,12 +26,21 @@ public class CommandHub implements Subsystem {
     private final Drive drive = Drive.INSTANCE;
 
     public SequentialGroup fireColor(FidgetTech.artifactColor color) {
-        return new SequentialGroup(
-        cannon.setVelocity(3500).and(sorter.shootArtifact(color)),
-                boot.fire,
-                boot.reset
+        boolean artifactFound= false;
+        for (FidgetTech.artifactColor artifact : artifactsHeld)
+            if (artifact == color) {
+                artifactFound = true;
+                break;
+            }
+        if (artifactFound) {
+            return new SequentialGroup(
+                    cannon.setVelocity(3500).and(sorter.shootArtifact(color)),
+                    boot.fire,
+                    boot.reset,
+                    cannon.stopPower()
 
-        );
+            );
+        } else return new SequentialGroup(cannon.setVelocity(3500));
     }
 
     public SequentialGroup firePattern() {
@@ -68,13 +77,6 @@ public class CommandHub implements Subsystem {
                     .and(sorter.goEmptyIntakeSlot)
                     .then(colorSensor.findArtifact)
     );
-
-    public SequentialGroup followPath(Pose pose) {
-        return new SequentialGroup(
-                drive.goTo(pose),
-                drive.teleOpDrive
-        );
-    }
 
     @Override
     public void periodic(){

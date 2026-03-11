@@ -96,48 +96,31 @@ public class FidgetTech implements Subsystem {
 
     private final ServoEx fidgetTech = new ServoEx("fidgetTech", 0.001);
 
-    public Command next(boolean intake) {
-        return new Command(){
+    public Command next = new Command(){
 
-            @Override
-            public void start () {
-                if (intake) {
-                    if (inIntakePosition) {
-                        setSnapPosition(snapPosition + 2);
-                    } else setSnapPosition(snapPosition + 1);
-                } else if (inIntakePosition) {
-                    setSnapPosition(snapPosition + 1);
-                } else setSnapPosition(snapPosition + 2);
-            }
+        @Override
+        public void start () {
+            setSnapPosition(snapPosition+2);
+        }
 
-            @Override
-            public boolean isDone () {
-                return spinComplete;
-            }
+        @Override
+        public boolean isDone () {
+            return spinComplete;
+        }
 
-        };
-    }
-    public Command previous(boolean intake) {
-        return new Command(){
+    };
+    public Command previous = new Command(){
+        @Override
+        public void start () {
+            setSnapPosition(snapPosition-2);
+        }
 
-            @Override
-            public void start () {
-                if (intake) {
-                    if (inIntakePosition) {
-                        setSnapPosition(snapPosition - 2);
-                    } else setSnapPosition(snapPosition - 1);
-                } else if (inIntakePosition) {
-                    setSnapPosition(snapPosition - 1);
-                } else setSnapPosition(snapPosition - 2);
-            }
+        @Override
+        public boolean isDone () {
+            return spinComplete;
+        }
 
-            @Override
-            public boolean isDone () {
-                return spinComplete;
-            }
-
-        };
-    }
+    };
     public Command setSnapPoint(int snapPoint) {
         return new Command() {
 
@@ -176,19 +159,19 @@ public class FidgetTech implements Subsystem {
             public void start() {
                 if (artifact == artifactColor.PURPLE) {
                     if (artifactsHeld[0] == artifactColor.PURPLE) {
-                        goToIntakeSlot(0);
+                        goToShootSlot(0);
                     } else if (artifactsHeld[1] == artifactColor.PURPLE) {
-                        goToIntakeSlot(1);
+                        goToShootSlot(1);
                     } else if (artifactsHeld[2] == artifactColor.PURPLE) {
-                        goToIntakeSlot(2);
+                        goToShootSlot(2);
                     }
                 } else {
                     if (artifactsHeld[0] == artifactColor.GREEN) {
-                        goToIntakeSlot(0);
+                        goToShootSlot(0);
                     } else if (artifactsHeld[1] == artifactColor.GREEN) {
-                        goToIntakeSlot(1);
+                        goToShootSlot(1);
                     } else if (artifactsHeld[2] == artifactColor.GREEN) {
-                        goToIntakeSlot(2);
+                        goToShootSlot(2);
                     }
                 }
             }
@@ -223,4 +206,5 @@ public class FidgetTech implements Subsystem {
             } else currentSlot = 0;
         }
     }
+
 }

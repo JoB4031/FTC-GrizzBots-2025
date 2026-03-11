@@ -31,8 +31,7 @@ public class Flywheel implements Subsystem {
         return new SetPower(flywheel, 0).requires(this);
     }
 
-
-    public boolean atSpeed() {
+    public boolean currentSpeed() {
         double current = flywheel.getState().getVelocity();
         return Math.abs(current - goal) < 50;
     }
@@ -45,6 +44,7 @@ public class Flywheel implements Subsystem {
         }
         flywheel.setPower(velocityController.calculate(flywheel.getState()));
     }
+
 }
 
 

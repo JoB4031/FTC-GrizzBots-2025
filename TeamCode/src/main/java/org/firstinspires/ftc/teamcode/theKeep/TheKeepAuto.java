@@ -11,12 +11,16 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 
 import org.firstinspires.ftc.teamcode.hardware.centralHub.AutoProgram;
+import org.firstinspires.ftc.teamcode.hardware.centralHub.CommandHub;
 import org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchZoneTracker;
+import org.firstinspires.ftc.teamcode.hardware.pedroPathing.PoseLibrary;
+import org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Vision;
 
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
@@ -26,15 +30,19 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 @Autonomous(name="The Keep Auto",group="The Keep")
 public class TheKeepAuto extends NextFTCOpMode {
 
-    public void AutonomousProgram() {
+    public TheKeepAuto() {
         addComponents(
                 new SubsystemComponent(
-                        Ejector.INSTANCE,
-                        Flywheel.INSTANCE,
-                        FidgetTech.INSTANCE,
-                        Intake.INSTANCE,
                         Drive.INSTANCE,
-                        LaunchZoneTracker.INSTANCE
+                        Ejector.INSTANCE,
+                        FidgetTech.INSTANCE,
+                        Flywheel.INSTANCE,
+                        Intake.INSTANCE,
+                        Vision.INSTANCE,
+                        ArtifactSensor.INSTANCE,
+                        LaunchZoneTracker.INSTANCE,
+                        PoseLibrary.INSTANCE,
+                        CommandHub.INSTANCE
                 ),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE

@@ -1,28 +1,93 @@
 package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
+import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.core.units.Angle;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.extensions.pedro.PedroDriverControlled;
 import dev.nextftc.extensions.pedro.TurnBy;
+import dev.nextftc.extensions.pedro.TurnTo;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.hardware.driving.DriverControlledCommand;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.HeadingInterpolator;
+import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 
 public class Drive implements Subsystem {
     public static final Drive INSTANCE = new Drive();
+    public boolean normalDrive = true;
     private Drive() {}
-    public DriverControlledCommand teleOpDrive = new PedroDriverControlled(
-            Gamepads.gamepad1().leftStickY(),
-            Gamepads.gamepad1().leftStickX(),
-            Gamepads.gamepad1().rightStickX(),
-            false
-    );
+    public DriverControlledCommand normalTeleOpDrive() {
+        normalDrive = true;
+        return new PedroDriverControlled(
+                Gamepads.gamepad1().leftStickY(),
+                Gamepads.gamepad1().leftStickX(),
+                Gamepads.gamepad1().rightStickX(),
+                false
+        );
+    }
+    public DriverControlledCommand slowTeleOpDrive() {
+        normalDrive = false;
+        return new PedroDriverControlled(
+                () -> Gamepads.gamepad1().leftStickY().get() * 0.5,
+                () -> Gamepads.gamepad1().leftStickX().get() * 0.5,
+                () -> Gamepads.gamepad1().rightStickX().get() * 0.5,
+                false
+        );
+    }
+    public DriverControlledCommand resumeTeleOpDrive() {
+        if(normalDrive) {
+            return normalTeleOpDrive();
+        } else return slowTeleOpDrive();
+    }
+    public Command facePointDrive(Pose target) {
+        return new Command() {
+
+            @Override
+            public void update() {
+                Pose robotPose = PedroComponent.follower().getPose();
+
+                double dx = target.getX() - robotPose.getX();
+                double dy = target.getY() - robotPose.getY();
+
+                // Angle robot should face
+                double targetAngle = Math.atan2(dy, dx);
+
+                // Current robot heading
+                double currentHeading = robotPose.getHeading();
+
+                // Heading error wrapped to -π..π
+                double error = wrapAngle(targetAngle - currentHeading);
+
+                // Simple proportional controller for rotation
+                double kP = 2.0; // tune this
+                double rotationPower = kP * error;
+
+                // Drive with joystick, rotation locked
+                PedroComponent.follower().setTeleOpDrive(
+                        Gamepads.gamepad1().leftStickY().get(),
+                        Gamepads.gamepad1().leftStickX().get(),
+                        rotationPower
+                );
+            }
+
+            @Override
+            public boolean isDone() {
+                return false; // runs until canceled
+            }
+            private double wrapAngle(double angle) {
+                while (angle > Math.PI) angle -= 2 * Math.PI;
+                while (angle < -Math.PI) angle += 2 * Math.PI;
+                return angle;
+            }
+        };
+    }
 
     public FollowPath goTo(Pose pose) {
         Follower pedro = PedroComponent.follower();
@@ -32,33 +97,34 @@ public class Drive implements Subsystem {
                 .build();
         return new FollowPath(pathToFollow);
     }
-
-    public TurnBy turnToTarget(Pose target) {
-        Pose currentPose = PedroComponent.follower().getPose();
-        return new TurnBy(Angle.fromDeg(rotationToFacePoint(target)));
+    public FollowPath goTo(Pose pose, Pose spline, boolean linearInterpolation) {
+        Follower pedro = PedroComponent.follower();
+        PathChain pathToFollow;
+        if (linearInterpolation) {
+            pathToFollow = pedro.pathBuilder()
+                    .addPath(new BezierCurve(pedro.getPose(), spline, pose))
+                    .setLinearHeadingInterpolation(pedro.getHeading(), pose.getHeading())
+                    .build();
+        } else {
+            pathToFollow = pedro.pathBuilder()
+                    .addPath(new BezierCurve(pedro.getPose(), spline, pose))
+                    .setConstantHeadingInterpolation(pose.getHeading())
+                    .build();
+        }
+        return new FollowPath(pathToFollow);
     }
-    public static double rotationToFacePoint(Pose target) {
-        double px = PedroComponent.follower().getPose().getX();
-        double py = PedroComponent.follower().getPose().getY();
-        double heading = PedroComponent.follower().getHeading();
 
-        double fx = target.getX();
-        double fy = target.getX();
-        // Vector from moving point to fixed point
-        double dx = fx - px;
-        double dy = fy - py;
-
-        // Angle from moving point to fixed point
-        double targetAngle = Math.atan2(dy, dx);
-
-        // Difference between target angle and current heading
-        double delta = targetAngle - heading;
-
-        // Normalize to [-π, π]
-        delta = Math.atan2(Math.sin(delta), Math.cos(delta));
-
-        return delta;
+    public TurnTo turnToTarget(Pose target) {
+        return new TurnTo(Angle.fromRad(angleToPoint(target)));
     }
+    public double angleToPoint(Pose target) {
+        double x1 = PedroComponent.follower().getPose().getX();
+        double y1 = PedroComponent.follower().getPose().getY();
+        double x2 = target.getX();
+        double y2 = target.getY();
+        return Math.atan2(y2 - y1, x2 - x1);
+    }
+
 
 
 

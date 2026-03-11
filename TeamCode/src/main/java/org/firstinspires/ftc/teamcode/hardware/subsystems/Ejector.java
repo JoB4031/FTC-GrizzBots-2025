@@ -20,7 +20,9 @@ public class Ejector implements Subsystem {
         @Override
         public void start() {
             hitTime.restart();
-            ejector.setPosition(0.3);
+            if(!FidgetTech.INSTANCE.inIntakePosition && FidgetTech.INSTANCE.spinComplete) {
+                ejector.setPosition(0.3);
+            }
         }
 
         @Override
