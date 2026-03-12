@@ -86,7 +86,7 @@ public class Drive implements Subsystem {
                 while (angle < -Math.PI) angle += 2 * Math.PI;
                 return angle;
             }
-        };
+        }.requires(this);
     }
 
     public FollowPath goTo(Pose pose) {
