@@ -2,8 +2,6 @@ package org.firstinspires.ftc.teamcode.hardware.centralHub;
 
 import static org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech.artifactsHeld;
 
-import com.pedropathing.geometry.Pose;
-
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Drive;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
@@ -34,7 +32,7 @@ public class CommandHub implements Subsystem {
             }
         if (artifactFound) {
             return new SequentialGroup(
-                    cannon.setVelocity(3500).and(sorter.shootArtifact(color)),
+                    cannon.setVelocity(3500).and(sorter.goToArtifact(color)),
                     boot.fire,
                     boot.reset,
                     cannon.stopPower()

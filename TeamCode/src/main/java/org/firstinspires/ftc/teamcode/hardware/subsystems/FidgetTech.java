@@ -11,10 +11,24 @@ public class FidgetTech implements Subsystem {
     public static final FidgetTech INSTANCE = new FidgetTech();
     private FidgetTech() {}
 
+    public enum artifactColor { PURPLE, GREEN, NONE }
+    public static artifactColor[] artifactsHeld =
+            { artifactColor.NONE, artifactColor.NONE, artifactColor.NONE };
+    private final double[] positions = {
+            0.0, 0.03, 0.07, 0.105, 0.145, 0.18, 0.22, 0.26,
+            0.295, 0.325, 0.365, 0.405, 0.445, 0.485, 0.525, 0.565,
+            0.6, 0.64, 0.68, 0.715, 0.755, 0.785, 0.825, 0.855,
+            0.89, 0.925, 0.96, 0.995
+    };
+    private static int snapPosition = 14;
+    public static int currentSlot = 1;
+    public static boolean inIntakePosition = true;
+
     private static final ElapsedTime spinTime = new ElapsedTime();
     private static final double TIME_PER_SNAP = 0.25;
-
     private int snapSpaces = 0;
+    public boolean spinComplete = false;
+
     private void setSnapPosition(int targetSnap) {
         spinTime.reset();
         snapSpaces = Math.abs(snapPosition - targetSnap);
@@ -75,25 +89,6 @@ public class FidgetTech implements Subsystem {
         }
     }
 
-    public boolean spinComplete = false;
-
-    public enum artifactColor { PURPLE, GREEN, NONE }
-
-    public static artifactColor[] artifactsHeld =
-            { artifactColor.NONE, artifactColor.NONE, artifactColor.NONE };
-
-    // 28 servo positions
-    private final double[] positions = {
-            0.0, 0.03, 0.07, 0.105, 0.145, 0.18, 0.22, 0.26,
-            0.295, 0.325, 0.365, 0.405, 0.445, 0.485, 0.525, 0.565,
-            0.6, 0.64, 0.68, 0.715, 0.755, 0.785, 0.825, 0.855,
-            0.89, 0.925, 0.96, 0.995
-    };
-    private int snapPosition = 14;
-    public int currentSlot = 1;
-
-    public boolean inIntakePosition = true;
-
     private final ServoEx fidgetTech = new ServoEx("fidgetTech", 0.001);
 
     public Command next = new Command(){
@@ -152,7 +147,7 @@ public class FidgetTech implements Subsystem {
             return spinComplete;
         }
     };
-    public Command shootArtifact(artifactColor artifact) {
+    public Command goToArtifact(artifactColor artifact) {
         return new Command() {
 
             @Override
