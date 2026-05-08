@@ -2,12 +2,9 @@ package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.core.units.Angle;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.extensions.pedro.PedroDriverControlled;
-import dev.nextftc.extensions.pedro.TurnBy;
-import dev.nextftc.extensions.pedro.TurnTo;
 import dev.nextftc.ftc.Gamepads;
 import dev.nextftc.hardware.driving.DriverControlledCommand;
 
@@ -15,8 +12,6 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.HeadingInterpolator;
-import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
 
 public class Drive implements Subsystem {
@@ -113,19 +108,5 @@ public class Drive implements Subsystem {
         }
         return new FollowPath(pathToFollow);
     }
-
-    public TurnTo turnToTarget(Pose target) {
-        return new TurnTo(Angle.fromRad(angleToPoint(target)));
-    }
-    public double angleToPoint(Pose target) {
-        double x1 = PedroComponent.follower().getPose().getX();
-        double y1 = PedroComponent.follower().getPose().getY();
-        double x2 = target.getX();
-        double y2 = target.getY();
-        return Math.atan2(y2 - y1, x2 - x1);
-    }
-
-
-
 
 }
