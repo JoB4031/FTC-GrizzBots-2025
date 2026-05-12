@@ -105,5 +105,6 @@ public class Vision implements Subsystem {
                 }
             }
         }
+        ActiveOpMode.telemetry().addData("Pattern", pattern);
     }
 }

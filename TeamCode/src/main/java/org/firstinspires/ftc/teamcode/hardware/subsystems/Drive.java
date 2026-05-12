@@ -5,45 +5,46 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.extensions.pedro.PedroDriverControlled;
+import dev.nextftc.ftc.ActiveOpMode;
 import dev.nextftc.ftc.Gamepads;
-import dev.nextftc.hardware.driving.DriverControlledCommand;
-
-import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
+import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.PathChain;
 
 public class Drive implements Subsystem {
     public static final Drive INSTANCE = new Drive();
-    public boolean normalDrive = true;
     private Drive() {}
-    public DriverControlledCommand normalTeleOpDrive() {
-        normalDrive = true;
-        return new PedroDriverControlled(
-                Gamepads.gamepad1().leftStickY(),
-                Gamepads.gamepad1().leftStickX(),
-                Gamepads.gamepad1().rightStickX(),
-                false
-        );
-    }
-    public DriverControlledCommand slowTeleOpDrive() {
-        normalDrive = false;
-        return new PedroDriverControlled(
-                () -> Gamepads.gamepad1().leftStickY().get() * 0.5,
-                () -> Gamepads.gamepad1().leftStickX().get() * 0.5,
-                () -> Gamepads.gamepad1().rightStickX().get() * 0.5,
-                false
-        );
-    }
-    public DriverControlledCommand resumeTeleOpDrive() {
-        if(normalDrive) {
-            return normalTeleOpDrive();
-        } else return slowTeleOpDrive();
+
+    public Command normalTeleOpDrive() {
+        return new Command() {
+            final PedroDriverControlled teleOpDrive = new PedroDriverControlled(
+                    Gamepads.gamepad1().leftStickY().negate(),
+                    Gamepads.gamepad1().leftStickX().negate(),
+                    Gamepads.gamepad1().rightStickX().negate(),
+                    true
+            );
+            @Override
+            public void start() {
+
+                teleOpDrive.start();
+            }
+
+            @Override
+            public void update() {
+                teleOpDrive.update();
+            }
+
+            @Override
+            public boolean isDone() {
+                return false;
+            }
+        }.requires(this);
     }
     public Command facePointDrive(Pose target) {
-        return new Command() {
 
+        return new Command() {
             @Override
             public void update() {
                 Pose robotPose = PedroComponent.follower().getPose();
@@ -66,8 +67,8 @@ public class Drive implements Subsystem {
 
                 // Drive with joystick, rotation locked
                 PedroComponent.follower().setTeleOpDrive(
-                        Gamepads.gamepad1().leftStickY().get(),
-                        Gamepads.gamepad1().leftStickX().get(),
+                        Gamepads.gamepad1().leftStickY().get()*-1,
+                        Gamepads.gamepad1().leftStickX().get()*-1,
                         rotationPower
                 );
             }
@@ -85,28 +86,40 @@ public class Drive implements Subsystem {
     }
 
     public FollowPath goTo(Pose pose) {
-        Follower pedro = PedroComponent.follower();
-        PathChain pathToFollow = pedro.pathBuilder()
-                .addPath(new BezierLine(pedro.getPose(), pose.getPose()))
-                .setLinearHeadingInterpolation(pedro.getHeading(), pose.getHeading())
+        PathChain pathToFollow = PedroComponent.follower().pathBuilder()
+                .addPath(new BezierLine(PedroComponent.follower().getPose(), pose.getPose()))
+                .setLinearHeadingInterpolation(PedroComponent.follower().getHeading(), pose.getHeading())
                 .build();
         return new FollowPath(pathToFollow);
     }
+    public FollowPath goTo(Pose pose, Pose target) {
+        PathChain pathToFollow;
+            pathToFollow = PedroComponent.follower().pathBuilder()
+                    .addPath(new BezierCurve(PedroComponent.follower().getPose(), pose))
+                    .setHeadingInterpolation(HeadingInterpolator.facingPoint(target))
+                    .build();
+
+        return new FollowPath(pathToFollow);
+    }
     public FollowPath goTo(Pose pose, Pose spline, boolean linearInterpolation) {
-        Follower pedro = PedroComponent.follower();
         PathChain pathToFollow;
         if (linearInterpolation) {
-            pathToFollow = pedro.pathBuilder()
-                    .addPath(new BezierCurve(pedro.getPose(), spline, pose))
-                    .setLinearHeadingInterpolation(pedro.getHeading(), pose.getHeading())
+            pathToFollow = PedroComponent.follower().pathBuilder()
+                    .addPath(new BezierCurve(PedroComponent.follower().getPose(), spline, pose))
+                    .setLinearHeadingInterpolation(PedroComponent.follower().getHeading(), pose.getHeading())
                     .build();
         } else {
-            pathToFollow = pedro.pathBuilder()
-                    .addPath(new BezierCurve(pedro.getPose(), spline, pose))
+            pathToFollow = PedroComponent.follower().pathBuilder()
+                    .addPath(new BezierCurve(PedroComponent.follower().getPose(), spline, pose))
                     .setConstantHeadingInterpolation(pose.getHeading())
                     .build();
         }
         return new FollowPath(pathToFollow);
+    }
+
+    @Override
+    public void periodic() {
+        ActiveOpMode.telemetry().addData("Position", PedroComponent.follower().getPose());
     }
 
 }

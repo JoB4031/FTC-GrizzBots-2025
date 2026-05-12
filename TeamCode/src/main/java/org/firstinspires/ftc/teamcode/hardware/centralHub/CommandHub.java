@@ -1,85 +1,59 @@
 package org.firstinspires.ftc.teamcode.hardware.centralHub;
 
-import static org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech.artifactsHeld;
-
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Drive;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Vision;
-import dev.nextftc.core.commands.groups.SequentialGroup;
+import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
+import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 
 public class CommandHub implements Subsystem {
     public static final CommandHub INSTANCE = new CommandHub();
     CommandHub() {}
-    
-    private final Flywheel cannon = Flywheel.INSTANCE;
-    private final FidgetTech sorter = FidgetTech.INSTANCE;
-    private final Intake intake = Intake.INSTANCE;
-    private final ArtifactSensor colorSensor = ArtifactSensor.INSTANCE;
-    private final Ejector boot = Ejector.INSTANCE;
-    private final Drive drive = Drive.INSTANCE;
 
-    public SequentialGroup fireColor(FidgetTech.artifactColor color) {
-        boolean artifactFound= false;
-        for (FidgetTech.artifactColor artifact : artifactsHeld)
-            if (artifact == color) {
-                artifactFound = true;
-                break;
+    public Command intakeArtifacts() {
+        return new Command() {
+
+            @Override
+            public void start() {
+                Intake.INSTANCE.setPower(1, 1);
             }
-        if (artifactFound) {
-            return new SequentialGroup(
-                    cannon.setVelocity(3500).and(sorter.goToArtifact(color)),
-                    boot.fire,
-                    boot.reset,
-                    cannon.stopPower()
 
-            );
-        } else return new SequentialGroup(cannon.setVelocity(3500));
+            @Override
+            public void update() {
+                if (FidgetTech.artifactsHeld[FidgetTech.currentSlot] != FidgetTech.artifactColor.NONE) {
+                    FidgetTech.INSTANCE.goToArtifact(FidgetTech.artifactColor.NONE);
+                }
+            }
+
+            @Override
+            public boolean isDone() {
+                return FidgetTech.INSTANCE.fidgetTechFull;
+            }
+
+            @Override
+            public void stop(boolean interrupted) {
+                FidgetTech.INSTANCE.goToArtifact(FidgetTech.artifactColor.PURPLE);
+            }
+
+        };
     }
-
-    public SequentialGroup firePattern() {
-        if(Vision.pattern == Vision.BallPattern.PPG) {
-            return new SequentialGroup(
-                    fireColor(FidgetTech.artifactColor.PURPLE),
-                    fireColor(FidgetTech.artifactColor.PURPLE),
-                    fireColor(FidgetTech.artifactColor.GREEN)
-            );
-        }
-        if(Vision.pattern == Vision.BallPattern.PGP) {
-            return new SequentialGroup(
-                    fireColor(FidgetTech.artifactColor.PURPLE),
-                    fireColor(FidgetTech.artifactColor.GREEN),
-                    fireColor(FidgetTech.artifactColor.PURPLE)
-            );
-        }
-        if(Vision.pattern == Vision.BallPattern.GPP) {
-            return new SequentialGroup(
-                    fireColor(FidgetTech.artifactColor.GREEN),
-                    fireColor(FidgetTech.artifactColor.PURPLE),
-                    fireColor(FidgetTech.artifactColor.PURPLE)
-            );
-        }
-        return new SequentialGroup(
-                fireColor(FidgetTech.artifactColor.PURPLE),
-                fireColor(FidgetTech.artifactColor.GREEN),
-                fireColor(FidgetTech.artifactColor.PURPLE)
-        );
+    public Command stopIntakeArtifacts() {
+        return new Command() {
+            @Override
+            public void start() {
+                intakeArtifacts().cancel();
+            }
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+        };
     }
-
-    public SequentialGroup intakeOneArtifact = new SequentialGroup(
-            intake.setPower(1,1)
-                    .and(sorter.goEmptyIntakeSlot)
-                    .then(colorSensor.findArtifact)
-    );
 
     @Override
     public void periodic(){
-        if(sorter.spinComplete && (colorSensor.getArtifact() != FidgetTech.artifactColor.NONE)) {
-            artifactsHeld[sorter.currentSlot] = colorSensor.getArtifact();
+        if(FidgetTech.INSTANCE.spinComplete && (ArtifactSensor.INSTANCE.currentArtifact != FidgetTech.artifactColor.NONE)) {
+            FidgetTech.artifactsHeld[FidgetTech.currentSlot] = ArtifactSensor.INSTANCE.currentArtifact;
         }
     }
 

@@ -8,28 +8,69 @@ public class LEDIndicator implements Subsystem {
     public static final LEDIndicator INSTANCE = new LEDIndicator();
     private LEDIndicator() {}
     private final ServoEx led = new ServoEx("LED");
-    public void red() {
-        led.setPosition(0.277);
+
+    public Command red() {
+        return new Command() {
+            @Override
+            public void start() {led.setPosition(0.277);}
+            @Override
+            public boolean isDone() {return true;}
+        }.requires(this);
     }
-    public void orange() {
-        led.setPosition(0.333);
+    public Command orange() {
+        return new Command() {
+            @Override
+            public void start() {led.setPosition(0.333);}
+            @Override
+            public boolean isDone() {return true;}
+        }.requires(this);
     }
-    public void yellow() {
-        led.setPosition(0.388);
+    public Command yellow() {
+        return new Command() {
+            @Override
+            public void start() {led.setPosition(0.388);}
+            @Override
+            public boolean isDone() {return true;}
+        }.requires(this);
     }
-    public void green() {
-        led.setPosition(0.500);
+    public Command green() {
+        return new Command() {
+            @Override
+            public void start() {led.setPosition(0.500);}
+            @Override
+            public boolean isDone() {return true;}
+        }.requires(this);
     }
-    public void blue() {
-        led.setPosition(0.611);
+    public Command blue() {
+        return new Command() {
+            @Override
+            public void start() {led.setPosition(0.611);}
+            @Override
+            public boolean isDone() {return true;}
+        }.requires(this);
     }
-    public void purple() {
-        led.setPosition(0.722);
+    public Command purple() {
+        return new Command() {
+            @Override
+            public void start() {led.setPosition(0.722);}
+            @Override
+            public boolean isDone() {return true;}
+        }.requires(this);
     }
-    public void white() {
-        led.setPosition(1);
+    public Command white() {
+        return new Command() {
+            @Override
+            public void start() {led.setPosition(1);}
+            @Override
+            public boolean isDone() {return true;}
+        }.requires(this);
     }
-    public void off() {
-        led.setPosition(0);
+    public Command off() {
+        return new Command() {
+            @Override
+            public void start() {led.setPosition(0);}
+            @Override
+            public boolean isDone() {return true;}
+        }.requires(this);
     }
 }

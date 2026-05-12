@@ -9,8 +9,8 @@ public class Intake implements Subsystem {
     public static final Intake INSTANCE = new Intake();
     private Intake() {}
 
-    private final MotorEx externalIntake = new MotorEx("externalIntake").floatMode();
-    private final MotorEx internalIntake = new MotorEx("internalIntake").floatMode();
+    private final MotorEx externalIntake = new MotorEx("intake").floatMode();
+    private final MotorEx internalIntake = new MotorEx("internalIntake").reversed().floatMode();
 
     public Command setPower(double exteriorPower, double interiorPower) {
         return new Command() {
@@ -25,13 +25,12 @@ public class Intake implements Subsystem {
             public boolean isDone() {
                 return true;
             }
+
         }.requires(externalIntake, internalIntake);
     }
-
-    public Command externalPower(double power)  {
+    public Command externalPower(double power) {
         return new SetPower(externalIntake, power).requires(externalIntake);
     }
-
     public Command internalPower(double power) {
         return new SetPower(internalIntake, power).requires(internalIntake);
     }

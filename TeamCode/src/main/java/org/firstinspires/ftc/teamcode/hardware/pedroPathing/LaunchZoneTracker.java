@@ -1,21 +1,18 @@
 package org.firstinspires.ftc.teamcode.hardware.pedroPathing;
-import static org.firstinspires.ftc.teamcode.hardware.pedroPathing.PoseLibrary.targetPoint;
 
-import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.Pose;
 import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.PolygonZone;
-
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.extensions.pedro.PedroComponent;
+import dev.nextftc.ftc.ActiveOpMode;
 
 public class LaunchZoneTracker implements Subsystem {
+
     public static final LaunchZoneTracker INSTANCE = new LaunchZoneTracker();
     private LaunchZoneTracker() {}
 
     private final PolygonZone closeLaunchArea =
             new PolygonZone(new Point(144, 144), new Point(72, 72), new Point(0, 144));
-
     private final PolygonZone farLaunchArea =
             new PolygonZone(new Point(48, 0), new Point(72, 24), new Point(96, 0));
 
@@ -25,42 +22,21 @@ public class LaunchZoneTracker implements Subsystem {
     public boolean robotInRange;
     public boolean farLaunch;
     public double shootDistance;
-    private final Follower pedro = PedroComponent.follower();
 
     @Override
     public void periodic() {
-        robotToGoalZone.setPosition(pedro.getPose().getX(), pedro.getPose().getY());
-        robotToGoalZone.setRotation(pedro.getHeading());
+        robotToGoalZone.setPosition(PedroComponent.follower().getPose().getX(), PedroComponent.follower().getPose().getY());
+        robotToGoalZone.setRotation(PedroComponent.follower().getHeading());
 
-        robotLaunchZone.setPosition(pedro.getPose().getX(), pedro.getPose().getY());
-        robotLaunchZone.setRotation(pedro.getHeading());
+        robotLaunchZone.setPosition(PedroComponent.follower().getPose().getX(), PedroComponent.follower().getPose().getY());
+        robotLaunchZone.setRotation(PedroComponent.follower().getHeading());
 
-        shootDistance = ((robotToGoalZone.distanceTo(targetPoint) * 0.0254) - 0.2);
-
-        robotInRange =
-                (shootDistance >= 0.9);
+        shootDistance = ((robotToGoalZone.distanceTo(new Point(PoseLibrary.INSTANCE.goal.getX(), PoseLibrary.INSTANCE.goal.getY())) * 0.0254) - 0.2);
+        robotInRange = shootDistance >= 0.9;
 
         farLaunch = robotLaunchZone.isInside(farLaunchArea);
-    }
-    public Pose closestPoseToZone(PolygonZone zone, Pose... poses) {
-        if (poses == null || poses.length == 0) {
-            throw new IllegalArgumentException("At least one pose must be provided");
-        }
 
-        Pose closest = poses[0];
-        double closestDistance = zone.distanceTo(new Point(closest.getX(), closest.getY()));
-
-        for (int i = 1; i < poses.length; i++) {
-            Pose current = poses[i];
-            double currentDistance = zone.distanceTo(new Point(current.getX(), current.getY()));
-
-            if (currentDistance < closestDistance) {
-                closest = current;
-                closestDistance = currentDistance;
-            }
-        }
-
-        return closest;
+        ActiveOpMode.telemetry().addData("Shoot Distance", shootDistance);
     }
 
 }

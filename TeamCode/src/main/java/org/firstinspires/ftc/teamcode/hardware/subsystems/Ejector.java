@@ -1,50 +1,49 @@
 package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
 import com.skeletonarmy.marrow.TimerEx;
-
 import java.util.concurrent.TimeUnit;
-
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.ServoEx;
-import dev.nextftc.hardware.positionable.SetPosition;
 
 public class Ejector implements Subsystem {
     public static final Ejector INSTANCE = new Ejector();
-    private Ejector() { }
+    private Ejector() {}
     private final TimerEx hitTime = new TimerEx(0.2, TimeUnit.SECONDS);
     private final ServoEx ejector = new ServoEx("ejector", 0.001);
+    private boolean fireDone;
 
-    public Command fire = new Command() {
+    public Command fire()  {
+        return new Command() {
 
-        @Override
-        public void start() {
-            hitTime.restart();
-            if(!FidgetTech.inIntakePosition && FidgetTech.INSTANCE.spinComplete) {
-                ejector.setPosition(0.3);
+            @Override
+            public void start() {
+                fireDone = false;
+                hitTime.restart();
+                if (!FidgetTech.inIntakePosition && FidgetTech.INSTANCE.spinComplete) {
+                    ejector.setPosition(0.3);
+                    FidgetTech.artifactsHeld[FidgetTech.currentSlot] = FidgetTech.artifactColor.NONE;
+                }
             }
-        }
+            @Override
+            public void update() {
+                if (hitTime.isDone()) {
+                    hitTime.restart();
+                    ejector.setPosition(0);
+                    fireDone = true;
+                }
+            }
 
-        @Override
-        public boolean isDone() {
-            return hitTime.isDone();
-        }
+            @Override
+            public boolean isDone() {
+                return fireDone;
+            }
+        }.requires(this);
+    }
 
-    };
-
-    public Command reset = new Command() {
-
-        @Override
-        public void start() {
-            hitTime.restart();
-            ejector.setPosition(0);
-        }
-
-        @Override
-        public boolean isDone() {
-            return hitTime.isDone();
-        }
-
-    };
+    @Override
+    public void initialize() {
+        ejector.setPosition(0);
+    }
 }
 

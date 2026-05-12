@@ -1,17 +1,13 @@
 package org.firstinspires.ftc.teamcode.hardware.sensors;
 
 import android.graphics.Color;
-
 import com.bylazar.configurables.annotations.Configurable;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
-
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
-
-import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
@@ -21,21 +17,9 @@ public class ArtifactSensor implements Subsystem {
     public static final ArtifactSensor INSTANCE = new ArtifactSensor();
     private ArtifactSensor() {}
 
-    // ------------------------------------------------------------
-    // HARDWARE
-    // ------------------------------------------------------------
-
     private RevColorSensorV3 distanceSensor;
     private NormalizedColorSensor colorSensor;
-
-    // ------------------------------------------------------------
-    // STATE
-    // ------------------------------------------------------------
-
-
-    // ------------------------------------------------------------
-    // INITIALIZATION (NEXT FTC STYLE)
-    // ------------------------------------------------------------
+    public FidgetTech.artifactColor currentArtifact = FidgetTech.artifactColor.NONE;
 
     @Override
     public void initialize() {
@@ -43,44 +27,8 @@ public class ArtifactSensor implements Subsystem {
 
         distanceSensor = hw.get(RevColorSensorV3.class, "color");
         colorSensor = hw.get(NormalizedColorSensor.class, "color");
-
         colorSensor.setGain(10);
     }
-
-    // ------------------------------------------------------------
-    // ARTIFACT DETECTION LOGIC
-    // ------------------------------------------------------------
-
-    public FidgetTech.artifactColor getArtifact() {
-        double dist = distanceSensor.getDistance(DistanceUnit.INCH);
-
-        if (dist < 2 && (getDetectedColor() != FidgetTech.artifactColor.NONE)) {
-            return getDetectedColor();
-
-        }
-
-        return FidgetTech.artifactColor.NONE;
-    }
-
-    public Command findArtifact = new Command() {
-        @Override
-        public void update() {
-            getArtifact();
-        }
-        @Override
-        public boolean isDone() {
-            return getDetectedColor() != FidgetTech.artifactColor.NONE;
-        }
-    };
-
-    public boolean fidgetBlocked() {
-        double dist = distanceSensor.getDistance(DistanceUnit.INCH);
-        return dist < 2;
-    }
-
-    // ------------------------------------------------------------
-    // COLOR DETECTION LOGIC
-    // ------------------------------------------------------------
 
     public FidgetTech.artifactColor getDetectedColor() {
         NormalizedRGBA colors = colorSensor.getNormalizedColors();
@@ -95,6 +43,25 @@ public class ArtifactSensor implements Subsystem {
 
         return FidgetTech.artifactColor.NONE;
     }
+    public FidgetTech.artifactColor getArtifact() {
+
+        double dist = distanceSensor.getDistance(DistanceUnit.INCH);
+
+        if (dist < 2 && (getDetectedColor() != FidgetTech.artifactColor.NONE)) {
+            return getDetectedColor();
+
+        }
+
+        return FidgetTech.artifactColor.NONE;
+    }
+
+    @Override
+    public void periodic() {
+        currentArtifact = getArtifact();
+        ActiveOpMode.telemetry().addData("Current Artifact Color", currentArtifact);
+    }
+
+
 
 
 }
