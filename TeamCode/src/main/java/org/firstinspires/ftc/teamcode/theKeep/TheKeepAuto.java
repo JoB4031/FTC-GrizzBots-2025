@@ -10,7 +10,7 @@ package org.firstinspires.ftc.teamcode.theKeep;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.hardware.centralHub.AutoProgram;
 import org.firstinspires.ftc.teamcode.hardware.centralHub.CommandHub;
-import org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchZoneTracker;
+import org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchTracker;
 import org.firstinspires.ftc.teamcode.hardware.pedroPathing.PoseLibrary;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor;
 import org.firstinspires.ftc.teamcode.hardware.sensors.LEDIndicator;
@@ -36,7 +36,7 @@ public class TheKeepAuto extends NextFTCOpMode {
                         LEDIndicator.INSTANCE,
                         PoseLibrary.INSTANCE,
                         Vision.INSTANCE,
-                        LaunchZoneTracker.INSTANCE,
+                        LaunchTracker.INSTANCE,
                         Drive.INSTANCE,
                         Intake.INSTANCE,
                         Flywheel.INSTANCE,

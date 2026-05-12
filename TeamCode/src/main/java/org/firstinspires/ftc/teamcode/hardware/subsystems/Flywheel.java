@@ -11,6 +11,7 @@ import dev.nextftc.hardware.impl.MotorEx;
 public class Flywheel implements Subsystem {
     public static final Flywheel INSTANCE = new Flywheel();
     private Flywheel() { }
+
     private final MotorEx leftFlywheel = new MotorEx("leftFlywheel")
             .reversed()
             .floatMode();
@@ -19,7 +20,27 @@ public class Flywheel implements Subsystem {
     private final MotorGroup flywheel = new MotorGroup(rightFlywheel, leftFlywheel);
     private final ControlSystem velocityController = ControlSystem.builder()
             .velPid(0.006, 0.0, 0.0)
+            .basicFF()
             .build();
+
+    private double RPMToVelocity(double RPM) {
+        return RPM*0.41;
+    }
+    public double getRequiredVelocity(double distance, boolean farLaunch) {
+        double setPoint;
+        double shotMultiplier = 5.7;
+        if (farLaunch) {
+            setPoint = (RPMToVelocity((shotMultiplier + 0.5) * Math.sqrt(398210 * distance)
+                    - 900 * Math.sqrt(distance) + (-667 * distance)
+                    + (Math.ceil(distance / 5) * (1433))));
+        } else {
+            setPoint = (RPMToVelocity((shotMultiplier - 0.1) * Math.sqrt(398210 * distance)
+                    - 900 * Math.sqrt(distance) + (-667 * distance)
+                    + (Math.ceil(distance / 5) * (1433))));
+        }
+        if (setPoint > 2460) setPoint = 2460;
+        return setPoint;
+    }
 
     public Command setVelocity(double velocity) {
         return new RunToVelocity(velocityController, velocity).requires(this);

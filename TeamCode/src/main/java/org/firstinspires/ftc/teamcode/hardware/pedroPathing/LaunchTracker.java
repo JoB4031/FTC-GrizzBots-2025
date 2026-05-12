@@ -6,10 +6,10 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.ActiveOpMode;
 
-public class LaunchZoneTracker implements Subsystem {
+public class LaunchTracker implements Subsystem {
 
-    public static final LaunchZoneTracker INSTANCE = new LaunchZoneTracker();
-    private LaunchZoneTracker() {}
+    public static final LaunchTracker INSTANCE = new LaunchTracker();
+    private LaunchTracker() {}
 
     private final PolygonZone closeLaunchArea =
             new PolygonZone(new Point(144, 144), new Point(72, 72), new Point(0, 144));

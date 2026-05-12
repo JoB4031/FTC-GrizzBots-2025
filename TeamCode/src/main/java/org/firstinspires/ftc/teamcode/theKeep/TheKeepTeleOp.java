@@ -10,7 +10,7 @@ package org.firstinspires.ftc.teamcode.theKeep;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.hardware.centralHub.CommandHub;
-import org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchZoneTracker;
+import org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchTracker;
 import org.firstinspires.ftc.teamcode.hardware.pedroPathing.PoseLibrary;
 import org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor;
 import org.firstinspires.ftc.teamcode.hardware.sensors.LEDIndicator;
@@ -36,7 +36,7 @@ public class TheKeepTeleOp extends NextFTCOpMode {
                         LEDIndicator.INSTANCE,
                         PoseLibrary.INSTANCE,
                         Vision.INSTANCE,
-                        LaunchZoneTracker.INSTANCE,
+                        LaunchTracker.INSTANCE,
                         Drive.INSTANCE,
                         Intake.INSTANCE,
                         Flywheel.INSTANCE,
@@ -56,7 +56,7 @@ public class TheKeepTeleOp extends NextFTCOpMode {
         Drive.INSTANCE.normalTeleOpDrive().schedule();
 
         Gamepads.gamepad1().leftTrigger().greaterThan(0.1)
-                .whenBecomesTrue(Drive.INSTANCE.facePointDrive(PoseLibrary.INSTANCE.goal).and(Flywheel.INSTANCE.setVelocity(3500)))
+                .whenBecomesTrue(Drive.INSTANCE.facePointDrive(PoseLibrary.INSTANCE.goal).and(Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch))))
                 .whenBecomesFalse(Drive.INSTANCE.normalTeleOpDrive().and(Flywheel.INSTANCE.stopPower()))
         ;
 
@@ -66,7 +66,7 @@ public class TheKeepTeleOp extends NextFTCOpMode {
 
         Gamepads.gamepad1().circle().toggleOnBecomesTrue()
                 .whenBecomesTrue(CommandHub.INSTANCE.intakeArtifacts().then(Intake.INSTANCE.setPower(0,0)))
-                .whenBecomesFalse(CommandHub.INSTANCE.stopIntakeArtifacts().and(Intake.INSTANCE.setPower(0,0)));
+                .whenBecomesFalse(CommandHub.INSTANCE.stopIntakeArtifacts().and(Intake.INSTANCE.setPower(0,0)))
         ;
 
         Gamepads.gamepad1().triangle()
