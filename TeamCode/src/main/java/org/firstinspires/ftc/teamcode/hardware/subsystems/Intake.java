@@ -6,7 +6,7 @@ import dev.nextftc.hardware.impl.MotorEx;
 import dev.nextftc.hardware.powerable.SetPower;
 
 public class Intake implements Subsystem {
-    public static final Intake INSTANCE = new Intake();
+    public static final Intake INTAKE = new Intake();
     private Intake() {}
 
     private final MotorEx externalIntake = new MotorEx("intake").floatMode();

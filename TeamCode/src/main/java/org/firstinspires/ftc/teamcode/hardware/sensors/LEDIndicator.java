@@ -5,7 +5,7 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.ServoEx;
 
 public class LEDIndicator implements Subsystem {
-    public static final LEDIndicator INSTANCE = new LEDIndicator();
+    public static final LEDIndicator LED_INDICATOR = new LEDIndicator();
     private LEDIndicator() {}
     private final ServoEx led = new ServoEx("LED");
 

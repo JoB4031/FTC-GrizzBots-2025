@@ -8,10 +8,10 @@ import dev.nextftc.hardware.impl.ServoEx;
 
 public class FidgetTech implements Subsystem {
 
-    public static final FidgetTech INSTANCE = new FidgetTech();
+    public static final FidgetTech FIDGET_TECH = new FidgetTech();
     private FidgetTech() {}
 
-    public enum artifactColor { PURPLE, GREEN, NONE }
+    public enum artifactColor { PURPLE, GREEN, UNKNOWN, NONE }
     public static artifactColor[] artifactsHeld =
             { artifactColor.NONE, artifactColor.NONE, artifactColor.NONE };
     public boolean fidgetTechFull = false;

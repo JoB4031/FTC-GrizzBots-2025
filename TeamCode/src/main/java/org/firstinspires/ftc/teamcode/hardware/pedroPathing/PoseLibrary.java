@@ -9,7 +9,7 @@ import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.ActiveOpMode;
 
 public class PoseLibrary implements Subsystem {
-    public static final PoseLibrary INSTANCE = new PoseLibrary();
+    public static final PoseLibrary POSE_LIBRARY = new PoseLibrary();
     private PoseLibrary() {}
 
     public static Pose startPose;

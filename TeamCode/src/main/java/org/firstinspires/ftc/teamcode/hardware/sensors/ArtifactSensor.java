@@ -14,7 +14,7 @@ import dev.nextftc.ftc.ActiveOpMode;
 @Configurable
 public class ArtifactSensor implements Subsystem {
 
-    public static final ArtifactSensor INSTANCE = new ArtifactSensor();
+    public static final ArtifactSensor ARTIFACT_SENSOR = new ArtifactSensor();
     private ArtifactSensor() {}
 
     private RevColorSensorV3 distanceSensor;
@@ -48,10 +48,10 @@ public class ArtifactSensor implements Subsystem {
         double dist = distanceSensor.getDistance(DistanceUnit.INCH);
 
         if (dist < 2 && (getDetectedColor() != FidgetTech.artifactColor.NONE)) {
-            return getDetectedColor();
-
+            if (getDetectedColor() != FidgetTech.artifactColor.NONE) {
+                return getDetectedColor();
+            } else return FidgetTech.artifactColor.UNKNOWN;
         }
-
         return FidgetTech.artifactColor.NONE;
     }
 

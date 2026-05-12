@@ -9,7 +9,7 @@ import dev.nextftc.hardware.controllable.RunToVelocity;
 import dev.nextftc.hardware.impl.MotorEx;
 
 public class Flywheel implements Subsystem {
-    public static final Flywheel INSTANCE = new Flywheel();
+    public static final Flywheel FLYWHEEL = new Flywheel();
     private Flywheel() { }
 
     private final MotorEx leftFlywheel = new MotorEx("leftFlywheel")

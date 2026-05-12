@@ -14,7 +14,7 @@ import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.PathChain;
 
 public class Drive implements Subsystem {
-    public static final Drive INSTANCE = new Drive();
+    public static final Drive DRIVE = new Drive();
     private Drive() {}
 
     public Command normalTeleOpDrive() {

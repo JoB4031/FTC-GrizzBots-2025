@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.hardware.pedroPathing;
 
+import static org.firstinspires.ftc.teamcode.hardware.pedroPathing.PoseLibrary.POSE_LIBRARY;
 import com.skeletonarmy.marrow.zones.Point;
 import com.skeletonarmy.marrow.zones.PolygonZone;
 import dev.nextftc.core.subsystems.Subsystem;
@@ -8,7 +9,7 @@ import dev.nextftc.ftc.ActiveOpMode;
 
 public class LaunchTracker implements Subsystem {
 
-    public static final LaunchTracker INSTANCE = new LaunchTracker();
+    public static final LaunchTracker LAUNCH_TRACKER = new LaunchTracker();
     private LaunchTracker() {}
 
     private final PolygonZone closeLaunchArea =
@@ -31,7 +32,7 @@ public class LaunchTracker implements Subsystem {
         robotLaunchZone.setPosition(PedroComponent.follower().getPose().getX(), PedroComponent.follower().getPose().getY());
         robotLaunchZone.setRotation(PedroComponent.follower().getHeading());
 
-        shootDistance = ((robotToGoalZone.distanceTo(new Point(PoseLibrary.INSTANCE.goal.getX(), PoseLibrary.INSTANCE.goal.getY())) * 0.0254) - 0.2);
+        shootDistance = ((robotToGoalZone.distanceTo(new Point(POSE_LIBRARY.goal.getX(), POSE_LIBRARY.goal.getY())) * 0.0254) - 0.2);
         robotInRange = shootDistance >= 0.9;
 
         farLaunch = robotLaunchZone.isInside(farLaunchArea);

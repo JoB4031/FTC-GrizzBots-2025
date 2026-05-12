@@ -7,7 +7,7 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.hardware.impl.ServoEx;
 
 public class Ejector implements Subsystem {
-    public static final Ejector INSTANCE = new Ejector();
+    public static final Ejector EJECTOR = new Ejector();
     private Ejector() {}
     private final TimerEx hitTime = new TimerEx(0.2, TimeUnit.SECONDS);
     private final ServoEx ejector = new ServoEx("ejector", 0.001);
@@ -20,7 +20,7 @@ public class Ejector implements Subsystem {
             public void start() {
                 fireDone = false;
                 hitTime.restart();
-                if (!FidgetTech.inIntakePosition && FidgetTech.INSTANCE.spinComplete) {
+                if (!FidgetTech.inIntakePosition && FidgetTech.FIDGET_TECH.spinComplete) {
                     ejector.setPosition(0.3);
                     FidgetTech.artifactsHeld[FidgetTech.currentSlot] = FidgetTech.artifactColor.NONE;
                 }

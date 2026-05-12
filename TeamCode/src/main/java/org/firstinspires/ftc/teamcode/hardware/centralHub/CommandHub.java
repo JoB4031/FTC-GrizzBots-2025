@@ -1,18 +1,19 @@
 package org.firstinspires.ftc.teamcode.hardware.centralHub;
 
-import org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchTracker;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector;
+import static org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchTracker.LAUNCH_TRACKER;
+import static org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor.ARTIFACT_SENSOR;
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector.EJECTOR;
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech.FIDGET_TECH;
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel.FLYWHEEL;
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.Intake.INTAKE;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
-import org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.Vision;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.subsystems.Subsystem;
 
 public class CommandHub implements Subsystem {
-    public static final CommandHub INSTANCE = new CommandHub();
+    public static final CommandHub COMMAND_HUB = new CommandHub();
     private CommandHub() {}
 
     public Command intakeArtifacts() {
@@ -20,27 +21,30 @@ public class CommandHub implements Subsystem {
 
             @Override
             public void start() {
-                Intake.INSTANCE.setPower(1, 1);
+                INTAKE.setPower(1, 1);
             }
 
             @Override
             public void update() {
-                if (FidgetTech.artifactsHeld[FidgetTech.currentSlot] != FidgetTech.artifactColor.NONE) {
-                    FidgetTech.INSTANCE.goToArtifact(FidgetTech.artifactColor.NONE);
+                if (FidgetTech.artifactsHeld[FidgetTech.currentSlot] != FidgetTech.artifactColor.NONE && FidgetTech.artifactsHeld[FidgetTech.currentSlot] != FidgetTech.artifactColor.UNKNOWN) {
+                    FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.NONE);
                 }
+                if (FidgetTech.artifactsHeld[FidgetTech.currentSlot] != FidgetTech.artifactColor.NONE) {
+                    INTAKE.internalPower(-0.1);
+                } else INTAKE.internalPower(1);
             }
 
             @Override
             public boolean isDone() {
-                return FidgetTech.INSTANCE.fidgetTechFull;
+                return FIDGET_TECH.fidgetTechFull;
             }
 
             @Override
             public void stop(boolean interrupted) {
-                FidgetTech.INSTANCE.goToArtifact(FidgetTech.artifactColor.PURPLE);
+                FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE);
             }
 
-        };
+        }.requires(FIDGET_TECH, INTAKE);
     }
     public Command stopIntakeArtifacts() {
         return new Command() {
@@ -57,50 +61,50 @@ public class CommandHub implements Subsystem {
     public SequentialGroup firePattern() {
         if (Vision.pattern == Vision.BallPattern.GPP) {
             return new SequentialGroup(
-                    Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch))
-                            .and(FidgetTech.INSTANCE.goToArtifact(FidgetTech.artifactColor.GREEN))
-                            .then(Ejector.INSTANCE.fire()),
-                    Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch))
-                            .and(FidgetTech.INSTANCE.goToArtifact(FidgetTech.artifactColor.PURPLE))
-                            .then(Ejector.INSTANCE.fire()),
-                    Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch))
-                            .and(FidgetTech.INSTANCE.goToArtifact(FidgetTech.artifactColor.PURPLE))
-                            .then(Ejector.INSTANCE.fire()),
-                    Flywheel.INSTANCE.stopPower()
+                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                            .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.GREEN))
+                            .then(EJECTOR.fire()),
+                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                            .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE))
+                            .then(EJECTOR.fire()),
+                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                            .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE))
+                            .then(EJECTOR.fire()),
+                    FLYWHEEL.stopPower()
                     );
         } else if (Vision.pattern == Vision.BallPattern.PGP) {
             return new SequentialGroup(
-                    Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch))
-                            .and(FidgetTech.INSTANCE.goToArtifact(FidgetTech.artifactColor.PURPLE))
-                            .then(Ejector.INSTANCE.fire()),
-                    Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch))
-                            .and(FidgetTech.INSTANCE.goToArtifact(FidgetTech.artifactColor.GREEN))
-                            .then(Ejector.INSTANCE.fire()),
-                    Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch))
-                            .and(FidgetTech.INSTANCE.goToArtifact(FidgetTech.artifactColor.PURPLE))
-                            .then(Ejector.INSTANCE.fire()),
-                    Flywheel.INSTANCE.stopPower()
+                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                            .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE))
+                            .then(EJECTOR.fire()),
+                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                            .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.GREEN))
+                            .then(EJECTOR.fire()),
+                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                            .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE))
+                            .then(EJECTOR.fire()),
+                    FLYWHEEL.stopPower()
             );
         } else {
             return new SequentialGroup(
-                    Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch))
-                            .and(FidgetTech.INSTANCE.goToArtifact(FidgetTech.artifactColor.PURPLE))
-                            .then(Ejector.INSTANCE.fire()),
-                    Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch))
-                            .and(FidgetTech.INSTANCE.goToArtifact(FidgetTech.artifactColor.PURPLE))
-                            .then(Ejector.INSTANCE.fire()),
-                    Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch))
-                            .and(FidgetTech.INSTANCE.goToArtifact(FidgetTech.artifactColor.GREEN))
-                            .then(Ejector.INSTANCE.fire()),
-                    Flywheel.INSTANCE.stopPower()
+                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                            .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE))
+                            .then(EJECTOR.fire()),
+                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                            .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE))
+                            .then(EJECTOR.fire()),
+                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                            .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.GREEN))
+                            .then(EJECTOR.fire()),
+                    FLYWHEEL.stopPower()
             );
         }
     }
 
     @Override
     public void periodic(){
-        if(FidgetTech.INSTANCE.spinComplete && (ArtifactSensor.INSTANCE.currentArtifact != FidgetTech.artifactColor.NONE)) {
-            FidgetTech.artifactsHeld[FidgetTech.currentSlot] = ArtifactSensor.INSTANCE.currentArtifact;
+        if(FIDGET_TECH.spinComplete && (ARTIFACT_SENSOR.currentArtifact != FidgetTech.artifactColor.NONE && ARTIFACT_SENSOR.currentArtifact != FidgetTech.artifactColor.UNKNOWN)) {
+            FidgetTech.artifactsHeld[FidgetTech.currentSlot] = ARTIFACT_SENSOR.currentArtifact;
         }
     }
 

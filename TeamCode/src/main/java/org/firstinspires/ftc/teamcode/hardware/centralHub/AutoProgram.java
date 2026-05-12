@@ -1,41 +1,36 @@
 package org.firstinspires.ftc.teamcode.hardware.centralHub;
 
-import org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchTracker;
-import org.firstinspires.ftc.teamcode.hardware.pedroPathing.PoseLibrary;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Drive;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
-
-import dev.nextftc.core.commands.Command;
+import static org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchTracker.LAUNCH_TRACKER;
+import static org.firstinspires.ftc.teamcode.hardware.pedroPathing.PoseLibrary.POSE_LIBRARY;
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.Drive.DRIVE;
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel.FLYWHEEL;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 
 public class AutoProgram {
-    public static final AutoProgram INSTANCE = new AutoProgram();
+    public static final AutoProgram AUTO_PROGRAM = new AutoProgram();
     AutoProgram() {}
 
 
 
     public SequentialGroup farAuto = new SequentialGroup(
-            Drive.INSTANCE.goTo(PoseLibrary.INSTANCE.farLaunchPose, PoseLibrary.INSTANCE.goal)
-                    .and(Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch))),
-            CommandHub.INSTANCE.firePattern(),
-            (Drive.INSTANCE.goTo(PoseLibrary.INSTANCE.firstArtifacts, PoseLibrary.INSTANCE.firstArtifactControlPoint, false)
-                    .then((Drive.INSTANCE.goTo(PoseLibrary.INSTANCE.farLaunchPose, PoseLibrary.INSTANCE.goal))
-                            .and(Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch)))))
-                    .and(CommandHub.INSTANCE.intakeArtifacts()),
-            CommandHub.INSTANCE.firePattern(),
-            (Drive.INSTANCE.goTo(PoseLibrary.INSTANCE.secondArtifacts, PoseLibrary.INSTANCE.secondArtifactControlPoint, true)
-                    .then((Drive.INSTANCE.goTo(PoseLibrary.INSTANCE.nearLaunchPose, PoseLibrary.INSTANCE.goal))
-                        .and(Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch)))))
-                    .and(CommandHub.INSTANCE.intakeArtifacts()),
-            CommandHub.INSTANCE.firePattern(),
-            (Drive.INSTANCE.goTo(PoseLibrary.INSTANCE.thirdArtifacts, PoseLibrary.INSTANCE.thirdArtifacts, false)
-                    .then((Drive.INSTANCE.goTo(PoseLibrary.INSTANCE.nearLaunchPose, PoseLibrary.INSTANCE.goal))
-                        .and(Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch)))))
-                    .and(CommandHub.INSTANCE.intakeArtifacts()),
-            CommandHub.INSTANCE.firePattern(),
-            Drive.INSTANCE.goTo(PoseLibrary.INSTANCE.notLaunchZone)
+            DRIVE.goTo(POSE_LIBRARY.farLaunchPose, POSE_LIBRARY.goal)
+                    .and(FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))),
+            CommandHub.COMMAND_HUB.firePattern(),
+            (DRIVE.goTo(POSE_LIBRARY.firstArtifacts, POSE_LIBRARY.firstArtifactControlPoint, false)
+                    .then((DRIVE.goTo(POSE_LIBRARY.farLaunchPose, POSE_LIBRARY.goal))
+                            .and(FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch)))))
+                    .and(CommandHub.COMMAND_HUB.intakeArtifacts()),
+            CommandHub.COMMAND_HUB.firePattern(),
+            (DRIVE.goTo(POSE_LIBRARY.secondArtifacts, POSE_LIBRARY.secondArtifactControlPoint, true)
+                    .then((DRIVE.goTo(POSE_LIBRARY.nearLaunchPose, POSE_LIBRARY.goal))
+                        .and(FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch)))))
+                    .and(CommandHub.COMMAND_HUB.intakeArtifacts()),
+            CommandHub.COMMAND_HUB.firePattern(),
+            (DRIVE.goTo(POSE_LIBRARY.thirdArtifacts, POSE_LIBRARY.thirdArtifacts, false)
+                    .then((DRIVE.goTo(POSE_LIBRARY.nearLaunchPose, POSE_LIBRARY.goal))
+                        .and(FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch)))))
+                    .and(CommandHub.COMMAND_HUB.intakeArtifacts()),
+            CommandHub.COMMAND_HUB.firePattern(),
+            DRIVE.goTo(POSE_LIBRARY.notLaunchZone)
     );
 }

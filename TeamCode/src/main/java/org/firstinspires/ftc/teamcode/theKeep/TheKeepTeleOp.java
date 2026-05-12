@@ -8,18 +8,19 @@ scrimmage.
 */
 package org.firstinspires.ftc.teamcode.theKeep;
 
+import static org.firstinspires.ftc.teamcode.hardware.centralHub.CommandHub.COMMAND_HUB;
+import static org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchTracker.LAUNCH_TRACKER;
+import static org.firstinspires.ftc.teamcode.hardware.pedroPathing.PoseLibrary.POSE_LIBRARY;
+import static org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor.ARTIFACT_SENSOR;
+import static org.firstinspires.ftc.teamcode.hardware.sensors.LEDIndicator.LED_INDICATOR;
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.Drive.DRIVE;
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector.EJECTOR;
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech.FIDGET_TECH;
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel.FLYWHEEL;
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.Intake.INTAKE;
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.Vision.VISION;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import org.firstinspires.ftc.teamcode.hardware.centralHub.CommandHub;
-import org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchTracker;
 import org.firstinspires.ftc.teamcode.hardware.pedroPathing.PoseLibrary;
-import org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor;
-import org.firstinspires.ftc.teamcode.hardware.sensors.LEDIndicator;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Drive;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Intake;
-import org.firstinspires.ftc.teamcode.hardware.subsystems.Vision;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import dev.nextftc.core.components.BindingsComponent;
 import dev.nextftc.core.components.SubsystemComponent;
@@ -33,17 +34,17 @@ public class TheKeepTeleOp extends NextFTCOpMode {
     public TheKeepTeleOp() {
         addComponents(
                 new SubsystemComponent(
-                        LEDIndicator.INSTANCE,
-                        PoseLibrary.INSTANCE,
-                        Vision.INSTANCE,
-                        LaunchTracker.INSTANCE,
-                        Drive.INSTANCE,
-                        Intake.INSTANCE,
-                        Flywheel.INSTANCE,
-                        FidgetTech.INSTANCE,
-                        ArtifactSensor.INSTANCE,
-                        Ejector.INSTANCE,
-                        CommandHub.INSTANCE
+                        LED_INDICATOR,
+                        POSE_LIBRARY,
+                        VISION,
+                        LAUNCH_TRACKER,
+                        DRIVE,
+                        INTAKE,
+                        FLYWHEEL,
+                        FIDGET_TECH,
+                        ARTIFACT_SENSOR,
+                        EJECTOR,
+                        COMMAND_HUB
                 ),
                 BulkReadComponent.INSTANCE,
                 BindingsComponent.INSTANCE,
@@ -53,25 +54,25 @@ public class TheKeepTeleOp extends NextFTCOpMode {
     @Override
     public void onStartButtonPressed() {
         PedroComponent.follower().setPose(PoseLibrary.startPose);
-        Drive.INSTANCE.normalTeleOpDrive().schedule();
+        DRIVE.normalTeleOpDrive().schedule();
 
         Gamepads.gamepad1().leftTrigger().greaterThan(0.1)
-                .whenBecomesTrue(Drive.INSTANCE.facePointDrive(PoseLibrary.INSTANCE.goal).and(Flywheel.INSTANCE.setVelocity(Flywheel.INSTANCE.getRequiredVelocity(LaunchTracker.INSTANCE.shootDistance, LaunchTracker.INSTANCE.farLaunch))))
-                .whenBecomesFalse(Drive.INSTANCE.normalTeleOpDrive().and(Flywheel.INSTANCE.stopPower()))
+                .whenBecomesTrue(DRIVE.facePointDrive(POSE_LIBRARY.goal).and(FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))))
+                .whenBecomesFalse(DRIVE.normalTeleOpDrive().and(FLYWHEEL.stopPower()))
         ;
 
         Gamepads.gamepad1().rightTrigger().greaterThan(0.1)
-                .whenBecomesTrue(Ejector.INSTANCE.fire())
+                .whenBecomesTrue(EJECTOR.fire())
         ;
 
         Gamepads.gamepad1().circle().toggleOnBecomesTrue()
-                .whenBecomesTrue(CommandHub.INSTANCE.intakeArtifacts().then(Intake.INSTANCE.setPower(0,0)))
-                .whenBecomesFalse(CommandHub.INSTANCE.stopIntakeArtifacts().and(Intake.INSTANCE.setPower(0,0)))
+                .whenBecomesTrue(COMMAND_HUB.intakeArtifacts().then(INTAKE.setPower(0,0)))
+                .whenBecomesFalse(COMMAND_HUB.stopIntakeArtifacts().and(INTAKE.setPower(0,0)))
         ;
 
         Gamepads.gamepad1().triangle()
-                .whenBecomesTrue(Intake.INSTANCE.setPower(-1,-1))
-                .whenBecomesFalse(Intake.INSTANCE.setPower(0,0))
+                .whenBecomesTrue(INTAKE.setPower(-1,-1))
+                .whenBecomesFalse(INTAKE.setPower(0,0))
         ;
     }
 }

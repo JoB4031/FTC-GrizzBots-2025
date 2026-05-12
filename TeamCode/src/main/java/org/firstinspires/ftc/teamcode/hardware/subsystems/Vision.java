@@ -13,7 +13,7 @@ import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
 
 public class Vision implements Subsystem {
-    public static final Vision INSTANCE = new Vision();
+    public static final Vision VISION = new Vision();
     Vision() {}
     public AprilTagProcessor aprilTag;
     public VisionPortal visionPortal;
