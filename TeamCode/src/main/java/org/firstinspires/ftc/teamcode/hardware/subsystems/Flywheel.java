@@ -20,7 +20,7 @@ public class Flywheel implements Subsystem {
     private final MotorGroup flywheel = new MotorGroup(rightFlywheel, leftFlywheel);
     private final ControlSystem velocityController = ControlSystem.builder()
             .velPid(0.006, 0.0, 0.0)
-            .basicFF()
+            .basicFF(0.0004)
             .build();
 
     private double RPMToVelocity(double RPM) {
