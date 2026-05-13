@@ -47,12 +47,11 @@ public class ArtifactSensor implements Subsystem {
 
         double dist = distanceSensor.getDistance(DistanceUnit.INCH);
 
-        if (dist < 2 && (getDetectedColor() != FidgetTech.artifactColor.NONE)) {
+        if (dist < 2) {
             if (getDetectedColor() != FidgetTech.artifactColor.NONE) {
                 return getDetectedColor();
             } else return FidgetTech.artifactColor.UNKNOWN;
-        }
-        return FidgetTech.artifactColor.NONE;
+        } else return FidgetTech.artifactColor.NONE;
     }
 
     @Override

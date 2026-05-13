@@ -48,17 +48,21 @@ public class FidgetTech implements Subsystem {
         snapPosition = targetSnap;
     }
     public void goToSlot(int slot, boolean intakePosition) {
-        if (intakePosition == inIntakePosition) {
-            if (snapPosition > 14) {
-                setSnapPosition(snapPosition+((currentSlot-slot)*-2));
-            } else {
-                setSnapPosition(snapPosition-((currentSlot-slot)*-2));
+        if (intakePosition) {
+            if (slot == 0) {
+                setSnapPosition(14);
+            } else if (slot == 1) {
+                setSnapPosition(16);
+            } else if (slot == 2) {
+                setSnapPosition(18);
             }
         } else {
-            if (snapPosition > 14) {
-                setSnapPosition(snapPosition+((((currentSlot-slot)*2)+3)*-1));
-            } else {
-                setSnapPosition(snapPosition-((((currentSlot-slot)*2)+3)*-1));
+            if (slot == 0) {
+                setSnapPosition(11);
+            } else if (slot == 1) {
+                setSnapPosition(13);
+            } else if (slot == 2) {
+                setSnapPosition(15);
             }
         }
     }
@@ -69,10 +73,9 @@ public class FidgetTech implements Subsystem {
             public void start() {
                 int slotFound = 0;
                 for (artifactColor artifactWanted : artifactsHeld) {
-                    if (artifactWanted == artifact) return;
-                    slotFound ++;
+                    if (artifactWanted != artifact) slotFound ++;
                 }
-                if (slotFound > 3) {
+                if (slotFound == 0 || slotFound == 1 || slotFound == 2) {
                     goToSlot(slotFound, artifact == artifactColor.NONE);
                 }
             }
@@ -80,7 +83,7 @@ public class FidgetTech implements Subsystem {
             public boolean isDone() {
                 return spinComplete;
             }
-        };
+        }.requires(this);
     }
 
     @Override

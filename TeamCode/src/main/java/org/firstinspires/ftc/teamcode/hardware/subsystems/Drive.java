@@ -17,12 +17,13 @@ public class Drive implements Subsystem {
     public static final Drive DRIVE = new Drive();
     private Drive() {}
 
-    public Command normalTeleOpDrive() {
+    private double speedMultiplier = 1;
+    public Command teleOpDrive() {
         return new Command() {
             final PedroDriverControlled teleOpDrive = new PedroDriverControlled(
-                    Gamepads.gamepad1().leftStickY().negate(),
-                    Gamepads.gamepad1().leftStickX().negate(),
-                    Gamepads.gamepad1().rightStickX().negate(),
+                    () -> Gamepads.gamepad1().leftStickY().negate().get()* speedMultiplier,
+                    () -> Gamepads.gamepad1().leftStickX().negate().get() * speedMultiplier,
+                    () -> Gamepads.gamepad1().rightStickX().negate().get() * speedMultiplier,
                     true
             );
             @Override
@@ -41,6 +42,26 @@ public class Drive implements Subsystem {
                 return false;
             }
         }.requires(this);
+    }
+    public Command slowTeleOpDrive() {
+        return new Command() {
+            @Override
+            public void start() {
+                speedMultiplier = 0.5;
+            }
+            @Override
+            public boolean isDone() {
+                return true;
+            }
+        };
+    }
+    public Command normalTeleOpDrive() {
+        return new Command() {
+            @Override
+            public void start() {speedMultiplier = 1;}
+            @Override
+            public boolean isDone() {return true;}
+        };
     }
     public Command facePointDrive(Pose target) {
 
@@ -67,8 +88,8 @@ public class Drive implements Subsystem {
 
                 // Drive with joystick, rotation locked
                 PedroComponent.follower().setTeleOpDrive(
-                        Gamepads.gamepad1().leftStickY().get()*-1,
-                        Gamepads.gamepad1().leftStickX().get()*-1,
+                        Gamepads.gamepad1().leftStickY().negate().get()*speedMultiplier,
+                        Gamepads.gamepad1().leftStickX().negate().get()*speedMultiplier,
                         rotationPower
                 );
             }
@@ -85,23 +106,43 @@ public class Drive implements Subsystem {
         }.requires(this);
     }
 
-    public FollowPath goTo(Pose pose) {
+    public Command goTo(Pose pose) {
         PathChain pathToFollow = PedroComponent.follower().pathBuilder()
                 .addPath(new BezierLine(PedroComponent.follower().getPose(), pose.getPose()))
                 .setLinearHeadingInterpolation(PedroComponent.follower().getHeading(), pose.getHeading())
                 .build();
-        return new FollowPath(pathToFollow);
+        return new Command () {
+            final FollowPath pathFollower = new FollowPath(pathToFollow);
+            @Override
+            public void start() {pathFollower.start();}
+            @Override
+            public void update() {pathFollower.update();}
+            @Override
+            public boolean isDone() {return pathFollower.isDone();}
+            @Override
+            public void stop(boolean interrupted) {pathFollower.stop(interrupted);}
+        }.requires(this);
     }
-    public FollowPath goTo(Pose pose, Pose target) {
+    public Command goTo(Pose pose, Pose target) {
         PathChain pathToFollow;
             pathToFollow = PedroComponent.follower().pathBuilder()
                     .addPath(new BezierCurve(PedroComponent.follower().getPose(), pose))
                     .setHeadingInterpolation(HeadingInterpolator.facingPoint(target))
                     .build();
 
-        return new FollowPath(pathToFollow);
+        return new Command () {
+            final FollowPath pathFollower = new FollowPath(pathToFollow);
+            @Override
+            public void start() {pathFollower.start();}
+            @Override
+            public void update() {pathFollower.update();}
+            @Override
+            public boolean isDone() {return pathFollower.isDone();}
+            @Override
+            public void stop(boolean interrupted) {pathFollower.stop(interrupted);}
+        };
     }
-    public FollowPath goTo(Pose pose, Pose spline, boolean linearInterpolation) {
+    public Command goTo(Pose pose, Pose spline, boolean linearInterpolation) {
         PathChain pathToFollow;
         if (linearInterpolation) {
             pathToFollow = PedroComponent.follower().pathBuilder()
@@ -114,7 +155,17 @@ public class Drive implements Subsystem {
                     .setConstantHeadingInterpolation(pose.getHeading())
                     .build();
         }
-        return new FollowPath(pathToFollow);
+        return new Command () {
+            final FollowPath pathFollower = new FollowPath(pathToFollow);
+            @Override
+            public void start() {pathFollower.start();}
+            @Override
+            public void update() {pathFollower.update();}
+            @Override
+            public boolean isDone() {return pathFollower.isDone();}
+            @Override
+            public void stop(boolean interrupted) {pathFollower.stop(interrupted);}
+        };
     }
 
     @Override

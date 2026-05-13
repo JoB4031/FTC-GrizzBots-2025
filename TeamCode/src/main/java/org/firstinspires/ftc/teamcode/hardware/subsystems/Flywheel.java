@@ -57,6 +57,7 @@ public class Flywheel implements Subsystem {
             flywheel.setPower(0);
         }
         ActiveOpMode.telemetry().addData("Goal", velocityController.getGoal().getVelocity());
+        ActiveOpMode.telemetry().addData("Flywheel Speed", flywheel.getState().getVelocity());
     }
 
 }

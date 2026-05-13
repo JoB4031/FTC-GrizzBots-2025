@@ -11,7 +11,7 @@ public class Ejector implements Subsystem {
     private Ejector() {}
     private final TimerEx hitTime = new TimerEx(0.2, TimeUnit.SECONDS);
     private final ServoEx ejector = new ServoEx("ejector", 0.001);
-    private boolean fireDone;
+    public boolean fireDone;
 
     public Command fire()  {
         return new Command() {
@@ -23,8 +23,9 @@ public class Ejector implements Subsystem {
                 if (!FidgetTech.inIntakePosition && FidgetTech.FIDGET_TECH.spinComplete) {
                     ejector.setPosition(0.3);
                     FidgetTech.artifactsHeld[FidgetTech.currentSlot] = FidgetTech.artifactColor.NONE;
-                }
+                } else fireDone = true;
             }
+
             @Override
             public void update() {
                 if (hitTime.isDone()) {
@@ -38,6 +39,7 @@ public class Ejector implements Subsystem {
             public boolean isDone() {
                 return fireDone;
             }
+
         }.requires(this);
     }
 

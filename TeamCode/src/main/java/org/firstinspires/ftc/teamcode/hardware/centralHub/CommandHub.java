@@ -11,27 +11,30 @@ import org.firstinspires.ftc.teamcode.hardware.subsystems.Vision;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.commands.groups.SequentialGroup;
 import dev.nextftc.core.subsystems.Subsystem;
+import dev.nextftc.ftc.ActiveOpMode;
 
 public class CommandHub implements Subsystem {
     public static final CommandHub COMMAND_HUB = new CommandHub();
     private CommandHub() {}
 
+    private boolean automaticIntake = false;
     public Command intakeArtifacts() {
         return new Command() {
 
             @Override
             public void start() {
-                INTAKE.setPower(1, 1);
+                INTAKE.setPower(1, 1).schedule();
+                automaticIntake = true;
             }
 
             @Override
             public void update() {
                 if (FidgetTech.artifactsHeld[FidgetTech.currentSlot] != FidgetTech.artifactColor.NONE && FidgetTech.artifactsHeld[FidgetTech.currentSlot] != FidgetTech.artifactColor.UNKNOWN) {
-                    FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.NONE);
+                    FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.NONE).schedule();
                 }
                 if (FidgetTech.artifactsHeld[FidgetTech.currentSlot] != FidgetTech.artifactColor.NONE) {
-                    INTAKE.internalPower(-0.1);
-                } else INTAKE.internalPower(1);
+                    INTAKE.internalPower(-0.1).schedule();
+                } else INTAKE.internalPower(1).schedule();
             }
 
             @Override
@@ -41,10 +44,14 @@ public class CommandHub implements Subsystem {
 
             @Override
             public void stop(boolean interrupted) {
-                FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE);
+                automaticIntake = false;
+                if (!interrupted) {
+                    INTAKE.setPower(0,0).schedule();
+                }
             }
 
-        }.requires(FIDGET_TECH, INTAKE);
+
+        };
     }
     public Command stopIntakeArtifacts() {
         return new Command() {
@@ -103,9 +110,13 @@ public class CommandHub implements Subsystem {
 
     @Override
     public void periodic(){
-        if(FIDGET_TECH.spinComplete && (ARTIFACT_SENSOR.currentArtifact != FidgetTech.artifactColor.NONE && ARTIFACT_SENSOR.currentArtifact != FidgetTech.artifactColor.UNKNOWN)) {
+        if (FIDGET_TECH.spinComplete && ARTIFACT_SENSOR.currentArtifact == FidgetTech.artifactColor.NONE) {
+            FidgetTech.artifactsHeld[FidgetTech.currentSlot] = ARTIFACT_SENSOR.currentArtifact;
+        } else if (FIDGET_TECH.spinComplete && ARTIFACT_SENSOR.currentArtifact != FidgetTech.artifactColor.UNKNOWN) {
             FidgetTech.artifactsHeld[FidgetTech.currentSlot] = ARTIFACT_SENSOR.currentArtifact;
         }
+        ActiveOpMode.telemetry().addData("Automatic Intake", automaticIntake);
+        ActiveOpMode.telemetry().update();
     }
 
 }
