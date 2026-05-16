@@ -35,6 +35,8 @@ public class TheKeepTeleOp extends NextFTCOpMode {
     public TheKeepTeleOp() {
         addComponents(
                 new PedroComponent(Constants::createFollower),
+                BulkReadComponent.INSTANCE,
+                BindingsComponent.INSTANCE,
                 new SubsystemComponent(
                         LED_INDICATOR,
                         POSE_LIBRARY,
@@ -47,9 +49,7 @@ public class TheKeepTeleOp extends NextFTCOpMode {
                         ARTIFACT_SENSOR,
                         EJECTOR,
                         COMMAND_HUB
-                ),
-                BulkReadComponent.INSTANCE,
-                BindingsComponent.INSTANCE
+                )
         );
     }
     @Override
@@ -64,7 +64,7 @@ public class TheKeepTeleOp extends NextFTCOpMode {
                         .and(FLYWHEEL.stopPower()))
         ;
 
-        Gamepads.gamepad1().rightTrigger().greaterThan(0.1).and(() -> EJECTOR.fireDone)
+        Gamepads.gamepad1().rightTrigger().greaterThan(0.1)
                 .whenBecomesTrue(EJECTOR.fire())
         ;
 
@@ -87,8 +87,8 @@ public class TheKeepTeleOp extends NextFTCOpMode {
         ;
 
         Gamepads.gamepad1().square()
-                .whenBecomesTrue(DRIVE.slowTeleOpDrive())
-                .whenBecomesFalse(DRIVE.normalTeleOpDrive())
+                .whenBecomesTrue(DRIVE.slowDrive())
+                .whenBecomesFalse(DRIVE.normalDrive())
         ;
 
     }

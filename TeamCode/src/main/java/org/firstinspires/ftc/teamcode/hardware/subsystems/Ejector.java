@@ -14,33 +14,42 @@ public class Ejector implements Subsystem {
     public boolean fireDone;
 
     public Command fire()  {
-        return new Command() {
+        if (fireDone) {
+            return new Command() {
 
-            @Override
-            public void start() {
-                fireDone = false;
-                hitTime.restart();
-                if (!FidgetTech.inIntakePosition && FidgetTech.FIDGET_TECH.spinComplete) {
-                    ejector.setPosition(0.3);
-                    FidgetTech.artifactsHeld[FidgetTech.currentSlot] = FidgetTech.artifactColor.NONE;
-                } else fireDone = true;
-            }
-
-            @Override
-            public void update() {
-                if (hitTime.isDone()) {
+                @Override
+                public void start() {
+                    fireDone = false;
                     hitTime.restart();
-                    ejector.setPosition(0);
-                    fireDone = true;
+                    if (!FidgetTech.inIntakePosition && FidgetTech.FIDGET_TECH.spinComplete) {
+                        ejector.setPosition(0.3);
+                        FidgetTech.artifactsHeld[FidgetTech.currentSlot] = FidgetTech.artifactColor.NONE;
+                    } else fireDone = true;
                 }
-            }
 
-            @Override
-            public boolean isDone() {
-                return fireDone;
-            }
+                @Override
+                public void update() {
+                    if (hitTime.isDone()) {
+                        hitTime.restart();
+                        ejector.setPosition(0);
+                        fireDone = true;
+                    }
+                }
 
-        }.requires(this);
+                @Override
+                public boolean isDone() {
+                    return fireDone;
+                }
+
+            }.requires(this);
+        } else {
+            return new Command() {
+                @Override
+                public boolean isDone() {
+                    return true;
+                }
+            };
+        }
     }
 
     @Override

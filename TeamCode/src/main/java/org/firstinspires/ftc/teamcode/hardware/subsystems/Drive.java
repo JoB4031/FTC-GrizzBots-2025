@@ -18,17 +18,20 @@ public class Drive implements Subsystem {
     public static final Drive DRIVE = new Drive();
     private Drive() {}
 
-    // -----------------------------
-    //  STATE FLAGS
-    // -----------------------------
+    private boolean teleOpDrive = false;
     private boolean slowMode = false;
     private boolean autoAim = false;
     private Pose autoAimTarget = null;
     private double forward = 0;
     private double strafe = 0;
     private double rotate = 0;
+
     public Command teleOpDrive() {
         return new Command() {
+            @Override
+            public void start() {
+                teleOpDrive = true;
+            }
             @Override
             public void update() {
                 PedroComponent.follower().setTeleOpDrive(forward, strafe, rotate);
@@ -36,61 +39,54 @@ public class Drive implements Subsystem {
 
             @Override
             public boolean isDone() {
-                return false; // runs forever
+                return false;
             }
         }.requires(this);
     }
-
-    // -----------------------------
-    //  SLOW MODE COMMANDS
-    // -----------------------------
-    public Command slowTeleOpDrive() {
+    public Command slowDrive() {
         return new Command() {
             @Override
             public void start() {
+                teleOpDrive = true;
                 slowMode = true;
             }
             @Override
             public boolean isDone() { return true; }
         };
     }
-
-    public Command normalTeleOpDrive() {
+    public Command normalDrive() {
         return new Command() {
             @Override
             public void start() {
+                teleOpDrive = true;
                 slowMode = false;
             }
             @Override
             public boolean isDone() { return true; }
         };
     }
-
-    // -----------------------------
-    //  AUTO-AIM COMMAND
-    // -----------------------------
     public Command facePointDrive(Pose target) {
         return new Command() {
             @Override
             public void start() {
+                teleOpDrive = true;
                 autoAim = true;
                 autoAimTarget = target;
             }
-
+            @Override
+            public void update() {
+                PedroComponent.follower().setTeleOpDrive(forward, strafe, rotate);
+            }
             @Override
             public void stop(boolean interrupted) {
                 autoAim = false;
                 autoAimTarget = null;
             }
-
             @Override
             public boolean isDone() { return false; }
-        };
+        }.requires(this);
     }
 
-    // -----------------------------
-    //  AUTONOMOUS PATH COMMANDS
-    // -----------------------------
     public Command goTo(Pose pose) {
         PathChain pathToFollow = PedroComponent.follower().pathBuilder()
                 .addPath(new BezierLine(PedroComponent.follower().getPose(), pose.getPose()))
@@ -109,7 +105,6 @@ public class Drive implements Subsystem {
 
     public Command goTo(Pose pose, Pose spline, boolean linearInterpolation) {
         PathChain pathToFollow;
-
         if (linearInterpolation) {
             pathToFollow = PedroComponent.follower().pathBuilder()
                     .addPath(new BezierCurve(PedroComponent.follower().getPose(), spline, pose))
@@ -129,33 +124,34 @@ public class Drive implements Subsystem {
     // -----------------------------
     @Override
     public void periodic() {
-
-        forward = Gamepads.gamepad1().leftStickY().negate().get();
-        strafe  = Gamepads.gamepad1().leftStickX().negate().get();
-        rotate  = Gamepads.gamepad1().rightStickX().negate().get();
-
-        // Apply slow mode
-        if (slowMode) {
-            forward *= 0.4;
-            strafe  *= 0.4;
-            rotate  *= 0.4;
-        }
-
-        // Auto-aim overrides rotation
-        if (autoAim && autoAimTarget != null) {
-
-            Pose robotPose = PedroComponent.follower().getPose();
-
-            double dx = autoAimTarget.getX() - robotPose.getX();
-            double dy = autoAimTarget.getY() - robotPose.getY();
-
-            double targetAngle = Math.atan2(dy, dx);
-            double currentHeading = robotPose.getHeading();
-
-            double error = wrapAngle(targetAngle - currentHeading);
-
-            double kP = 2.0;
-            rotate = kP * error;
+        if (teleOpDrive) {
+            if (autoAim && autoAimTarget != null) {
+                Pose robotPose = PedroComponent.follower().getPose();
+                double dx = autoAimTarget.getX() - robotPose.getX();
+                double dy = autoAimTarget.getY() - robotPose.getY();
+                double targetAngle = Math.atan2(dy, dx);
+                double currentHeading = robotPose.getHeading();
+                double error = wrapAngle(targetAngle - currentHeading);
+                double kP = 2.0;
+                rotate = kP * error;
+                if (!slowMode) {
+                    forward = Gamepads.gamepad1().leftStickY().negate().get();
+                    strafe  = Gamepads.gamepad1().leftStickX().negate().get();
+                } else {
+                    forward = Gamepads.gamepad1().leftStickY().negate().get() * 0.5;
+                    strafe  = Gamepads.gamepad1().leftStickX().negate().get() * 0.5;
+                }
+            } else {
+                if (!slowMode) {
+                    forward = Gamepads.gamepad1().leftStickY().negate().get();
+                    strafe = Gamepads.gamepad1().leftStickX().negate().get();
+                    rotate = Gamepads.gamepad1().rightStickX().negate().get();
+                } else {
+                    forward = Gamepads.gamepad1().leftStickY().negate().get() * 0.5;
+                    strafe = Gamepads.gamepad1().leftStickX().negate().get() * 0.5;
+                    rotate = Gamepads.gamepad1().rightStickX().negate().get() * 0.5;
+                }
+            }
         }
 
         ActiveOpMode.telemetry().addData("Position", PedroComponent.follower().getPose());

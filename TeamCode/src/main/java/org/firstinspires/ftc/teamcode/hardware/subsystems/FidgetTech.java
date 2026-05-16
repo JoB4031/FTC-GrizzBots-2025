@@ -96,7 +96,9 @@ public class FidgetTech implements Subsystem {
 
         ActiveOpMode.telemetry().addData("Current Slot", currentSlot);
         ActiveOpMode.telemetry().addData("In Intake Position", inIntakePosition);
-        ActiveOpMode.telemetry().addData("Artifacts Held", artifactsHeld);
+        ActiveOpMode.telemetry().addData("Slot 1", artifactsHeld[0]);
+        ActiveOpMode.telemetry().addData("Slot 2", artifactsHeld[1]);
+        ActiveOpMode.telemetry().addData("Slot 3", artifactsHeld[2]);
     }
 
 }

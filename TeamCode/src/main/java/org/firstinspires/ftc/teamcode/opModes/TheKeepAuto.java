@@ -33,6 +33,9 @@ public class TheKeepAuto extends NextFTCOpMode {
 
     public TheKeepAuto() {
         addComponents(
+                new PedroComponent(Constants::createFollower),
+                BulkReadComponent.INSTANCE,
+                BindingsComponent.INSTANCE,
                 new SubsystemComponent(
                         LED_INDICATOR,
                         POSE_LIBRARY,
@@ -45,10 +48,7 @@ public class TheKeepAuto extends NextFTCOpMode {
                         ARTIFACT_SENSOR,
                         EJECTOR,
                         COMMAND_HUB
-                ),
-                BulkReadComponent.INSTANCE,
-                BindingsComponent.INSTANCE,
-                new PedroComponent(Constants::createFollower)
+                )
         );
     }
 

@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchTracker
 import static org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor.ARTIFACT_SENSOR;
 import static org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector.EJECTOR;
 import static org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech.FIDGET_TECH;
+import static org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech.currentSlot;
 import static org.firstinspires.ftc.teamcode.hardware.subsystems.Flywheel.FLYWHEEL;
 import static org.firstinspires.ftc.teamcode.hardware.subsystems.Intake.INTAKE;
 import org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech;
@@ -18,6 +19,7 @@ public class CommandHub implements Subsystem {
     private CommandHub() {}
 
     private boolean automaticIntake = false;
+
     public Command intakeArtifacts() {
         return new Command() {
 
@@ -47,7 +49,6 @@ public class CommandHub implements Subsystem {
                 automaticIntake = false;
                 INTAKE.setPower(0,0).schedule();
             }
-
 
         };
     }
@@ -108,10 +109,12 @@ public class CommandHub implements Subsystem {
 
     @Override
     public void periodic(){
-        if (FIDGET_TECH.spinComplete && ARTIFACT_SENSOR.currentArtifact == FidgetTech.artifactColor.NONE) {
-            FidgetTech.artifactsHeld[FidgetTech.currentSlot] = ARTIFACT_SENSOR.currentArtifact;
-        } else if (FIDGET_TECH.spinComplete && ARTIFACT_SENSOR.currentArtifact != FidgetTech.artifactColor.UNKNOWN) {
-            FidgetTech.artifactsHeld[FidgetTech.currentSlot] = ARTIFACT_SENSOR.currentArtifact;
+        if (FIDGET_TECH.spinComplete && ARTIFACT_SENSOR.currentArtifact != FidgetTech.artifactColor.NONE) {
+            if (ARTIFACT_SENSOR.currentArtifact == FidgetTech.artifactColor.UNKNOWN && (FidgetTech.artifactsHeld[currentSlot] == FidgetTech.artifactColor.NONE || FidgetTech.artifactsHeld[currentSlot] == FidgetTech.artifactColor.UNKNOWN)) {
+                FidgetTech.artifactsHeld[FidgetTech.currentSlot] = ARTIFACT_SENSOR.currentArtifact;
+            } else if (ARTIFACT_SENSOR.currentArtifact != FidgetTech.artifactColor.UNKNOWN) {
+                FidgetTech.artifactsHeld[FidgetTech.currentSlot] = ARTIFACT_SENSOR.currentArtifact;
+            }
         }
         ActiveOpMode.telemetry().addData("Automatic Intake", automaticIntake);
         ActiveOpMode.telemetry().update();
