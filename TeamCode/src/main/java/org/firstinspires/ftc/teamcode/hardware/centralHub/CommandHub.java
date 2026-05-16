@@ -45,9 +45,7 @@ public class CommandHub implements Subsystem {
             @Override
             public void stop(boolean interrupted) {
                 automaticIntake = false;
-                if (!interrupted) {
-                    INTAKE.setPower(0,0).schedule();
-                }
+                INTAKE.setPower(0,0).schedule();
             }
 
 

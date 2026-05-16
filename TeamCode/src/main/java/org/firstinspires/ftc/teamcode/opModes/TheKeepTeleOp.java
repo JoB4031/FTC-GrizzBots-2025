@@ -34,6 +34,7 @@ import dev.nextftc.ftc.components.BulkReadComponent;
 public class TheKeepTeleOp extends NextFTCOpMode {
     public TheKeepTeleOp() {
         addComponents(
+                new PedroComponent(Constants::createFollower),
                 new SubsystemComponent(
                         LED_INDICATOR,
                         POSE_LIBRARY,
@@ -48,8 +49,7 @@ public class TheKeepTeleOp extends NextFTCOpMode {
                         COMMAND_HUB
                 ),
                 BulkReadComponent.INSTANCE,
-                BindingsComponent.INSTANCE,
-                new PedroComponent(Constants::createFollower)
+                BindingsComponent.INSTANCE
         );
     }
     @Override
