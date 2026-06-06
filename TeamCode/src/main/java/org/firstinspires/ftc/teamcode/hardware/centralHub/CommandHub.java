@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.hardware.centralHub;
 
-import static org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchTracker.LAUNCH_TRACKER;
 import static org.firstinspires.ftc.teamcode.hardware.sensors.ArtifactSensor.ARTIFACT_SENSOR;
 import static org.firstinspires.ftc.teamcode.hardware.subsystems.Ejector.EJECTOR;
 import static org.firstinspires.ftc.teamcode.hardware.subsystems.FidgetTech.FIDGET_TECH;
@@ -67,40 +66,49 @@ public class CommandHub implements Subsystem {
     public SequentialGroup firePattern() {
         if (Vision.pattern == Vision.BallPattern.GPP) {
             return new SequentialGroup(
-                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                    FLYWHEEL.setVelocity()
                             .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.GREEN))
+                            .then(FLYWHEEL.waitTillReady())
                             .then(EJECTOR.fire()),
-                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                    FLYWHEEL.setVelocity()
                             .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE))
+                            .then(FLYWHEEL.waitTillReady())
                             .then(EJECTOR.fire()),
-                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                    FLYWHEEL.setVelocity()
                             .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE))
+                            .then(FLYWHEEL.waitTillReady())
                             .then(EJECTOR.fire()),
                     FLYWHEEL.stopPower()
                     );
         } else if (Vision.pattern == Vision.BallPattern.PGP) {
             return new SequentialGroup(
-                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                    FLYWHEEL.setVelocity()
                             .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE))
+                            .then(FLYWHEEL.waitTillReady())
                             .then(EJECTOR.fire()),
-                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                    FLYWHEEL.setVelocity()
                             .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.GREEN))
+                            .then(FLYWHEEL.waitTillReady())
                             .then(EJECTOR.fire()),
-                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                    FLYWHEEL.setVelocity()
                             .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE))
+                            .then(FLYWHEEL.waitTillReady())
                             .then(EJECTOR.fire()),
                     FLYWHEEL.stopPower()
             );
         } else {
             return new SequentialGroup(
-                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                    FLYWHEEL.setVelocity()
                             .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE))
+                            .then(FLYWHEEL.waitTillReady())
                             .then(EJECTOR.fire()),
-                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                    FLYWHEEL.setVelocity()
                             .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.PURPLE))
+                            .then(FLYWHEEL.waitTillReady())
                             .then(EJECTOR.fire()),
-                    FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))
+                    FLYWHEEL.setVelocity()
                             .and(FIDGET_TECH.goToArtifact(FidgetTech.artifactColor.GREEN))
+                            .then(FLYWHEEL.waitTillReady())
                             .then(EJECTOR.fire()),
                     FLYWHEEL.stopPower()
             );

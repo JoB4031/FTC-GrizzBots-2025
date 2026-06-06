@@ -1,8 +1,7 @@
 /*
-The Keep Auto Version 4.1.0
+The Keep Auto Version 5.0.0
 Changelog:
-Had to do a major overhaul of the farAuto which mainly included fixing bugs.
-Also added a process to hold positions during farAuto.
+Testing NextFTC Library
 */
 
 package org.firstinspires.ftc.teamcode.opModes;

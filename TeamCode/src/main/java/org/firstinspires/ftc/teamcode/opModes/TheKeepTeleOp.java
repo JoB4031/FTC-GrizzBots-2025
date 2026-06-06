@@ -1,10 +1,7 @@
 /*
-The Keep Version 2.4.0
+The Keep Version 3.0.0
 Changelog:
-Fixed the issue where the shoot all balls function would
-not allow the bot to move once the function started.
-Also fixed a few bugs that surfaced during the 1/17/2026
-scrimmage.
+Testing NextFTC Library
 */
 package org.firstinspires.ftc.teamcode.opModes;
 
@@ -55,16 +52,16 @@ public class TheKeepTeleOp extends NextFTCOpMode {
     @Override
     public void onStartButtonPressed() {
         PedroComponent.follower().setPose(PoseLibrary.startPose);
-        DRIVE.teleOpDrive().schedule();
+        DRIVE.normalTeleOpDrive().schedule();
 
         Gamepads.gamepad1().cross().toggleOnBecomesTrue()
                 .whenBecomesTrue(DRIVE.facePointDrive(POSE_LIBRARY.goal)
-                        .and(FLYWHEEL.setVelocity(FLYWHEEL.getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch))))
-                .whenBecomesFalse(DRIVE.teleOpDrive()
+                        .and(FLYWHEEL.setVelocity()))
+                .whenBecomesFalse(DRIVE.normalTeleOpDrive()
                         .and(FLYWHEEL.stopPower()))
         ;
 
-        Gamepads.gamepad1().rightTrigger().greaterThan(0.1)
+        Gamepads.gamepad1().rightTrigger().greaterThan(0.1).and(FLYWHEEL.weaponPrimed)
                 .whenBecomesTrue(EJECTOR.fire())
         ;
 
@@ -87,8 +84,8 @@ public class TheKeepTeleOp extends NextFTCOpMode {
         ;
 
         Gamepads.gamepad1().square()
-                .whenBecomesTrue(DRIVE.slowDrive())
-                .whenBecomesFalse(DRIVE.normalDrive())
+                .whenBecomesTrue(DRIVE.slowTeleOpDrive())
+                .whenBecomesFalse(DRIVE.normalTeleOpDrive())
         ;
 
     }

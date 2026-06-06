@@ -1,6 +1,11 @@
 package org.firstinspires.ftc.teamcode.hardware.subsystems;
 
+import static org.firstinspires.ftc.teamcode.hardware.pedroPathing.LaunchTracker.LAUNCH_TRACKER;
+
+import java.util.function.Supplier;
+
 import dev.nextftc.control.ControlSystem;
+import dev.nextftc.control.KineticState;
 import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.ftc.ActiveOpMode;
@@ -22,11 +27,14 @@ public class Flywheel implements Subsystem {
             .velPid(0.006, 0.0, 0.0)
             .basicFF(0.0004)
             .build();
+    private double velocityGoal = 0;
+    private boolean flywheelReady = false;
+    public final Supplier<Boolean> weaponPrimed = ()-> flywheelReady;
 
     private double RPMToVelocity(double RPM) {
         return RPM*0.41;
     }
-    public double getRequiredVelocity(double distance, boolean farLaunch) {
+    private double getRequiredVelocity(double distance, boolean farLaunch) {
         double setPoint;
         double shotMultiplier = 5.7;
         if (farLaunch) {
@@ -42,19 +50,39 @@ public class Flywheel implements Subsystem {
         return setPoint;
     }
 
-    public Command setVelocity(double velocity) {
-        return new RunToVelocity(velocityController, velocity).requires(this);
+    public Command setVelocity() {
+        return new Command() {
+            @Override
+            public void update() {
+                velocityController.setGoal(new KineticState(0, velocityGoal, 0));
+            }
+            @Override
+            public boolean isDone() {
+                return velocityController.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 50, Double.POSITIVE_INFINITY));
+            }
+        }.requires(this);
     }
     public Command stopPower() {
         return new RunToVelocity(velocityController, 0).requires(this);
     }
+    public Command waitTillReady() {
+        return  new Command() {
+            @Override
+            public boolean isDone() {
+                return flywheelReady;
+            }
+        };
+    }
 
     @Override
     public void periodic() {
+        velocityGoal = getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch);
         if (velocityController.getGoal().getVelocity() > 0) {
             flywheel.setPower(velocityController.calculate(flywheel.getState()));
+            flywheelReady = velocityController.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 50, Double.POSITIVE_INFINITY));
         } else {
             flywheel.setPower(0);
+            flywheelReady = false;
         }
         ActiveOpMode.telemetry().addData("Goal", velocityController.getGoal().getVelocity());
         ActiveOpMode.telemetry().addData("Flywheel Speed", flywheel.getState().getVelocity());

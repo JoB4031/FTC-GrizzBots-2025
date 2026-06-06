@@ -66,7 +66,6 @@ public class FidgetTech implements Subsystem {
             }
         }
     }
-
     public Command goToArtifact(artifactColor artifact) {
         return new Command() {
             @Override
