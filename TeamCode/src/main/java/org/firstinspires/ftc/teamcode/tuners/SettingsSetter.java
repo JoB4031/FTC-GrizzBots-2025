@@ -15,7 +15,6 @@ public class SettingsSetter extends SettingsOpMode {
         add("debug_mode", "Debug Mode", new BooleanPrompt("Enable debug mode?", false));
         add("alliance", "Select Alliance", new OptionPrompt<>("Select alliance", alliance.RED, alliance.BLUE));
         add("start position", "Select Start", new OptionPrompt<>("select start", startLocations.NEAR, startLocations.FAR));
-        add("artifact sets", "Artifact Sets", new ValuePrompt("How Many", 0, 2, 2, 1));
-
+        add("artifact sets", "Artifact Sets", new ValuePrompt<>("Number of Sets", Integer.class, 0, 2, 2, 1));
     }
 }
