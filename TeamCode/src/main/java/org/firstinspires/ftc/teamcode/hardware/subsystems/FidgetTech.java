@@ -15,6 +15,7 @@ public class FidgetTech implements Subsystem {
     public static artifactColor[] artifactsHeld =
             { artifactColor.NONE, artifactColor.NONE, artifactColor.NONE };
     public boolean fidgetTechFull = false;
+
     private final double[] positions = {
             0.0, 0.03, 0.07, 0.105, 0.145, 0.18, 0.22, 0.26,
             0.295, 0.325, 0.365, 0.405, 0.445, 0.485, 0.525, 0.565,
@@ -29,6 +30,7 @@ public class FidgetTech implements Subsystem {
     private static final double TIME_PER_SNAP = 0.25;
     private int snapSpaces = 0;
     public boolean spinComplete = false;
+
     private final ServoEx fidgetTech = new ServoEx("fidgetTech", 0.001);
 
     private void getCurrentSlot() {

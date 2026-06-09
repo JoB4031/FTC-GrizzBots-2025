@@ -9,6 +9,7 @@ import dev.nextftc.hardware.impl.ServoEx;
 public class Ejector implements Subsystem {
     public static final Ejector EJECTOR = new Ejector();
     private Ejector() {}
+
     private final TimerEx hitTime = new TimerEx(0.2, TimeUnit.SECONDS);
     private final ServoEx ejector = new ServoEx("ejector", 0.001);
     public boolean fireDone;

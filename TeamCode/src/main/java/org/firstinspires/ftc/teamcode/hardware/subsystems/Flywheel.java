@@ -23,6 +23,7 @@ public class Flywheel implements Subsystem {
     private final MotorEx rightFlywheel = new MotorEx("rightFlywheel")
             .floatMode();
     private final MotorGroup flywheel = new MotorGroup(rightFlywheel, leftFlywheel);
+
     private final ControlSystem velocityController = ControlSystem.builder()
             .velPid(0.006, 0.0, 0.0)
             .basicFF(0.0004)
