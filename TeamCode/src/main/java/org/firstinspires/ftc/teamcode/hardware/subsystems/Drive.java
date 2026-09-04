@@ -6,6 +6,8 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.PathChain;
 import java.util.function.Supplier;
+
+import dev.nextftc.core.commands.Command;
 import dev.nextftc.core.subsystems.Subsystem;
 import dev.nextftc.extensions.pedro.FollowPath;
 import dev.nextftc.extensions.pedro.PedroComponent;
@@ -20,19 +22,47 @@ public class Drive implements Subsystem {
     private double rotate = 0;
     private final Supplier<Double> rotateSupplier = () -> rotate;
 
-    private final Supplier<Double> normalForward = () -> (double) (ActiveOpMode.gamepad1().left_stick_y);
-    private final Supplier<Double> normalStrafe = () -> (double) (ActiveOpMode.gamepad1().left_stick_x);
-    private final Supplier<Double> normalRotate = () -> (double) (ActiveOpMode.gamepad1().right_stick_x);
+    private final Supplier<Double> normalForward = () -> (double) (-ActiveOpMode.gamepad1().left_stick_y);
+    private final Supplier<Double> normalStrafe = () -> (double) (-ActiveOpMode.gamepad1().left_stick_x);
+    private final Supplier<Double> normalRotate = () -> (double) (-ActiveOpMode.gamepad1().right_stick_x);
 
-    private final Supplier<Double> slowForward = () -> (double) (ActiveOpMode.gamepad1().left_stick_y*0.5);
-    private final Supplier<Double> slowStrafe = () -> (double) (ActiveOpMode.gamepad1().left_stick_x*0.5);
-    private final Supplier<Double> slowRotate = () -> (double) (ActiveOpMode.gamepad1().right_stick_x*0.5);
+    private final Supplier<Double> slowForward = () -> (double) (ActiveOpMode.gamepad1().left_stick_y*-0.5);
+    private final Supplier<Double> slowStrafe = () -> (double) (ActiveOpMode.gamepad1().left_stick_x*-0.5);
+    private final Supplier<Double> slowRotate = () -> (double) (ActiveOpMode.gamepad1().right_stick_x*-0.5);
 
-    public PedroDriverControlled normalTeleOpDrive() {
-        return new PedroDriverControlled(normalForward, normalStrafe, normalRotate);
+    public Command normalTeleOpDrive() {
+        PedroDriverControlled drive = new PedroDriverControlled(normalForward, normalStrafe, normalRotate);
+        return new Command() {
+            @Override
+            public void start() {
+                drive.start();
+            }
+            @Override
+            public void update() {
+                drive.update();
+            }
+            @Override
+            public boolean isDone() {
+                return false;
+            }
+        }.requires(this);
     }
-    public PedroDriverControlled slowTeleOpDrive() {
-        return new PedroDriverControlled(slowForward, slowStrafe, slowRotate);
+    public Command slowTeleOpDrive() {
+        PedroDriverControlled drive = new PedroDriverControlled(slowForward, slowStrafe, slowRotate);
+        return new Command() {
+            @Override
+            public void start() {
+                drive.start();
+            }
+            @Override
+            public void update() {
+                drive.update();
+            }
+            @Override
+            public boolean isDone() {
+                return false;
+            }
+        }.requires(this);
     }
     public PedroDriverControlled facePointDrive(Pose target) {
         autoAimTarget = target;
@@ -82,6 +112,7 @@ public class Drive implements Subsystem {
             rotate = kP * error;
         } else rotate = 0;
         ActiveOpMode.telemetry().addData("Position", PedroComponent.follower().getPose());
+        ActiveOpMode.telemetry().update();
     }
 
     private double wrapAngle(double angle) {

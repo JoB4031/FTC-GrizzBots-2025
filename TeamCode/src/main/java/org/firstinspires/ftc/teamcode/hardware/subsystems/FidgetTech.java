@@ -23,66 +23,31 @@ public class FidgetTech implements Subsystem {
             0.89, 0.925, 0.96, 0.995
     };
     private static int snapPosition = 14;
-    public static int currentSlot = 0;
-    public static boolean inIntakePosition = true;
-
     private static final ElapsedTime spinTime = new ElapsedTime();
-    private static final double TIME_PER_SNAP = 0.25;
-    private int snapSpaces = 0;
-    public boolean spinComplete = false;
 
     private final ServoEx fidgetTech = new ServoEx("fidgetTech", 0.001);
 
-    private void getCurrentSlot() {
-        if (inIntakePosition) {
-            if (snapPosition == 2 || snapPosition == 8 || snapPosition == 14 || snapPosition == 20 || snapPosition == 26) currentSlot = 0;
-            if (snapPosition == 4 || snapPosition == 10 || snapPosition == 16 || snapPosition == 22 || snapPosition == 28) currentSlot = 1;
-            if (snapPosition == 0 || snapPosition == 6 || snapPosition == 12 || snapPosition == 18 || snapPosition == 24) currentSlot = 2;
-        } else {
-            if (snapPosition == 1 || snapPosition == 7 || snapPosition == 13 || snapPosition == 19 || snapPosition == 25) currentSlot = 1;
-            if (snapPosition == 3 || snapPosition == 9 || snapPosition == 15 || snapPosition == 21 || snapPosition == 27) currentSlot = 2;
-            if (snapPosition == 5 || snapPosition == 11 || snapPosition == 17 || snapPosition == 23) currentSlot = 0;
-        }
-    }
-    private void setSnapPosition(int targetSnap) {
-        spinTime.reset();
-        snapSpaces = Math.abs(snapPosition - targetSnap);
-        snapPosition = targetSnap;
-    }
-    public void goToSlot(int slot, boolean intakePosition) {
-        if (intakePosition) {
-            if (slot == 0) {
-                setSnapPosition(14);
-            } else if (slot == 1) {
-                setSnapPosition(16);
-            } else if (slot == 2) {
-                setSnapPosition(18);
-            }
-        } else {
-            if (slot == 0) {
-                setSnapPosition(11);
-            } else if (slot == 1) {
-                setSnapPosition(13);
-            } else if (slot == 2) {
-                setSnapPosition(15);
-            }
-        }
-    }
-    public Command goToArtifact(artifactColor artifact) {
+    public Command nextSlot() {
         return new Command() {
             @Override
             public void start() {
-                int slotFound = 0;
-                for (artifactColor artifactWanted : artifactsHeld) {
-                    if (artifactWanted != artifact) slotFound ++;
-                }
-                if (slotFound == 0 || slotFound == 1 || slotFound == 2) {
-                    goToSlot(slotFound, artifact == artifactColor.NONE);
-                }
+                if (snapPosition != 27) snapPosition -= 1;
             }
             @Override
             public boolean isDone() {
-                return spinComplete;
+                return true;
+            }
+        }.requires(this);
+    }
+    public Command previousSlot() {
+        return new Command() {
+            @Override
+            public void start() {
+                if (snapPosition != 1) snapPosition += 1;
+            }
+            @Override
+            public boolean isDone() {
+                return true;
             }
         }.requires(this);
     }
@@ -90,16 +55,6 @@ public class FidgetTech implements Subsystem {
     @Override
     public void periodic() {
         fidgetTech.setPosition(positions[snapPosition]);
-        inIntakePosition = snapPosition % 2 == 0;
-        getCurrentSlot();
-        spinComplete = spinTime.seconds() > snapSpaces * TIME_PER_SNAP;
-        fidgetTechFull = (artifactsHeld[0] != artifactColor.NONE) && (artifactsHeld[1] != artifactColor.NONE) && (artifactsHeld[2] != artifactColor.NONE);
-
-        ActiveOpMode.telemetry().addData("Current Slot", currentSlot);
-        ActiveOpMode.telemetry().addData("In Intake Position", inIntakePosition);
-        ActiveOpMode.telemetry().addData("Slot 1", artifactsHeld[0]);
-        ActiveOpMode.telemetry().addData("Slot 2", artifactsHeld[1]);
-        ActiveOpMode.telemetry().addData("Slot 3", artifactsHeld[2]);
     }
 
 }

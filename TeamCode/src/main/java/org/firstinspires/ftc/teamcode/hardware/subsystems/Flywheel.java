@@ -31,6 +31,7 @@ public class Flywheel implements Subsystem {
     private double velocityGoal = 0;
     private boolean flywheelReady = false;
     public final Supplier<Boolean> weaponPrimed = ()-> flywheelReady;
+    private boolean spinUp = false;
 
     private double RPMToVelocity(double RPM) {
         return RPM*0.41;
@@ -54,8 +55,8 @@ public class Flywheel implements Subsystem {
     public Command setVelocity() {
         return new Command() {
             @Override
-            public void update() {
-                velocityController.setGoal(new KineticState(0, velocityGoal, 0));
+            public void start() {
+                spinUp = true;
             }
             @Override
             public boolean isDone() {
@@ -64,21 +65,23 @@ public class Flywheel implements Subsystem {
         }.requires(this);
     }
     public Command stopPower() {
-        return new RunToVelocity(velocityController, 0).requires(this);
-    }
-    public Command waitTillReady() {
-        return  new Command() {
+        return new Command () {
+            @Override
+            public void start() {
+                spinUp = false;
+            }
             @Override
             public boolean isDone() {
-                return flywheelReady;
+                return true;
             }
-        };
+        }.requires(this);
     }
 
     @Override
     public void periodic() {
-        velocityGoal = getRequiredVelocity(LAUNCH_TRACKER.shootDistance, LAUNCH_TRACKER.farLaunch);
-        if (velocityController.getGoal().getVelocity() > 0) {
+        velocityGoal = 1500;
+        velocityController.setGoal(new KineticState(0, velocityGoal, 0));
+        if (spinUp) {
             flywheel.setPower(velocityController.calculate(flywheel.getState()));
             flywheelReady = velocityController.isWithinTolerance(new KineticState(Double.POSITIVE_INFINITY, 50, Double.POSITIVE_INFINITY));
         } else {

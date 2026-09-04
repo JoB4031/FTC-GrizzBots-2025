@@ -37,14 +37,9 @@ public class PoseLibrary implements Subsystem {
     public Pose goal = new Pose(16, 131);
 
     public void assignStartPose() {
-        boolean isAuto = ActiveOpMode.INSTANCE.getClass().isAnnotationPresent(Autonomous.class);
-        if (isAuto) {
-            startPose = (Settings.get("start position", SettingsSetter.startLocations.FAR) == SettingsSetter.startLocations.NEAR) ? blueNearStart : blueFarStart;
-            if (Settings.get("alliance", SettingsSetter.alliance.BLUE) == SettingsSetter.alliance.RED) {
-                startPose = startPose.mirror();
-            }
-        } else {
-            startPose = PedroComponent.follower().getPose();
+        startPose = (Settings.get("start position", SettingsSetter.startLocations.FAR) == SettingsSetter.startLocations.NEAR) ? blueNearStart : blueFarStart;
+        if (Settings.get("alliance", SettingsSetter.alliance.BLUE) == SettingsSetter.alliance.RED) {
+            startPose = startPose.mirror();
         }
     }
 

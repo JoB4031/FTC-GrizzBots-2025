@@ -15,42 +15,25 @@ public class Ejector implements Subsystem {
     public boolean fireDone;
 
     public Command fire()  {
-        if (fireDone) {
-            return new Command() {
-
-                @Override
-                public void start() {
-                    fireDone = false;
+        return new Command() {
+            @Override
+            public void start() {
+                hitTime.restart();
+                ejector.setPosition(0.3);
+            }
+            @Override
+            public void update() {
+                if (hitTime.isDone()) {
                     hitTime.restart();
-                    if (!FidgetTech.inIntakePosition && FidgetTech.FIDGET_TECH.spinComplete) {
-                        ejector.setPosition(0.3);
-                        FidgetTech.artifactsHeld[FidgetTech.currentSlot] = FidgetTech.artifactColor.NONE;
-                    } else fireDone = true;
+                    ejector.setPosition(0);
                 }
+            }
+            @Override
+            public boolean isDone() {
+                return fireDone;
+            }
 
-                @Override
-                public void update() {
-                    if (hitTime.isDone()) {
-                        hitTime.restart();
-                        ejector.setPosition(0);
-                        fireDone = true;
-                    }
-                }
-
-                @Override
-                public boolean isDone() {
-                    return fireDone;
-                }
-
-            }.requires(this);
-        } else {
-            return new Command() {
-                @Override
-                public boolean isDone() {
-                    return true;
-                }
-            };
-        }
+        }.requires(this);
     }
 
     @Override
