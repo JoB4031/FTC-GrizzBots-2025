@@ -1,11 +1,9 @@
 package org.firstinspires.ftc.teamcode.hardware.pedroPathing;
 
 import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.skeletonarmy.marrow.settings.Settings;
-import org.firstinspires.ftc.teamcode.tuners.SettingsSetter;
+import org.firstinspires.ftc.teamcode.marrow.SettingsSetter;
 import dev.nextftc.core.subsystems.Subsystem;
-import dev.nextftc.extensions.pedro.PedroComponent;
 import dev.nextftc.ftc.ActiveOpMode;
 
 public class PoseLibrary implements Subsystem {
